@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quotation Application</title>
+    
+    <!-- Favicon and Meta Tags for Link Sharing -->
+    <link rel="icon" type="image/svg+xml" href="logo.svg">
+    <meta property="og:title" content="Quotation Application">
+    <meta property="og:description" content="Generate, save, and download professional quotations in English and Arabic.">
+    <meta property="og:image" content="logo.svg">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -151,6 +158,10 @@
             </div>
         </main>
     </div>
+
+    <footer class="text-center text-gray-500 text-sm py-4 no-print">
+        Made by Joseph HAMDY KAMAL
+    </footer>
 
     <script>
         // --- GLOBAL STATE ---
@@ -381,7 +392,7 @@
                     const pdfWidth = pdf.internal.pageSize.getWidth();
                     const pdfHeight = pdf.internal.pageSize.getHeight();
                     
-                    const pageMargin = 15; // 7.5mm margin on each side
+                    const pageMargin = 15;
                     const effectivePdfWidth = pdfWidth - (pageMargin * 2);
                     const effectivePdfHeight = pdfHeight - (pageMargin * 2);
                     
