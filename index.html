@@ -371,7 +371,8 @@
             const printableClone = quoteElement.cloneNode(true);
             printableClone.style.position = 'absolute';
             printableClone.style.left = '-9999px';
-            printableClone.style.width = quoteElement.offsetWidth + 'px';
+            // Force a desktop-like width for the clone to ensure desktop layout in PDF
+            printableClone.style.width = '1024px'; 
             document.body.appendChild(printableClone);
 
             printableClone.querySelectorAll('input.quantity, input.unit-price').forEach(input => {
