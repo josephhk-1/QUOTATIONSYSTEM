@@ -380,15 +380,26 @@
                     const pdf = new jsPDF('p', 'mm', 'a4');
                     const pdfWidth = pdf.internal.pageSize.getWidth();
                     const pdfHeight = pdf.internal.pageSize.getHeight();
-                    const ratio = canvas.width / canvas.height;
-                    let imgWidth = pdfWidth - 20;
-                    let imgHeight = imgWidth / ratio;
-                    if (imgHeight > pdfHeight - 20) {
-                        imgHeight = pdfHeight - 20;
-                        imgWidth = imgHeight * ratio;
+                    
+                    const pageMargin = 15; // 7.5mm margin on each side
+                    const effectivePdfWidth = pdfWidth - (pageMargin * 2);
+                    const effectivePdfHeight = pdfHeight - (pageMargin * 2);
+                    
+                    const canvasRatio = canvas.width / canvas.height;
+                    
+                    let imgWidth, imgHeight;
+
+                    if ((effectivePdfWidth / effectivePdfHeight) > canvasRatio) {
+                        imgHeight = effectivePdfHeight;
+                        imgWidth = imgHeight * canvasRatio;
+                    } else {
+                        imgWidth = effectivePdfWidth;
+                        imgHeight = imgWidth / canvasRatio;
                     }
+
                     const x = (pdfWidth - imgWidth) / 2;
-                    const y = 10;
+                    const y = (pdfHeight - imgHeight) / 2;
+
                     pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
                     pdf.save('quotation.pdf');
                 })
