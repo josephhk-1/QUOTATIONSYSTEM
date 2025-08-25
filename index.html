@@ -369,6 +369,18 @@
             const quoteElement = document.querySelector('.print-area');
             
             const printableClone = quoteElement.cloneNode(true);
+            
+            // Apply desktop styles to the clone for PDF generation
+            const mainHeader = printableClone.querySelector('.flex.justify-between.items-center');
+            if(mainHeader) {
+                mainHeader.classList.remove('flex-col', 'sm:flex-row', 'items-start', 'sm:items-center');
+            }
+            printableClone.querySelectorAll('.grid').forEach(grid => {
+                grid.classList.remove('grid-cols-1', 'md:grid-cols-2');
+                grid.classList.add('grid-cols-2');
+            });
+
+
             printableClone.style.position = 'absolute';
             printableClone.style.left = '-9999px';
             printableClone.style.width = '1024px'; 
