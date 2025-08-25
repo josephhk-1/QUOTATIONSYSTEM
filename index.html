@@ -52,7 +52,7 @@
         <!-- Main Quotation Area -->
         <main class="p-6 md:p-10 print-area">
             <!-- Company Info and Logo -->
-            <div class="flex justify-between items-start mb-8">
+            <div class="flex justify-between items-start mb-6">
                 <div>
                     <h2 class="text-2xl font-bold text-gray-800 editable" contenteditable="true" data-field="companyName"></h2>
                     <p class="text-gray-500 editable" contenteditable="true" data-field="companyCR"></p>
@@ -60,7 +60,7 @@
                     <p class="text-gray-500 editable" contenteditable="true" data-field="companyAddress"></p>
                 </div>
                 <div class="text-right">
-                     <img id="company-logo" src="logowooden.svg" onerror="this.onerror=null;this.src='https://placehold.co/150x80/e2e8f0/334155?text=Logo+Not+Found';" alt="Company Logo" class="w-36 h-auto">
+                     <img id="company-logo" src="logowooden.svg" onerror="this.onerror=null;this.src='https://placehold.co/160x90/e2e8f0/334155?text=Logo+Not+Found';" alt="Company Logo" class="w-40 h-auto">
                 </div>
             </div>
 
@@ -190,10 +190,7 @@
             const profile = companyProfiles[profileKey];
             if (!profile) return;
 
-            // Update logo
             document.getElementById('company-logo').src = profile.logo;
-
-            // Update data attributes for company info fields
             document.querySelector('[data-field="companyName"]').dataset.en = profile.name.en;
             document.querySelector('[data-field="companyName"]').dataset.ar = profile.name.ar;
             document.querySelector('[data-field="companyCR"]').dataset.en = profile.cr.en;
@@ -203,7 +200,6 @@
             document.querySelector('[data-field="companyAddress"]').dataset.en = profile.address.en;
             document.querySelector('[data-field="companyAddress"]').dataset.ar = profile.address.ar;
 
-            // Refresh UI with the new language data
             setLanguage(currentLang);
         }
 
@@ -231,7 +227,6 @@
         }
         
         function syncUIData() {
-            // Syncs all visible data back to the data attributes before saving or printing
             document.querySelectorAll('.editable').forEach(el => updateEditableData(el));
             document.querySelectorAll('.item-description').forEach(el => updateEditableData(el));
         }
@@ -285,7 +280,7 @@
         // --- FILE & PDF OPERATIONS ---
 
         function saveQuote() {
-            syncUIData(); // Sync data before saving
+            syncUIData();
             const quoteData = {
                 lang: currentLang,
                 companyProfile: document.getElementById('company-selector').value,
@@ -325,13 +320,11 @@
                 try {
                     const data = JSON.parse(e.target.result);
                     
-                    // Set company profile first
                     if (data.companyProfile) {
                         document.getElementById('company-selector').value = data.companyProfile;
                         switchCompanyProfile(data.companyProfile);
                     }
 
-                    // Load main fields
                     Object.keys(data.fields).forEach(fieldName => {
                         const el = document.querySelector(`.editable[data-field="${fieldName}"]`);
                         if (el) {
@@ -355,13 +348,32 @@
         }
 
         function generatePDF() {
-            syncUIData(); // Sync data before generating PDF
+            syncUIData();
             const { jsPDF } = window.jspdf;
             const quoteElement = document.querySelector('.print-area');
-            const nonPrintableElements = document.querySelectorAll('.no-print');
-            nonPrintableElements.forEach(el => el.style.display = 'none');
             
-            html2canvas(quoteElement, { scale: 3, useCORS: true, logging: false })
+            // Create a clone to modify for printing
+            const printableClone = quoteElement.cloneNode(true);
+            printableClone.style.position = 'absolute';
+            printableClone.style.left = '-9999px';
+            printableClone.style.width = quoteElement.offsetWidth + 'px'; // Set explicit width
+            document.body.appendChild(printableClone);
+
+            // Replace inputs with spans in the clone
+            printableClone.querySelectorAll('input.quantity, input.unit-price').forEach(input => {
+                const span = document.createElement('span');
+                span.textContent = input.value;
+                // Copy text alignment classes
+                if (input.classList.contains('text-center')) span.classList.add('text-center');
+                if (input.classList.contains('text-right')) span.classList.add('text-right');
+                span.classList.add('w-full', 'block', 'p-2'); // Ensure it fills space like the input
+                input.parentNode.replaceChild(span, input);
+            });
+
+            // Remove non-printable elements from the clone
+            printableClone.querySelectorAll('.no-print').forEach(el => el.remove());
+            
+            html2canvas(printableClone, { scale: 3, useCORS: true, logging: false })
                 .then(canvas => {
                     const imgData = canvas.toDataURL('image/png');
                     const pdf = new jsPDF('p', 'mm', 'a4');
@@ -380,7 +392,8 @@
                     pdf.save('quotation.pdf');
                 })
                 .finally(() => {
-                    nonPrintableElements.forEach(el => el.style.display = '');
+                    // Clean up the clone
+                    document.body.removeChild(printableClone);
                 });
         }
 
@@ -398,8 +411,7 @@
 
             document.getElementById('add-row').addEventListener('click', () => addNewRow());
 
-            // Initial setup
-            switchCompanyProfile('wooden_pieces'); // Set default company
+            switchCompanyProfile('wooden_pieces');
             addNewRow();
             updateTotals();
         });
