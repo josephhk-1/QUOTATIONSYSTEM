@@ -52,15 +52,15 @@
         <!-- Main Quotation Area -->
         <main class="p-6 md:p-10 print-area">
             <!-- Company Info and Logo -->
-            <div class="flex justify-between items-start mb-6">
-                <div>
-                    <h2 class="text-2xl font-bold text-gray-800 editable" contenteditable="true" data-field="companyName"></h2>
+            <div class="flex justify-between items-start mb-4">
+                <div class="w-2/3">
+                    <h2 class="text-3xl font-bold text-gray-800 editable" contenteditable="true" data-field="companyName"></h2>
                     <p class="text-gray-500 editable" contenteditable="true" data-field="companyCR"></p>
                     <p class="text-gray-500 editable" contenteditable="true" data-field="companyVat"></p>
                     <p class="text-gray-500 editable" contenteditable="true" data-field="companyAddress"></p>
                 </div>
-                <div class="text-right">
-                     <img id="company-logo" src="logowooden.svg" onerror="this.onerror=null;this.src='https://placehold.co/160x90/e2e8f0/334155?text=Logo+Not+Found';" alt="Company Logo" class="w-40 h-auto">
+                <div class="w-1/3 flex justify-end">
+                     <img id="company-logo" src="logowooden.svg" onerror="this.onerror=null;this.src='https://placehold.co/180x100/e2e8f0/334155?text=Logo+Not+Found';" alt="Company Logo" class="w-48 h-auto">
                 </div>
             </div>
 
@@ -352,25 +352,26 @@
             const { jsPDF } = window.jspdf;
             const quoteElement = document.querySelector('.print-area');
             
-            // Create a clone to modify for printing
             const printableClone = quoteElement.cloneNode(true);
             printableClone.style.position = 'absolute';
             printableClone.style.left = '-9999px';
-            printableClone.style.width = quoteElement.offsetWidth + 'px'; // Set explicit width
+            printableClone.style.width = quoteElement.offsetWidth + 'px';
             document.body.appendChild(printableClone);
 
-            // Replace inputs with spans in the clone
             printableClone.querySelectorAll('input.quantity, input.unit-price').forEach(input => {
                 const span = document.createElement('span');
                 span.textContent = input.value;
-                // Copy text alignment classes
                 if (input.classList.contains('text-center')) span.classList.add('text-center');
                 if (input.classList.contains('text-right')) span.classList.add('text-right');
-                span.classList.add('w-full', 'block', 'p-2'); // Ensure it fills space like the input
+                span.classList.add('w-full', 'block', 'p-2');
                 input.parentNode.replaceChild(span, input);
             });
+            
+            printableClone.querySelectorAll('.bg-gray-50').forEach(el => {
+                el.classList.remove('bg-gray-50');
+            });
 
-            // Remove non-printable elements from the clone
+
             printableClone.querySelectorAll('.no-print').forEach(el => el.remove());
             
             html2canvas(printableClone, { scale: 3, useCORS: true, logging: false })
@@ -392,7 +393,6 @@
                     pdf.save('quotation.pdf');
                 })
                 .finally(() => {
-                    // Clean up the clone
                     document.body.removeChild(printableClone);
                 });
         }
