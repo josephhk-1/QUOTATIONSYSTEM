@@ -292,6 +292,9 @@
 
         function saveQuote() {
             syncUIData();
+            const customerName = document.querySelector('[data-field="customerName"]').textContent.trim();
+            const sanitizedName = customerName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+
             const quoteData = {
                 lang: currentLang,
                 companyProfile: document.getElementById('company-selector').value,
@@ -319,7 +322,7 @@
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(quoteData, null, 2));
             const downloadAnchorNode = document.createElement('a');
             downloadAnchorNode.setAttribute("href", dataStr);
-            downloadAnchorNode.setAttribute("download", "quotation_source.json");
+            downloadAnchorNode.setAttribute("download", `Source_${sanitizedName || 'quotation'}.json`);
             document.body.appendChild(downloadAnchorNode);
             downloadAnchorNode.click();
             downloadAnchorNode.remove();
@@ -360,6 +363,9 @@
 
         function generatePDF() {
             syncUIData();
+            const customerName = document.querySelector('[data-field="customerName"]').textContent.trim();
+            const sanitizedName = customerName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+
             const { jsPDF } = window.jspdf;
             const quoteElement = document.querySelector('.print-area');
             
@@ -412,7 +418,7 @@
                     const y = (pdfHeight - imgHeight) / 2;
 
                     pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
-                    pdf.save('quotation.pdf');
+                    pdf.save(`Quotation_${sanitizedName || 'details'}.pdf`);
                 })
                 .finally(() => {
                     document.body.removeChild(printableClone);
