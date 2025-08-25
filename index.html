@@ -21,7 +21,14 @@
     <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg" id="quote-container">
         <!-- Header with Action Buttons -->
         <header class="bg-gray-800 text-white p-6 rounded-t-2xl flex justify-between items-center no-print">
-            <h1 class="text-xl font-bold" data-lang="appTitle">Quotation Generator</h1>
+            <div class="flex items-center space-x-4">
+                <h1 class="text-xl font-bold" data-lang="appTitle">Quotation Generator</h1>
+                <!-- Company Profile Selector -->
+                <select id="company-selector" onchange="switchCompanyProfile(this.value)" class="bg-gray-700 text-white text-sm rounded-lg p-2 border-gray-600 focus:ring-blue-500 focus:border-blue-500">
+                    <option value="wooden_pieces">Wooden Pieces EST.</option>
+                    <option value="rattan_palace">Rattan Palace</option>
+                </select>
+            </div>
             <div class="flex items-center space-x-2 md:space-x-4">
                 <!-- Language Switcher -->
                 <div class="flex space-x-1">
@@ -47,13 +54,13 @@
             <!-- Company Info and Logo -->
             <div class="flex justify-between items-start mb-8">
                 <div>
-                    <h2 class="text-2xl font-bold text-gray-800 editable" contenteditable="true" data-field="companyName" data-en="Wooden Pieces EST." data-ar="مؤسسة القطع الخشبية"></h2>
-                    <p class="text-gray-500 editable" contenteditable="true" data-field="companyCR" data-en="CR: 1010798529" data-ar="س.ت: 1010798529"></p>
-                    <p class="text-gray-500 editable" contenteditable="true" data-field="companyVat" data-en="Vat No.: 310618978500003" data-ar="الرقم الضريبي: 310618978500003"></p>
-                    <p class="text-gray-500 editable" contenteditable="true" data-field="companyAddress" data-en="RFKB2501. ALQods st, Alkhaleej, P.O.Box: 2401 RIYADH 13223, Kingdom of Saudi Arabia" data-ar="RFKB2501. شارع القدس, الخليج, ص.ب: 2401 الرياض 13223, المملكة العربية السعودية"></p>
+                    <h2 class="text-2xl font-bold text-gray-800 editable" contenteditable="true" data-field="companyName"></h2>
+                    <p class="text-gray-500 editable" contenteditable="true" data-field="companyCR"></p>
+                    <p class="text-gray-500 editable" contenteditable="true" data-field="companyVat"></p>
+                    <p class="text-gray-500 editable" contenteditable="true" data-field="companyAddress"></p>
                 </div>
                 <div class="text-right">
-                     <img src="logo.svg" onerror="this.onerror=null;this.src='https://placehold.co/150x80/e2e8f0/334155?text=Logo+Not+Found';" alt="Company Logo" class="w-32 h-auto">
+                     <img id="company-logo" src="logowooden.svg" onerror="this.onerror=null;this.src='https://placehold.co/150x80/e2e8f0/334155?text=Logo+Not+Found';" alt="Company Logo" class="w-36 h-auto">
                 </div>
             </div>
 
@@ -149,6 +156,24 @@
         // --- GLOBAL STATE ---
         let currentLang = 'en';
 
+        // --- COMPANY PROFILES DATA ---
+        const companyProfiles = {
+            'wooden_pieces': {
+                logo: 'logowooden.svg',
+                name: { en: 'Wooden Pieces EST.', ar: 'مؤسسة القطع الخشبية' },
+                cr: { en: 'CR: 1010798529', ar: 'س.ت: 1010798529' },
+                vat: { en: 'Vat No.: 310618978500003', ar: 'الرقم الضريبي: 310618978500003' },
+                address: { en: 'RFKB2501. ALQods st, Alkhaleej, P.O.Box: 2401 RIYADH 13223, Kingdom of Saudi Arabia', ar: 'RFKB2501. شارع القدس, الخليج, ص.ب: 2401 الرياض 13223, المملكة العربية السعودية' }
+            },
+            'rattan_palace': {
+                logo: 'logo.svg',
+                name: { en: 'Rattan Palace', ar: 'قصر الخيزران' },
+                cr: { en: 'CR: 1010798529', ar: 'س.ت: 1010798529' },
+                vat: { en: 'Vat No.: 310618978500003', ar: 'الرقم الضريبي: 310618978500003' },
+                address: { en: 'RFKB2501. ALQods st, Alkhaleej, P.O.Box: 2401 RIYADH 13223, Kingdom of Saudi Arabia', ar: 'RFKB2501. شارع القدس, الخليج, ص.ب: 2401 الرياض 13223, المملكة العربية السعودية' }
+            }
+        };
+
         // --- TRANSLATION DATA ---
         const translations = {
             en: {
@@ -161,31 +186,54 @@
 
         // --- CORE FUNCTIONS ---
 
+        function switchCompanyProfile(profileKey) {
+            const profile = companyProfiles[profileKey];
+            if (!profile) return;
+
+            // Update logo
+            document.getElementById('company-logo').src = profile.logo;
+
+            // Update data attributes for company info fields
+            document.querySelector('[data-field="companyName"]').dataset.en = profile.name.en;
+            document.querySelector('[data-field="companyName"]').dataset.ar = profile.name.ar;
+            document.querySelector('[data-field="companyCR"]').dataset.en = profile.cr.en;
+            document.querySelector('[data-field="companyCR"]').dataset.ar = profile.cr.ar;
+            document.querySelector('[data-field="companyVat"]').dataset.en = profile.vat.en;
+            document.querySelector('[data-field="companyVat"]').dataset.ar = profile.vat.ar;
+            document.querySelector('[data-field="companyAddress"]').dataset.en = profile.address.en;
+            document.querySelector('[data-field="companyAddress"]').dataset.ar = profile.address.ar;
+
+            // Refresh UI with the new language data
+            setLanguage(currentLang);
+        }
+
         function setLanguage(lang) {
             currentLang = lang;
             document.documentElement.lang = lang;
             document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
             
-            // Translate static labels
             document.querySelectorAll('[data-lang]').forEach(el => {
                 const key = el.getAttribute('data-lang');
                 if (translations[lang][key]) el.textContent = translations[lang][key];
             });
 
-            // Swap content for all editable fields
             document.querySelectorAll('.editable').forEach(el => {
                 el.innerHTML = el.dataset[lang] || '';
             });
 
-            // Swap content for table item descriptions
             document.querySelectorAll('.item-description').forEach(el => {
                 el.innerHTML = el.dataset[lang] || '';
             });
         }
 
         function updateEditableData(element) {
-            // When user edits a field, save its content to the correct data attribute
             element.dataset[currentLang] = element.innerHTML;
+        }
+        
+        function syncUIData() {
+            // Syncs all visible data back to the data attributes before saving or printing
+            document.querySelectorAll('.editable').forEach(el => updateEditableData(el));
+            document.querySelectorAll('.item-description').forEach(el => updateEditableData(el));
         }
 
         function updateTotals() {
@@ -224,9 +272,8 @@
             `;
             tableBody.appendChild(row);
             
-            // Add listeners to the new row
             const descDiv = row.querySelector('.item-description');
-            descDiv.innerHTML = descDiv.dataset[currentLang]; // Set initial text
+            descDiv.innerHTML = descDiv.dataset[currentLang];
             descDiv.addEventListener('blur', () => updateEditableData(descDiv));
             row.querySelector('.quantity').addEventListener('input', updateTotals);
             row.querySelector('.unit-price').addEventListener('input', updateTotals);
@@ -238,37 +285,31 @@
         // --- FILE & PDF OPERATIONS ---
 
         function saveQuote() {
+            syncUIData(); // Sync data before saving
             const quoteData = {
                 lang: currentLang,
+                companyProfile: document.getElementById('company-selector').value,
                 fields: {},
                 items: []
             };
 
-            // Save all main editable fields
             document.querySelectorAll('.editable').forEach(el => {
-                updateEditableData(el); // Ensure the latest edit is saved before capturing
                 const fieldName = el.dataset.field;
                 if (fieldName) {
-                    quoteData.fields[fieldName] = {
-                        en: el.dataset.en || '',
-                        ar: el.dataset.ar || ''
-                    };
+                    quoteData.fields[fieldName] = { en: el.dataset.en || '', ar: el.dataset.ar || '' };
                 }
             });
 
-            // Save all table items
             document.querySelectorAll('#table-body tr').forEach(row => {
                 const descEl = row.querySelector('.item-description');
-                updateEditableData(descEl); // Ensure latest edit is saved
                 quoteData.items.push({
                     desc_en: descEl.dataset.en,
                     desc_ar: descEl.dataset.ar,
                     qty: row.querySelector('.quantity').value,
-                    price: row.querySelector('.price').value
+                    price: row.querySelector('.unit-price').value
                 });
             });
 
-            // Trigger download
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(quoteData, null, 2));
             const downloadAnchorNode = document.createElement('a');
             downloadAnchorNode.setAttribute("href", dataStr);
@@ -284,6 +325,12 @@
                 try {
                     const data = JSON.parse(e.target.result);
                     
+                    // Set company profile first
+                    if (data.companyProfile) {
+                        document.getElementById('company-selector').value = data.companyProfile;
+                        switchCompanyProfile(data.companyProfile);
+                    }
+
                     // Load main fields
                     Object.keys(data.fields).forEach(fieldName => {
                         const el = document.querySelector(`.editable[data-field="${fieldName}"]`);
@@ -293,11 +340,9 @@
                         }
                     });
 
-                    // Load items
-                    document.getElementById('table-body').innerHTML = ''; // Clear existing items
+                    document.getElementById('table-body').innerHTML = '';
                     data.items.forEach(item => addNewRow(item));
 
-                    // Set language and update UI
                     setLanguage(data.lang || 'en');
                     updateTotals();
                 } catch (error) {
@@ -306,16 +351,17 @@
                 }
             };
             reader.readAsText(event.target.files[0]);
-            event.target.value = ''; // Reset file input
+            event.target.value = '';
         }
 
         function generatePDF() {
+            syncUIData(); // Sync data before generating PDF
             const { jsPDF } = window.jspdf;
             const quoteElement = document.querySelector('.print-area');
             const nonPrintableElements = document.querySelectorAll('.no-print');
             nonPrintableElements.forEach(el => el.style.display = 'none');
             
-            html2canvas(quoteElement, { scale: 2, useCORS: true, logging: false })
+            html2canvas(quoteElement, { scale: 3, useCORS: true, logging: false })
                 .then(canvas => {
                     const imgData = canvas.toDataURL('image/png');
                     const pdf = new jsPDF('p', 'mm', 'a4');
@@ -340,23 +386,20 @@
 
         // --- INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', function () {
-            // Set dates
             const today = new Date();
             document.getElementById('quoteDate').textContent = today.toLocaleDateString('en-CA');
             const validUntil = new Date();
             validUntil.setDate(today.getDate() + 7);
             document.getElementById('validDate').textContent = validUntil.toLocaleDateString('en-CA');
 
-            // Add listeners to initial editable fields
             document.querySelectorAll('.editable').forEach(el => {
                 el.addEventListener('blur', () => updateEditableData(el));
             });
 
-            // Add listener for the "Add Row" button
             document.getElementById('add-row').addEventListener('click', () => addNewRow());
 
             // Initial setup
-            setLanguage('en');
+            switchCompanyProfile('wooden_pieces'); // Set default company
             addNewRow();
             updateTotals();
         });
