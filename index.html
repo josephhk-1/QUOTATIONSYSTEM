@@ -437,18 +437,37 @@
             pdfImageData = null;
         }
 
+        function waitForImagesToLoad(container) {
+            const images = Array.from(container.getElementsByTagName('img'));
+            const promises = images.map(img => {
+                return new Promise((resolve, reject) => {
+                    if (img.complete && img.naturalHeight !== 0) {
+                        resolve();
+                    } else {
+                        img.onload = resolve;
+                        img.onerror = resolve; // Resolve on error too, so we don't block forever
+                    }
+                });
+            });
+            return Promise.all(promises);
+        }
+
+
         async function generatePDF() {
             syncUIData();
             if (document.activeElement) document.activeElement.blur();
             const { jsPDF } = window.jspdf;
             const quoteElement = document.getElementById('print-area');
             const printableClone = quoteElement.cloneNode(true);
+            
+            // Force a consistent, desktop-like layout for PDF rendering
             printableClone.style.width = '1024px'; 
             printableClone.style.position = 'absolute';
             printableClone.style.left = '-9999px';
             printableClone.style.top = '0';
             document.body.appendChild(printableClone);
 
+            // Replace inputs with static text
             printableClone.querySelectorAll('input.quantity, input.unit-price').forEach(input => {
                 const span = document.createElement('span');
                 span.textContent = input.value;
@@ -458,16 +477,18 @@
                 input.parentNode.replaceChild(span, input);
             });
             
+            // Clean up UI elements for printing
             printableClone.querySelectorAll('.bg-gray-50').forEach(el => {
                 el.classList.remove('bg-gray-50');
                 el.style.backgroundColor = 'transparent';
             });
             printableClone.querySelectorAll('.no-print').forEach(el => el.remove());
             
-            await new Promise(resolve => setTimeout(resolve, 200));
+            // Wait for all images (logos, item photos) to load before rendering
+            await waitForImagesToLoad(printableClone);
 
             try {
-                const canvas = await html2canvas(printableClone, { scale: 3, useCORS: true, logging: false });
+                const canvas = await html2canvas(printableClone, { scale: 3, useCORS: true, logging: true });
                 pdfImageData = canvas.toDataURL('image/png');
                 document.getElementById('pdf-preview-image').src = pdfImageData;
                 document.getElementById('pdf-preview-modal').classList.remove('hidden');
