@@ -60,6 +60,9 @@
              justify-content: space-between !important;
              align-items: center !important;
         }
+        .pdf-render-mode [dir="rtl"] .text-right {
+            text-align: right !important;
+        }
     </style>
 </head>
 <body class="bg-gray-100 p-2 sm:p-6 md:p-8">
@@ -216,12 +219,10 @@
         let isPhotoColumnVisible = true;
 
         // --- COMPANY PROFILES DATA ---
-        // IMPORTANT: The logos are now included as Base64 data URIs to ensure they always load correctly in the PDF.
-        // To update a logo, encode your SVG or PNG file to Base64 and paste the result here.
         const companyProfiles = {
             'wooden_pieces': { 
                 acronym: 'WPE', 
-                logo_base64: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDE4MCAxMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHJlY3Qgd2lkdGg9IjE4MCIgaGVpZ2h0PSIxMDAiIHJ4PSIxMCIgZmlsbD0iI2YwZjBmMCIvPgogIDx0ZXh0IHg9IjkwIiB5PSI2MCIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iNDAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiMzMzMiPldQPC90ZXh0Pgo8L3N2Zz4=',
+                logo: 'logowooden.svg', // Using the direct file path
                 name: { en: 'Wooden Pieces EST.', ar: 'مؤسسة القطع الخشبية' }, 
                 cr: { en: 'CR: 1010798529', ar: 'س.ت: 1010798529' }, 
                 vat: { en: 'Vat No.: 310618978500003', ar: 'الرقم الضريبي: 310618978500003' }, 
@@ -230,7 +231,7 @@
             },
             'rattan_palace': { 
                 acronym: 'RP', 
-                logo_base64: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDE4MCAxMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHJlY3Qgd2lkdGg9IjE4MCIgaGVpZ2h0PSIxMDAiIHJ4PSIxMCIgZmlsbD0iI2YwZjBmMCIvPgogIDx0ZXh0IHg9IjkwIiB5PSI2MCIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iNDAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiMzMzMiPlJQPC90ZXh0Pgo8L3N2Zz4=',
+                logo: 'logo.svg', // Using the direct file path
                 name: { en: 'Rattan Palace', ar: 'قصر الخيزران' }, 
                 cr: { en: 'CR: 7050562888', ar: 'س.ت: 7050562888' }, 
                 vat: { en: 'Vat No.: 313099850500003', ar: 'الرقم الضريبي: 313099850500003' }, 
@@ -286,7 +287,7 @@
         function switchCompanyProfile(profileKey) {
             const profile = companyProfiles[profileKey];
             if (!profile) return;
-            document.getElementById('company-logo').src = profile.logo_base64;
+            document.getElementById('company-logo').src = profile.logo;
             document.querySelector('[data-field="companyName"]').dataset.en = profile.name.en;
             document.querySelector('[data-field="companyName"]').dataset.ar = profile.name.ar;
             document.querySelector('[data-field="companyCR"]').dataset.en = profile.cr.en;
@@ -471,6 +472,9 @@
             const { jsPDF } = window.jspdf;
             const quoteElement = document.getElementById('print-area');
             const printableClone = quoteElement.cloneNode(true);
+            
+            // Force LTR direction for consistent block layout in PDF
+            printableClone.dir = 'ltr';
             
             // Add a class to the clone to apply PDF-specific styles
             printableClone.classList.add('pdf-render-mode');
