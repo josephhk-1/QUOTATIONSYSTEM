@@ -97,14 +97,14 @@
 
         <!-- Main Quotation Area -->
         <main class="p-4 md:p-10 print-area" id="print-area">
-            <div class="flex justify-between items-center mb-6 gap-4">
+            <div class="flex justify-between items-center mb-6 gap-4 rtl:flex-row-reverse">
                 <div class="w-2/3">
                     <h2 class="text-3xl font-bold text-gray-800 editable" contenteditable="true" data-field="companyName" spellcheck="false"></h2>
                     <p class="text-sm text-gray-500 editable" contenteditable="true" data-field="companyCR" spellcheck="false"></p>
                     <p class="text-sm text-gray-500 editable" contenteditable="true" data-field="companyVat" spellcheck="false"></p>
                     <p class="text-sm text-gray-500 editable" contenteditable="true" data-field="companyAddress" spellcheck="false"></p>
                 </div>
-                <div class="w-1/3 flex justify-end">
+                <div class="w-1/3 flex justify-end rtl:justify-start">
                      <img id="company-logo" src="" alt="Company Logo" class="w-48 h-auto">
                 </div>
             </div>
@@ -116,7 +116,7 @@
                     <p class="editable" contenteditable="true" data-field="customerAddress" data-en="Customer Address" data-ar="عنوان العميل" spellcheck="false">Customer Address</p>
                     <p class="editable" contenteditable="true" data-field="customerCountry" data-en="Saudi Arabia" data-ar="المملكة العربية السعودية" spellcheck="false">Saudi Arabia</p>
                 </div>
-                <div class="bg-gray-50 p-4 rounded-lg text-left md:text-right">
+                <div class="bg-gray-50 p-4 rounded-lg text-left md:text-right rtl:md:text-left">
                     <p><span class="font-bold text-gray-700" data-lang="quoteNum">Quote #:</span> <span class="editable" contenteditable="true" data-field="quoteNum" spellcheck="false"></span></p>
                     <p><span class="font-bold text-gray-700" data-lang="date">Date:</span> <span id="quoteDate"></span></p>
                     <p><span class="font-bold text-gray-700" data-lang="validUntil">Valid Until:</span> <span id="validDate"></span></p>
@@ -133,10 +133,10 @@
                     <thead>
                         <tr class="bg-gray-800 text-white">
                             <th class="p-3 photo-col" data-lang="photo">Photo</th>
-                            <th class="p-3 text-left" data-lang="description">Description</th>
+                            <th class="p-3 text-left rtl:text-right" data-lang="description">Description</th>
                             <th class="p-3 w-24 text-center" data-lang="quantity">Quantity</th>
-                            <th class="p-3 w-32 text-right" data-lang="unitPrice">Unit Price</th>
-                            <th class="p-3 w-32 text-right" data-lang="total">Total</th>
+                            <th class="p-3 w-32 text-right rtl:text-left" data-lang="unitPrice">Unit Price</th>
+                            <th class="p-3 w-32 text-right rtl:text-left" data-lang="total">Total</th>
                             <th class="p-3 w-16 text-center no-print" data-lang="action">Action</th>
                         </tr>
                     </thead>
@@ -146,20 +146,20 @@
                             <td colspan="3" class="no-print">
                                 <button id="add-row" class="mt-4 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg flex items-center"><span data-lang="addRow">Add Row</span></button>
                             </td>
-                            <td class="text-right font-bold p-3 border-t-2" data-lang="subtotal">SUBTOTAL</td>
-                            <td class="text-right p-3 border-t-2" id="subtotal">0.00</td>
+                            <td class="text-right rtl:text-left font-bold p-3 border-t-2" data-lang="subtotal">SUBTOTAL</td>
+                            <td class="text-right rtl:text-left p-3 border-t-2" id="subtotal">0.00</td>
                             <td class="no-print border-t-2"></td>
                         </tr>
                         <tr>
                             <td colspan="3"></td>
-                            <td class="text-right font-bold p-3" data-lang="vat">VAT (15%)</td>
-                            <td class="text-right p-3" id="vat">0.00</td>
+                            <td class="text-right rtl:text-left font-bold p-3" data-lang="vat">VAT (15%)</td>
+                            <td class="text-right rtl:text-left p-3" id="vat">0.00</td>
                             <td class="no-print"></td>
                         </tr>
                         <tr class="bg-gray-800 text-white font-bold text-lg">
                             <td colspan="3"></td>
-                            <td class="text-right p-4 rounded-l-lg" data-lang="grandTotal">TOTAL</td>
-                            <td class="text-right p-4 rounded-r-lg" id="grand-total">0.00</td>
+                            <td class="text-right rtl:text-left p-4 rounded-l-lg rtl:rounded-l-none rtl:rounded-r-lg" data-lang="grandTotal">TOTAL</td>
+                            <td class="text-right rtl:text-left p-4 rounded-r-lg rtl:rounded-r-none rtl:rounded-l-lg" id="grand-total">0.00</td>
                             <td class="no-print"></td>
                         </tr>
                     </tfoot>
@@ -182,7 +182,7 @@
                     <div>
                         <p class="font-bold text-gray-800" data-lang="thankYou">Thank you for your business!</p>
                     </div>
-                    <div class="text-right">
+                    <div class="text-right rtl:text-left">
                         <div class="w-48 h-12 border-b-2 border-gray-300 mb-2"></div>
                         <p class="font-bold text-gray-700" data-lang="signature">Signature</p>
                     </div>
@@ -222,7 +222,7 @@
         const companyProfiles = {
             'wooden_pieces': { 
                 acronym: 'WPE', 
-                logo: 'logowooden.svg', // Using the direct file path
+                logo: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiB2aWV3Qm94PSIwIDAgMTAwIDEwMCI+PHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IiM4QjQ1MTMiLz48dGV4dCB4PSI1MCIgeT0iNTUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIzMCIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiPldQRTwvdGV4dD48L3N2Zz4=',
                 name: { en: 'Wooden Pieces EST.', ar: 'مؤسسة القطع الخشبية' }, 
                 cr: { en: 'CR: 1010798529', ar: 'س.ت: 1010798529' }, 
                 vat: { en: 'Vat No.: 310618978500003', ar: 'الرقم الضريبي: 310618978500003' }, 
@@ -231,7 +231,7 @@
             },
             'rattan_palace': { 
                 acronym: 'RP', 
-                logo: 'logo.svg', // Using the direct file path
+                logo: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiB2aWV3Qm94PSIwIDAgMTAwIDEwMCI+PHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IiMzMzMiLz48dGV4dCB4PSI1MCIgeT0iNTUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSI0MCIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiPlJQPC90ZXh0Pjwvc3ZnPg==',
                 name: { en: 'Rattan Palace', ar: 'قصر الخيزران' }, 
                 cr: { en: 'CR: 7050562888', ar: 'س.ت: 7050562888' }, 
                 vat: { en: 'Vat No.: 313099850500003', ar: 'الرقم الضريبي: 313099850500003' }, 
@@ -363,8 +363,8 @@
                     <div class="w-full bg-gray-50 rounded p-2 item-description editable" contenteditable="true" data-en="${item.desc_en}" data-ar="${item.desc_ar}" spellcheck="false"></div>
                 </td>
                 <td class="p-3"><input type="number" value="${item.qty}" min="0" class="quantity w-full text-center bg-gray-50 rounded p-2"></td>
-                <td class="p-3"><input type="number" value="${item.price}" step="0.01" min="0" class="unit-price w-full text-right bg-gray-50 rounded p-2"></td>
-                <td class="p-3 text-right total">0.00</td>
+                <td class="p-3"><input type="number" value="${item.price}" step="0.01" min="0" class="unit-price w-full text-right rtl:text-left bg-gray-50 rounded p-2"></td>
+                <td class="p-3 text-right rtl:text-left total">0.00</td>
                 <td class="p-3 text-center no-print">
                     <button class="remove-row text-red-500 hover:text-red-700"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
                 </td>
@@ -556,4 +556,3 @@
     </script>
 </body>
 </html>
-
