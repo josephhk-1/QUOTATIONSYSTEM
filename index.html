@@ -99,9 +99,9 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 mb-8">
                 <div class="bg-gray-50 p-4 rounded-lg">
                     <h3 class="font-bold text-gray-700 mb-2" data-lang="customer">Customer</h3>
-                    <p class="editable" contenteditable="true" data-field="customerName" data-en="Customer Name" data-ar="اسم العميل" spellcheck="false"></p>
-                    <p class="editable" contenteditable="true" data-field="customerAddress" data-en="Customer Address" data-ar="عنوان العميل" spellcheck="false"></p>
-                    <p class="editable" contenteditable="true" data-field="customerCountry" data-en="Saudi Arabia" data-ar="المملكة العربية السعودية" spellcheck="false"></p>
+                    <p class="editable" contenteditable="true" data-field="customerName" data-en="Customer Name" data-ar="اسم العميل" spellcheck="false">Customer Name</p>
+                    <p class="editable" contenteditable="true" data-field="customerAddress" data-en="Customer Address" data-ar="عنوان العميل" spellcheck="false">Customer Address</p>
+                    <p class="editable" contenteditable="true" data-field="customerCountry" data-en="Saudi Arabia" data-ar="المملكة العربية السعودية" spellcheck="false">Saudi Arabia</p>
                 </div>
                 <div class="bg-gray-50 p-4 rounded-lg text-left md:text-right">
                     <p><span class="font-bold text-gray-700" data-lang="quoteNum">Quote #:</span> <span class="editable" contenteditable="true" data-field="quoteNum" spellcheck="false"></span></p>
@@ -112,7 +112,7 @@
             
             <div class="mb-8">
                 <h3 class="text-xl font-bold text-gray-800 mb-2" data-lang="projectDescription">Project Description</h3>
-                <p class="editable bg-gray-50 p-4 rounded-lg" contenteditable="true" data-field="projectDescription" data-en="Enter your project description here..." data-ar="أدخل وصف مشروعك هنا..." spellcheck="false"></p>
+                <p class="editable bg-gray-50 p-4 rounded-lg" contenteditable="true" data-field="projectDescription" data-en="Enter your project description here..." data-ar="أدخل وصف مشروعك هنا..." spellcheck="false">Enter your project description here...</p>
             </div>
 
             <div class="overflow-x-auto">
@@ -156,7 +156,7 @@
             <div class="mt-10 grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div class="bg-gray-50 p-4 rounded-lg">
                     <h3 class="font-bold text-gray-700 mb-2" data-lang="terms">Terms and Conditions</h3>
-                    <div class="editable text-sm" contenteditable="true" data-field="terms" data-en="<ul><li>50% Down payment</li><li>30% second payment upon delivery</li><li>20% third payment upon delivery</li><li>Delivery within 20 to 30 days from down payment</li><li>3 years warranty on manufacturing defects</li></ul>" data-ar="<ul><li>دفعة أولى 50%</li><li>الدفعة الثانية 30% عند التسليم</li><li>الدفعة الثالثة 20% عند التسليم</li><li>التسليم في غضون 20 إلى 30 يومًا</li><li>ضمان 3 سنوات على عيوب التصنيع</li></ul>" spellcheck="false"></div>
+                    <div class="editable text-sm" contenteditable="true" data-field="terms" data-en="<ul><li>50% Down payment</li><li>50% second payment upon delivery</li><li>Delivery within 20 to 30 days from down payment</li><li>3 years warranty on manufacturing defects</li></ul>" data-ar="<ul><li>دفعة أولى 50%</li><li>الدفعة الثانية 50% عند التسليم</li><li>التسليم في غضون 20 إلى 30 يومًا من الدفعة الأولى</li><li>ضمان 3 سنوات على عيوب التصنيع</li></ul>" spellcheck="false"><ul><li>50% Down payment</li><li>50% second payment upon delivery</li><li>Delivery within 20 to 30 days from down payment</li><li>3 years warranty on manufacturing defects</li></ul></div>
                 </div>
                 <div class="bg-gray-50 p-4 rounded-lg">
                     <h3 class="font-bold text-gray-700 mb-2" data-lang="bankDetails">Bank Details</h3>
@@ -284,9 +284,7 @@
             const toggleBtn = document.getElementById('toggle-photos-btn');
             toggleBtn.textContent = isPhotoColumnVisible ? translations[lang].hidePhotos : translations[lang].showPhotos;
             document.querySelectorAll('.editable').forEach(el => {
-                if (!isProfileSwitch || (el.dataset.field && (el.dataset.field.startsWith('company') || el.dataset.field.startsWith('bank')))) {
-                     el.innerHTML = el.dataset[lang] || '';
-                }
+                 el.innerHTML = el.dataset[lang] || '';
             });
             document.querySelectorAll('.item-description').forEach(el => {
                 el.innerHTML = el.dataset[lang] || '';
