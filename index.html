@@ -20,10 +20,20 @@
     <style>
         body { font-family: 'Inter', sans-serif; }
         html[lang="ar"] body { font-family: 'Tajawal', sans-serif; }
-        .no-print { /* This class is used for elements hidden during PDF generation */ }
+        /* The .no-print class is used for elements hidden during PDF generation */
+        .no-print { }
+        /* Style for the custom notification */
+        #notification {
+            transition: opacity 0.5s, transform 0.5s;
+        }
     </style>
 </head>
 <body class="bg-gray-100 p-2 sm:p-6 md:p-8">
+
+    <!-- Custom Notification Area -->
+    <div id="notification" class="fixed top-0 left-1/2 -translate-x-1/2 mt-4 p-4 rounded-lg shadow-lg text-white opacity-0 transform -translate-y-20 z-50 no-print">
+        <span id="notification-message"></span>
+    </div>
 
     <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg" id="quote-container">
         <!-- Header with Action Buttons -->
@@ -50,15 +60,15 @@
                     <span data-lang="saveSource">Save</span>
                 </button>
                  <button onclick="generatePDF()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-3 rounded-lg flex items-center text-xs md:text-sm">
-                    <span data-lang="downloadPdf">PDF</span>
+                    <span data-lang="previewPdf">Preview PDF</span>
                 </button>
             </div>
         </header>
 
         <!-- Main Quotation Area -->
-        <main class="p-4 md:p-10 print-area">
+        <main class="p-4 md:p-10 print-area" id="print-area">
             <!-- Company Info and Logo -->
-            <div class="flex justify-between items-center mb-6 gap-4">
+            <div class="flex justify-between items-start mb-6 gap-4">
                 <div class="w-2/3">
                     <h2 class="text-3xl font-bold text-gray-800 editable" contenteditable="true" data-field="companyName" spellcheck="false"></h2>
                     <p class="text-sm text-gray-500 editable" contenteditable="true" data-field="companyCR" spellcheck="false"></p>
@@ -66,7 +76,7 @@
                     <p class="text-sm text-gray-500 editable" contenteditable="true" data-field="companyAddress" spellcheck="false"></p>
                 </div>
                 <div class="w-1/3 flex justify-end">
-                     <img id="company-logo" src="logowooden.svg" onerror="this.onerror=null;this.src='https://placehold.co/180x100/e2e8f0/334155?text=Logo+Not+Found';" alt="Company Logo" class="w-52 h-auto">
+                     <img id="company-logo" src="logowooden.svg" onerror="this.onerror=null;this.src='https://placehold.co/180x100/e2e8f0/334155?text=Logo+Not+Found';" alt="Company Logo" class="w-48 h-auto">
                 </div>
             </div>
 
@@ -99,7 +109,7 @@
                             <th class="p-3 rounded-l-lg text-left" data-lang="description">Description</th>
                             <th class="p-3 w-24 text-center" data-lang="quantity">Quantity</th>
                             <th class="p-3 w-32 text-right" data-lang="unitPrice">Unit Price</th>
-                            <th class="p-3 w-32 text-right rounded-r-lg" data-lang="total">Total</th>
+                            <th class="p-3 w-32 text-right" data-lang="total">Total</th>
                             <th class="p-3 w-16 text-center rounded-r-lg no-print" data-lang="action">Action</th>
                         </tr>
                     </thead>
@@ -135,11 +145,11 @@
             <div class="mt-10 grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div class="bg-gray-50 p-4 rounded-lg">
                     <h3 class="font-bold text-gray-700 mb-2" data-lang="terms">Terms and Conditions</h3>
-                    <div class="editable" contenteditable="true" data-field="terms" data-en="<ul><li>50% Down payment</li><li>30% second payment upon delivery</li><li>20% third payment upon delivery</li><li>Delivery within 20 to 30 days from down payment</li><li>3 years warranty on manufacturing defects</li></ul>" data-ar="<ul><li>دفعة أولى 50%</li><li>الدفعة الثانية 30% عند التسليم</li><li>الدفعة الثالثة 20% عند التسليم</li><li>التسليم في غضون 20 إلى 30 يومًا</li><li>ضمان 3 سنوات على عيوب التصنيع</li></ul>" spellcheck="false"></div>
+                    <div class="editable text-sm" contenteditable="true" data-field="terms" data-en="<ul><li>50% Down payment</li><li>30% second payment upon delivery</li><li>20% third payment upon delivery</li><li>Delivery within 20 to 30 days from down payment</li><li>3 years warranty on manufacturing defects</li></ul>" data-ar="<ul><li>دفعة أولى 50%</li><li>الدفعة الثانية 30% عند التسليم</li><li>الدفعة الثالثة 20% عند التسليم</li><li>التسليم في غضون 20 إلى 30 يومًا</li><li>ضمان 3 سنوات على عيوب التصنيع</li></ul>" spellcheck="false"></div>
                 </div>
                 <div class="bg-gray-50 p-4 rounded-lg">
                     <h3 class="font-bold text-gray-700 mb-2" data-lang="bankDetails">Bank Details</h3>
-                    <div class="editable" contenteditable="true" data-field="bankDetails" spellcheck="false"></div>
+                    <div class="editable text-sm" contenteditable="true" data-field="bankDetails" spellcheck="false"></div>
                 </div>
             </div>
 
@@ -158,6 +168,24 @@
         </main>
     </div>
 
+    <!-- PDF Preview Modal -->
+    <div id="pdf-preview-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-40 hidden no-print">
+        <div class="bg-white rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col">
+            <header class="p-4 border-b flex justify-between items-center">
+                <h2 class="text-xl font-bold" data-lang="pdfPreviewTitle">PDF Preview</h2>
+                <button onclick="closePreviewModal()" class="text-gray-500 hover:text-gray-800">&times;</button>
+            </header>
+            <div class="p-4 overflow-auto flex-grow">
+                <img id="pdf-preview-image" src="" alt="PDF Preview" class="w-full h-auto border">
+            </div>
+            <footer class="p-4 bg-gray-50 border-t flex justify-end gap-3">
+                <button onclick="closePreviewModal()" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg" data-lang="cancel">Cancel</button>
+                <button id="download-pdf-btn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg" data-lang="downloadPdf">Download PDF</button>
+            </footer>
+        </div>
+    </div>
+
+
     <footer class="text-center text-gray-500 text-sm py-4 no-print">
         Made by Joseph HAMDY KAMAL
     </footer>
@@ -165,6 +193,7 @@
     <script>
         // --- GLOBAL STATE ---
         let currentLang = 'en';
+        let pdfImageData = null; // To store the generated canvas image data for the PDF
 
         // --- COMPANY PROFILES DATA ---
         const companyProfiles = {
@@ -181,7 +210,7 @@
             },
             'rattan_palace': {
                 logo: 'logo.svg',
-                name: { en: 'Rattan Palace', ar: 'Kasr elKhizran' },
+                name: { en: 'Rattan Palace', ar: 'قصر الخيزران' },
                 cr: { en: 'CR: 7050562888', ar: 'س.ت: 7050562888' },
                 vat: { en: 'Vat No.: 313099850500003', ar: 'الرقم الضريبي: 313099850500003' },
                 address: { en: 'RFKB2501. ALQods st, Alkhaleej, P.O.Box: 2401<br>RIYADH 13223, Kingdom of Saudi Arabia', ar: 'RFKB2501. شارع القدس, الخليج, ص.ب: 2401<br>الرياض 13223, المملكة العربية السعودية' },
@@ -195,14 +224,34 @@
         // --- TRANSLATION DATA ---
         const translations = {
             en: {
-                appTitle: "Quotation Generator", loadSource: "Load", saveSource: "Save", downloadPdf: "PDF", customer: "Customer", quoteNum: "Quote #:", date: "Date:", validUntil: "Valid Until:", projectDescription: "Project Description", description: "Description", quantity: "Quantity", unitPrice: "Unit Price", total: "Total", action: "Action", addRow: "Add Row", subtotal: "SUBTOTAL", vat: "VAT (15%)", grandTotal: "TOTAL", terms: "Terms and Conditions", bankDetails: "Bank Details", thankYou: "Thank you for your business!", signature: "Signature",
+                appTitle: "Quotation Generator", loadSource: "Load", saveSource: "Save", previewPdf: "Preview PDF", downloadPdf: "Download PDF", customer: "Customer", quoteNum: "Quote #:", date: "Date:", validUntil: "Valid Until:", projectDescription: "Project Description", description: "Description", quantity: "Quantity", unitPrice: "Unit Price", total: "Total", action: "Action", addRow: "Add Row", subtotal: "SUBTOTAL", vat: "VAT (15%)", grandTotal: "TOTAL", terms: "Terms and Conditions", bankDetails: "Bank Details", thankYou: "Thank you for your business!", signature: "Signature", pdfPreviewTitle: "PDF Preview", cancel: "Cancel", fileLoadError: "Error: Could not load the quote file. It may be corrupted.",
             },
             ar: {
-                appTitle: "مولد عروض الأسعار", loadSource: "تحميل", saveSource: "حفظ", downloadPdf: "PDF", customer: "العميل", quoteNum: "رقم عرض السعر:", date: "التاريخ:", validUntil: "صالح حتى:", projectDescription: "وصف المشروع", description: "الوصف", quantity: "الكمية", unitPrice: "سعر الوحدة", total: "المجموع", action: "إجراء", addRow: "أضف سطراً", subtotal: "المجموع الفرعي", vat: "ضريبة القيمة المضافة (15%)", grandTotal: "المجموع الإجمالي", terms: "الشروط والأحكام", bankDetails: "التفاصيل البنكية", thankYou: "شكرا لعملك معنا!", signature: "التوقيع",
+                appTitle: "مولد عروض الأسعار", loadSource: "تحميل", saveSource: "حفظ", previewPdf: "معاينة PDF", downloadPdf: "تحميل PDF", customer: "العميل", quoteNum: "رقم عرض السعر:", date: "التاريخ:", validUntil: "صالح حتى:", projectDescription: "وصف المشروع", description: "الوصف", quantity: "الكمية", unitPrice: "سعر الوحدة", total: "المجموع", action: "إجراء", addRow: "أضف سطراً", subtotal: "المجموع الفرعي", vat: "ضريبة القيمة المضافة (15%)", grandTotal: "المجموع الإجمالي", terms: "الشروط والأحكام", bankDetails: "التفاصيل البنكية", thankYou: "شكرا لعملك معنا!", signature: "التوقيع", pdfPreviewTitle: "معاينة PDF", cancel: "إلغاء", fileLoadError: "خطأ: لا يمكن تحميل ملف عرض السعر. قد يكون تالفًا.",
             }
         };
 
-        // --- CORE FUNCTIONS ---
+        // --- UI FUNCTIONS ---
+
+        function showNotification(messageKey, isError = false) {
+            const notification = document.getElementById('notification');
+            const messageEl = document.getElementById('notification-message');
+            
+            messageEl.textContent = translations[currentLang][messageKey] || messageKey;
+            notification.className = `fixed top-0 left-1/2 -translate-x-1/2 mt-4 p-4 rounded-lg shadow-lg text-white opacity-0 transform -translate-y-20 z-50 no-print ${isError ? 'bg-red-500' : 'bg-green-500'}`;
+
+            // Animate in
+            setTimeout(() => {
+                notification.classList.remove('opacity-0', '-translate-y-20');
+                notification.classList.add('opacity-100', 'translate-y-0');
+            }, 10);
+
+            // Animate out after 3 seconds
+            setTimeout(() => {
+                notification.classList.remove('opacity-100', 'translate-y-0');
+                notification.classList.add('opacity-0', '-translate-y-20');
+            }, 3000);
+        }
 
         function switchCompanyProfile(profileKey) {
             const profile = companyProfiles[profileKey];
@@ -220,10 +269,10 @@
             document.querySelector('[data-field="bankDetails"]').dataset.en = profile.bankDetails.en;
             document.querySelector('[data-field="bankDetails"]').dataset.ar = profile.bankDetails.ar;
 
-            setLanguage(currentLang);
+            setLanguage(currentLang, true); // Pass true to avoid resetting all fields
         }
 
-        function setLanguage(lang) {
+        function setLanguage(lang, isProfileSwitch = false) {
             currentLang = lang;
             document.documentElement.lang = lang;
             document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
@@ -233,8 +282,13 @@
                 if (translations[lang][key]) el.textContent = translations[lang][key];
             });
 
+            // Update content of editable fields based on the new language
             document.querySelectorAll('.editable').forEach(el => {
-                el.innerHTML = el.dataset[lang] || '';
+                // On a full language switch, update the displayed text from the data attributes
+                // On a profile switch, we only want to update the company-specific fields
+                if (!isProfileSwitch || el.dataset.field.startsWith('company') || el.dataset.field.startsWith('bank')) {
+                     el.innerHTML = el.dataset[lang] || '';
+                }
             });
 
             document.querySelectorAll('.item-description').forEach(el => {
@@ -247,8 +301,7 @@
         }
         
         function syncUIData() {
-            document.querySelectorAll('.editable').forEach(el => updateEditableData(el));
-            document.querySelectorAll('.item-description').forEach(el => updateEditableData(el));
+            document.querySelectorAll('.editable, .item-description').forEach(el => updateEditableData(el));
         }
 
         function updateTotals() {
@@ -290,7 +343,6 @@
             const descDiv = row.querySelector('.item-description');
             descDiv.innerHTML = descDiv.dataset[currentLang];
             descDiv.addEventListener('input', () => updateEditableData(descDiv));
-            descDiv.addEventListener('blur', () => updateEditableData(descDiv));
             row.querySelector('.quantity').addEventListener('input', updateTotals);
             row.querySelector('.unit-price').addEventListener('input', updateTotals);
             row.querySelector('.remove-row').addEventListener('click', () => { row.remove(); updateTotals(); });
@@ -346,7 +398,7 @@
                     
                     if (data.companyProfile) {
                         document.getElementById('company-selector').value = data.companyProfile;
-                        switchCompanyProfile(data.companyProfile);
+                        // We call switchCompanyProfile first, which will set the language
                     }
 
                     Object.keys(data.fields).forEach(fieldName => {
@@ -356,50 +408,52 @@
                             el.dataset.ar = data.fields[fieldName].ar;
                         }
                     });
+                    
+                    // This must be called *after* setting the data attributes
+                    switchCompanyProfile(data.companyProfile || 'wooden_pieces');
 
                     document.getElementById('table-body').innerHTML = '';
                     data.items.forEach(item => addNewRow(item));
-
+                    
+                    // Set language and update UI from new data
                     setLanguage(data.lang || 'en');
                     updateTotals();
                 } catch (error) {
                     console.error("Failed to parse JSON file:", error);
-                    alert("Error: Could not load the quote file. It may be corrupted.");
+                    showNotification('fileLoadError', true);
                 }
             };
             reader.readAsText(event.target.files[0]);
             event.target.value = '';
         }
 
-        function generatePDF() {
+        function closePreviewModal() {
+            document.getElementById('pdf-preview-modal').classList.add('hidden');
+            pdfImageData = null; // Clear the stored image data
+        }
+
+        async function generatePDF() {
             syncUIData();
-            const customerName = document.querySelector('[data-field="customerName"]').textContent.trim();
-            const sanitizedName = customerName.replace(/[^a-z0-9\u0600-\u06FF]/gi, '_');
+
+            // De-focus any active element to prevent spellcheck lines from appearing
+            if (document.activeElement) document.activeElement.blur();
 
             const { jsPDF } = window.jspdf;
-            const quoteElement = document.querySelector('.print-area');
+            const quoteElement = document.getElementById('print-area');
             
+            // Create a clone to modify for printing, preserving the original UI
             const printableClone = quoteElement.cloneNode(true);
             
-            // Apply desktop styles to the clone for PDF generation
-            const mainHeader = printableClone.querySelector('.flex.justify-between.items-center');
-            if(mainHeader) {
-                mainHeader.classList.remove('flex-col', 'sm:flex-row', 'items-start');
-                mainHeader.classList.add('items-center');
-            }
-            printableClone.querySelectorAll('.grid').forEach(grid => {
-                if(!grid.closest('.mt-10')) { 
-                    grid.classList.remove('grid-cols-1', 'md:grid-cols-2');
-                    grid.classList.add('grid-cols-2');
-                }
-            });
-
-
+            // Set a fixed width for consistent rendering by html2canvas
+            printableClone.style.width = '1024px'; 
+            
+            // Position it off-screen
             printableClone.style.position = 'absolute';
             printableClone.style.left = '-9999px';
-            printableClone.style.width = '1024px'; 
+            printableClone.style.top = '0';
             document.body.appendChild(printableClone);
 
+            // Replace input fields with static text for a clean PDF look
             printableClone.querySelectorAll('input.quantity, input.unit-price').forEach(input => {
                 const span = document.createElement('span');
                 span.textContent = input.value;
@@ -409,45 +463,60 @@
                 input.parentNode.replaceChild(span, input);
             });
             
+            // Remove gray backgrounds for a standard white paper look
             printableClone.querySelectorAll('.bg-gray-50').forEach(el => {
                 el.classList.remove('bg-gray-50');
+                el.style.backgroundColor = 'transparent';
             });
 
-
+            // Remove all elements marked as no-print
             printableClone.querySelectorAll('.no-print').forEach(el => el.remove());
             
-            html2canvas(printableClone, { scale: 3, useCORS: true, logging: false })
-                .then(canvas => {
-                    const imgData = canvas.toDataURL('image/png');
+            // Give a slight delay for images to render before capturing
+            await new Promise(resolve => setTimeout(resolve, 200));
+
+            try {
+                const canvas = await html2canvas(printableClone, { scale: 3, useCORS: true, logging: false });
+                pdfImageData = canvas.toDataURL('image/png');
+                
+                // Show preview
+                document.getElementById('pdf-preview-image').src = pdfImageData;
+                document.getElementById('pdf-preview-modal').classList.remove('hidden');
+
+                // Attach the download handler to the button in the modal
+                document.getElementById('download-pdf-btn').onclick = () => {
+                    const customerName = document.querySelector('[data-field="customerName"]').textContent.trim();
+                    const sanitizedName = customerName.replace(/[^a-z0-9\u0600-\u06FF]/gi, '_');
+
                     const pdf = new jsPDF('p', 'mm', 'a4');
                     const pdfWidth = pdf.internal.pageSize.getWidth();
                     const pdfHeight = pdf.internal.pageSize.getHeight();
+                    const imgProps = pdf.getImageProperties(pdfImageData);
+                    const imgRatio = imgProps.width / imgProps.height;
                     
-                    const pageMargin = 15;
-                    const effectivePdfWidth = pdfWidth - (pageMargin * 2);
-                    const effectivePdfHeight = pdfHeight - (pageMargin * 2);
-                    
-                    const canvasRatio = canvas.width / canvas.height;
-                    
-                    let imgWidth, imgHeight;
+                    let imgWidth = pdfWidth - 20; // 10mm margin on each side
+                    let imgHeight = imgWidth / imgRatio;
 
-                    if ((effectivePdfWidth / effectivePdfHeight) > canvasRatio) {
-                        imgHeight = effectivePdfHeight;
-                        imgWidth = imgHeight * canvasRatio;
-                    } else {
-                        imgWidth = effectivePdfWidth;
-                        imgHeight = imgWidth / canvasRatio;
+                    if (imgHeight > pdfHeight - 20) {
+                        imgHeight = pdfHeight - 20; // 10mm margin top/bottom
+                        imgWidth = imgHeight * imgRatio;
                     }
 
                     const x = (pdfWidth - imgWidth) / 2;
-                    const y = (pdfHeight - imgHeight) / 2;
+                    const y = 10; // 10mm top margin
 
-                    pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
+                    pdf.addImage(pdfImageData, 'PNG', x, y, imgWidth, imgHeight);
                     pdf.save(`Quotation_${sanitizedName || 'details'}.pdf`);
-                })
-                .finally(() => {
-                    document.body.removeChild(printableClone);
-                });
+                    closePreviewModal();
+                };
+
+            } catch (error) {
+                console.error("Error generating PDF canvas:", error);
+                showNotification("Error generating PDF preview.", true);
+            } finally {
+                // Clean up by removing the cloned element
+                document.body.removeChild(printableClone);
+            }
         }
 
         // --- INITIALIZATION ---
@@ -460,11 +529,11 @@
 
             document.querySelectorAll('.editable').forEach(el => {
                 el.addEventListener('input', () => updateEditableData(el));
-                el.addEventListener('blur', () => updateEditableData(el));
             });
 
             document.getElementById('add-row').addEventListener('click', () => addNewRow());
 
+            // Initial setup
             switchCompanyProfile('wooden_pieces');
             addNewRow();
             updateTotals();
