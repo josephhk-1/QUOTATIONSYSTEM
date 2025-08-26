@@ -139,7 +139,7 @@
                 </div>
                 <div class="bg-gray-50 p-4 rounded-lg">
                     <h3 class="font-bold text-gray-700 mb-2" data-lang="bankDetails">Bank Details</h3>
-                    <div class="editable" contenteditable="true" data-field="bankDetails" data-en="<p><strong>Bank:</strong> ALINMAA BANK</p><p><strong>IBAN:</strong> SA0705000068203914512000</p>" data-ar="<p><strong>البنك:</strong> مصرف الإنماء</p><p><strong>الآيبان:</strong> SA0705000068203914512000</p>"></div>
+                    <div class="editable" contenteditable="true" data-field="bankDetails"></div>
                 </div>
             </div>
 
@@ -173,14 +173,22 @@
                 name: { en: 'Wooden Pieces EST.', ar: 'مؤسسة القطع الخشبية' },
                 cr: { en: 'CR: 1010798529', ar: 'س.ت: 1010798529' },
                 vat: { en: 'Vat No.: 310618978500003', ar: 'الرقم الضريبي: 310618978500003' },
-                address: { en: 'RFKB2501. ALQods st, Alkhaleej, P.O.Box: 2401<br>RIYADH 13223, Kingdom of Saudi Arabia', ar: 'RFKB2501. شارع القدس, الخليج, ص.ب: 2401<br>الرياض 13223, المملكة العربية السعودية' }
+                address: { en: 'RFKB2501. ALQods st, Alkhaleej, P.O.Box: 2401<br>RIYADH 13223, Kingdom of Saudi Arabia', ar: 'RFKB2501. شارع القدس, الخليج, ص.ب: 2401<br>الرياض 13223, المملكة العربية السعودية' },
+                bankDetails: {
+                    en: `<p><strong>Bank:</strong> ALINMAA BANK</p><p><strong>IBAN:</strong> SA0705000068203914512000</p>`,
+                    ar: `<p><strong>البنك:</strong> مصرف الإنماء</p><p><strong>الآيبان:</strong> SA0705000068203914512000</p>`
+                }
             },
             'rattan_palace': {
                 logo: 'logo.svg',
                 name: { en: 'Rattan Palace', ar: 'قصر الخيزران' },
-                cr: { en: 'CR: 1010798529', ar: 'س.ت: 1010798529' },
-                vat: { en: 'Vat No.: 310618978500003', ar: 'الرقم الضريبي: 310618978500003' },
-                address: { en: 'RFKB2501. ALQods st, Alkhaleej, P.O.Box: 2401<br>RIYADH 13223, Kingdom of Saudi Arabia', ar: 'RFKB2501. شارع القدس, الخليج, ص.ب: 2401<br>الرياض 13223, المملكة العربية السعودية' }
+                cr: { en: 'CR: 7050562888', ar: 'س.ت: 7050562888' },
+                vat: { en: 'Vat No.: 313099850500003', ar: 'الرقم الضريبي: 313099850500003' },
+                address: { en: 'RFKB2501. ALQods st, Alkhaleej, P.O.Box: 2401<br>RIYADH 13223, Kingdom of Saudi Arabia', ar: 'RFKB2501. شارع القدس, الخليج, ص.ب: 2401<br>الرياض 13223, المملكة العربية السعودية' },
+                bankDetails: {
+                    en: `<p><strong>Bank:</strong> Riyad Bank</p><p><strong>IBAN:</strong> SA3020000002126072249940</p>`,
+                    ar: `<p><strong>البنك:</strong> بنك الرياض</p><p><strong>الآيبان:</strong> SA3020000002126072249940</p>`
+                }
             }
         };
 
@@ -209,6 +217,8 @@
             document.querySelector('[data-field="companyVat"]').dataset.ar = profile.vat.ar;
             document.querySelector('[data-field="companyAddress"]').dataset.en = profile.address.en;
             document.querySelector('[data-field="companyAddress"]').dataset.ar = profile.address.ar;
+            document.querySelector('[data-field="bankDetails"]').dataset.en = profile.bankDetails.en;
+            document.querySelector('[data-field="bankDetails"]').dataset.ar = profile.bankDetails.ar;
 
             setLanguage(currentLang);
         }
@@ -373,10 +383,11 @@
             // Apply desktop styles to the clone for PDF generation
             const mainHeader = printableClone.querySelector('.flex.justify-between.items-center');
             if(mainHeader) {
-                mainHeader.classList.remove('flex-col', 'sm:flex-row', 'items-start', 'sm:items-center');
+                mainHeader.classList.remove('flex-col', 'sm:flex-row', 'items-start');
+                mainHeader.classList.add('items-center');
             }
             printableClone.querySelectorAll('.grid').forEach(grid => {
-                if(!grid.closest('.mt-10')) { // Avoid changing the terms/bank details grid on mobile
+                if(!grid.closest('.mt-10')) { 
                     grid.classList.remove('grid-cols-1', 'md:grid-cols-2');
                     grid.classList.add('grid-cols-2');
                 }
