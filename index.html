@@ -181,7 +181,7 @@
             },
             'rattan_palace': {
                 logo: 'logo.svg',
-                name: { en: 'Rattan Palace', ar: 'قصر الخيزران' },
+                name: { en: 'Rattan Palace', ar: 'Kasr elKhizran' },
                 cr: { en: 'CR: 7050562888', ar: 'س.ت: 7050562888' },
                 vat: { en: 'Vat No.: 313099850500003', ar: 'الرقم الضريبي: 313099850500003' },
                 address: { en: 'RFKB2501. ALQods st, Alkhaleej, P.O.Box: 2401<br>RIYADH 13223, Kingdom of Saudi Arabia', ar: 'RFKB2501. شارع القدس, الخليج, ص.ب: 2401<br>الرياض 13223, المملكة العربية السعودية' },
@@ -289,6 +289,7 @@
             
             const descDiv = row.querySelector('.item-description');
             descDiv.innerHTML = descDiv.dataset[currentLang];
+            descDiv.addEventListener('input', () => updateEditableData(descDiv));
             descDiv.addEventListener('blur', () => updateEditableData(descDiv));
             row.querySelector('.quantity').addEventListener('input', updateTotals);
             row.querySelector('.unit-price').addEventListener('input', updateTotals);
@@ -302,7 +303,7 @@
         function saveQuote() {
             syncUIData();
             const customerName = document.querySelector('[data-field="customerName"]').textContent.trim();
-            const sanitizedName = customerName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+            const sanitizedName = customerName.replace(/[^a-z0-9\u0600-\u06FF]/gi, '_');
 
             const quoteData = {
                 lang: currentLang,
@@ -373,7 +374,7 @@
         function generatePDF() {
             syncUIData();
             const customerName = document.querySelector('[data-field="customerName"]').textContent.trim();
-            const sanitizedName = customerName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+            const sanitizedName = customerName.replace(/[^a-z0-9\u0600-\u06FF]/gi, '_');
 
             const { jsPDF } = window.jspdf;
             const quoteElement = document.querySelector('.print-area');
@@ -458,6 +459,7 @@
             document.getElementById('validDate').textContent = validUntil.toLocaleDateString('en-CA');
 
             document.querySelectorAll('.editable').forEach(el => {
+                el.addEventListener('input', () => updateEditableData(el));
                 el.addEventListener('blur', () => updateEditableData(el));
             });
 
