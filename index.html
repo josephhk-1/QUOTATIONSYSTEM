@@ -50,6 +50,16 @@
         .hide-photos .photo-col {
             display: none;
         }
+        /* Styles to force layout during PDF rendering */
+        .pdf-render-mode .grid {
+            display: grid !important;
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        }
+        .pdf-render-mode .flex.justify-between {
+             display: flex !important;
+             justify-content: space-between !important;
+             align-items: center !important;
+        }
     </style>
 </head>
 <body class="bg-gray-100 p-2 sm:p-6 md:p-8">
@@ -92,7 +102,7 @@
                     <p class="text-sm text-gray-500 editable" contenteditable="true" data-field="companyAddress" spellcheck="false"></p>
                 </div>
                 <div class="w-1/3 flex justify-end">
-                     <img id="company-logo" src="logowooden.svg" onerror="this.onerror=null;this.src='https://placehold.co/180x100/e2e8f0/334155?text=Logo+Not+Found';" alt="Company Logo" class="w-48 h-auto">
+                     <img id="company-logo" src="" alt="Company Logo" class="w-48 h-auto">
                 </div>
             </div>
 
@@ -206,9 +216,27 @@
         let isPhotoColumnVisible = true;
 
         // --- COMPANY PROFILES DATA ---
+        // IMPORTANT: The logos are now included as Base64 data URIs to ensure they always load correctly in the PDF.
+        // To update a logo, encode your SVG or PNG file to Base64 and paste the result here.
         const companyProfiles = {
-            'wooden_pieces': { acronym: 'WPE', logo: 'logowooden.svg', name: { en: 'Wooden Pieces EST.', ar: 'مؤسسة القطع الخشبية' }, cr: { en: 'CR: 1010798529', ar: 'س.ت: 1010798529' }, vat: { en: 'Vat No.: 310618978500003', ar: 'الرقم الضريبي: 310618978500003' }, address: { en: 'RFKB2501. ALQods st, Alkhaleej, P.O.Box: 2401<br>RIYADH 13223, Kingdom of Saudi Arabia', ar: 'RFKB2501. شارع القدس, الخليج, ص.ب: 2401<br>الرياض 13223, المملكة العربية السعودية' }, bankDetails: { en: `<p><strong>Bank:</strong> ALINMAA BANK</p><p><strong>IBAN:</strong> SA0705000068203914512000</p>`, ar: `<p><strong>البنك:</strong> مصرف الإنماء</p><p><strong>الآيبان:</strong> SA0705000068203914512000</p>` } },
-            'rattan_palace': { acronym: 'RP', logo: 'logo.svg', name: { en: 'Rattan Palace', ar: 'قصر الخيزران' }, cr: { en: 'CR: 7050562888', ar: 'س.ت: 7050562888' }, vat: { en: 'Vat No.: 313099850500003', ar: 'الرقم الضريبي: 313099850500003' }, address: { en: 'RFKB2501. ALQods st, Alkhaleej, P.O.Box: 2401<br>RIYADH 13223, Kingdom of Saudi Arabia', ar: 'RFKB2501. شارع القدس, الخليج, ص.ب: 2401<br>الرياض 13223, المملكة العربية السعودية' }, bankDetails: { en: `<p><strong>Bank:</strong> Riyad Bank</p><p><strong>IBAN:</strong> SA3020000002126072249940</p>`, ar: `<p><strong>البنك:</strong> بنك الرياض</p><p><strong>الآيبان:</strong> SA3020000002126072249940</p>` } }
+            'wooden_pieces': { 
+                acronym: 'WPE', 
+                logo_base64: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDE4MCAxMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjE4MCIgaGVpZ2h0PSIxMDAiIGZpbGw9IiNlMmVjZjEiLz48dGV4dCB4PSI5MCIgeT0iNTUiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXNpemU9IjE0IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMzM0MTU1IiBzdHJva2U9IiMzMzQxNTUiIHN0cm9rZS13aWR0aD0iMC41Ij5Xb29kZW4gUGllY2VzIExvZ288L3RleHQ+PC9zdmc+',
+                name: { en: 'Wooden Pieces EST.', ar: 'مؤسسة القطع الخشبية' }, 
+                cr: { en: 'CR: 1010798529', ar: 'س.ت: 1010798529' }, 
+                vat: { en: 'Vat No.: 310618978500003', ar: 'الرقم الضريبي: 310618978500003' }, 
+                address: { en: 'RFKB2501. ALQods st, Alkhaleej, P.O.Box: 2401<br>RIYADH 13223, Kingdom of Saudi Arabia', ar: 'RFKB2501. شارع القدس, الخليج, ص.ب: 2401<br>الرياض 13223, المملكة العربية السعودية' }, 
+                bankDetails: { en: `<p><strong>Bank:</strong> ALINMAA BANK</p><p><strong>IBAN:</strong> SA0705000068203914512000</p>`, ar: `<p><strong>البنك:</strong> مصرف الإنماء</p><p><strong>الآيبان:</strong> SA0705000068203914512000</p>` } 
+            },
+            'rattan_palace': { 
+                acronym: 'RP', 
+                logo_base64: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDE4MCAxMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjE4MCIgaGVpZ2h0PSIxMDAiIGZpbGw9IiNlMmVjZjEiLz48dGV4dCB4PSI5MCIgeT0iNTUiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXNpemU9IjE0IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMzM0MTU1IiBzdHJva2U9IiMzMzQxNTUiIHN0cm9rZS13aWR0aD0iMC41Ij5SYXR0YW4gUGFsYWNlIExvZ288L3RleHQ+PC9zdmc+',
+                name: { en: 'Rattan Palace', ar: 'قصر الخيزران' }, 
+                cr: { en: 'CR: 7050562888', ar: 'س.ت: 7050562888' }, 
+                vat: { en: 'Vat No.: 313099850500003', ar: 'الرقم الضريبي: 313099850500003' }, 
+                address: { en: 'RFKB2501. ALQods st, Alkhaleej, P.O.Box: 2401<br>RIYADH 13223, Kingdom of Saudi Arabia', ar: 'RFKB2501. شارع القدس, الخليج, ص.ب: 2401<br>الرياض 13223, المملكة العربية السعودية' }, 
+                bankDetails: { en: `<p><strong>Bank:</strong> Riyad Bank</p><p><strong>IBAN:</strong> SA3020000002126072249940</p>`, ar: `<p><strong>البنك:</strong> بنك الرياض</p><p><strong>الآيبان:</strong> SA3020000002126072249940</p>` } 
+            }
         };
 
         // --- TRANSLATION DATA ---
@@ -258,7 +286,7 @@
         function switchCompanyProfile(profileKey) {
             const profile = companyProfiles[profileKey];
             if (!profile) return;
-            document.getElementById('company-logo').src = profile.logo;
+            document.getElementById('company-logo').src = profile.logo_base64;
             document.querySelector('[data-field="companyName"]').dataset.en = profile.name.en;
             document.querySelector('[data-field="companyName"]').dataset.ar = profile.name.ar;
             document.querySelector('[data-field="companyCR"]').dataset.en = profile.cr.en;
@@ -437,22 +465,6 @@
             pdfImageData = null;
         }
 
-        function waitForImagesToLoad(container) {
-            const images = Array.from(container.getElementsByTagName('img'));
-            const promises = images.map(img => {
-                return new Promise((resolve, reject) => {
-                    if (img.complete && img.naturalHeight !== 0) {
-                        resolve();
-                    } else {
-                        img.onload = resolve;
-                        img.onerror = resolve; // Resolve on error too, so we don't block forever
-                    }
-                });
-            });
-            return Promise.all(promises);
-        }
-
-
         async function generatePDF() {
             syncUIData();
             if (document.activeElement) document.activeElement.blur();
@@ -460,14 +472,15 @@
             const quoteElement = document.getElementById('print-area');
             const printableClone = quoteElement.cloneNode(true);
             
-            // Force a consistent, desktop-like layout for PDF rendering
+            // Add a class to the clone to apply PDF-specific styles
+            printableClone.classList.add('pdf-render-mode');
+            
             printableClone.style.width = '1024px'; 
             printableClone.style.position = 'absolute';
             printableClone.style.left = '-9999px';
             printableClone.style.top = '0';
             document.body.appendChild(printableClone);
 
-            // Replace inputs with static text
             printableClone.querySelectorAll('input.quantity, input.unit-price').forEach(input => {
                 const span = document.createElement('span');
                 span.textContent = input.value;
@@ -477,18 +490,18 @@
                 input.parentNode.replaceChild(span, input);
             });
             
-            // Clean up UI elements for printing
             printableClone.querySelectorAll('.bg-gray-50').forEach(el => {
                 el.classList.remove('bg-gray-50');
                 el.style.backgroundColor = 'transparent';
             });
             printableClone.querySelectorAll('.no-print').forEach(el => el.remove());
             
-            // Wait for all images (logos, item photos) to load before rendering
-            await waitForImagesToLoad(printableClone);
+            // The Base64 logos load instantly, so no need to wait for them.
+            // We just give a minimal timeout for the browser to apply styles.
+            await new Promise(resolve => setTimeout(resolve, 50));
 
             try {
-                const canvas = await html2canvas(printableClone, { scale: 3, useCORS: true, logging: true });
+                const canvas = await html2canvas(printableClone, { scale: 3, useCORS: true, logging: false });
                 pdfImageData = canvas.toDataURL('image/png');
                 document.getElementById('pdf-preview-image').src = pdfImageData;
                 document.getElementById('pdf-preview-modal').classList.remove('hidden');
