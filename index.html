@@ -95,16 +95,16 @@
                 <button onclick="document.getElementById('file-loader').click()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-3 rounded-lg flex items-center text-xs md:text-sm transition-colors"><span data-lang="loadSource">Load</span></button>
                 <input type="file" id="file-loader" class="hidden" accept=".json" onchange="loadQuote(event)">
                 <button onclick="saveQuote()" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-3 rounded-lg flex items-center text-xs md:text-sm transition-colors"><span data-lang="saveSource">Save</span></button>
-                <button onclick="generatePDF()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-3 rounded-lg flex items-center text-xs md:text-sm transition-colors"><span data-lang="previewPdf">Preview PDF</span></button>
+                <button id="generate-pdf-btn" onclick="generatePDF()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 rounded-lg flex items-center text-xs md:text-sm transition-colors"><span data-lang="previewPdf">Preview PDF</span></button>
             </div>
         </header>
 
         <!-- Main Quotation Area -->
         <main class="p-4 md:p-10 print-area" id="print-area">
-            <div class="flex justify-between items-center mb-6 gap-4 rtl:flex-row-reverse">
+            <div class="flex justify-between items-center mb-8 gap-4 rtl:flex-row-reverse">
                 <div class="w-2/3">
                     <h2 class="text-3xl font-bold text-gray-800 editable" contenteditable="true" data-field="companyName" spellcheck="false"></h2>
-                    <p class="text-sm text-gray-500 editable" contenteditable="true" data-field="companyCR" spellcheck="false"></p>
+                    <p class="text-sm text-gray-500 mt-2 editable" contenteditable="true" data-field="companyCR" spellcheck="false"></p>
                     <p class="text-sm text-gray-500 editable" contenteditable="true" data-field="companyVat" spellcheck="false"></p>
                     <p class="text-sm text-gray-500 editable" contenteditable="true" data-field="companyAddress" spellcheck="false"></p>
                 </div>
@@ -113,14 +113,14 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 mb-8">
-                <div class="bg-gray-50 p-4 rounded-lg">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-8">
+                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
                     <h3 class="font-bold text-gray-700 mb-2" data-lang="customer">Customer</h3>
-                    <p class="editable" contenteditable="true" data-field="customerName" data-en="Customer Name" data-ar="اسم العميل" spellcheck="false">Customer Name</p>
-                    <p class="editable" contenteditable="true" data-field="customerAddress" data-en="Customer Address" data-ar="عنوان العميل" spellcheck="false">Customer Address</p>
-                    <p class="editable" contenteditable="true" data-field="customerCountry" data-en="Saudi Arabia" data-ar="المملكة العربية السعودية" spellcheck="false">Saudi Arabia</p>
+                    <p class="editable" contenteditable="true" data-field="customerName" data-en="Enter customer name" data-ar="أدخل اسم العميل" spellcheck="false"></p>
+                    <p class="editable" contenteditable="true" data-field="customerAddress" data-en="Enter customer address" data-ar="أدخل عنوان العميل" spellcheck="false"></p>
+                    <p class="editable" contenteditable="true" data-field="customerCountry" data-en="Saudi Arabia" data-ar="المملكة العربية السعودية" spellcheck="false"></p>
                 </div>
-                <div class="bg-gray-50 p-4 rounded-lg text-left md:text-right rtl:md:text-left">
+                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 text-left md:text-right rtl:md:text-left">
                     <p><span class="font-bold text-gray-700" data-lang="quoteNum">Quote #:</span> <span class="editable" contenteditable="true" data-field="quoteNum" spellcheck="false"></span></p>
                     <p><span class="font-bold text-gray-700" data-lang="date">Date:</span> <span id="quoteDate"></span></p>
                     <p><span class="font-bold text-gray-700" data-lang="validUntil">Valid Until:</span> <span id="validDate"></span></p>
@@ -129,26 +129,26 @@
             
             <div class="mb-8">
                 <h3 class="text-xl font-bold text-gray-800 mb-2" data-lang="projectDescription">Project Description</h3>
-                <p class="editable bg-gray-50 p-4 rounded-lg" contenteditable="true" data-field="projectDescription" data-en="Enter your project description here..." data-ar="أدخل وصف مشروعك هنا..." spellcheck="false">Enter your project description here...</p>
+                <p class="editable bg-gray-50 p-4 rounded-lg border border-gray-200" contenteditable="true" data-field="projectDescription" data-en="Enter your project description here..." data-ar="أدخل وصف مشروعك هنا..." spellcheck="false"></p>
             </div>
 
-            <div class="overflow-x-auto">
+            <div class="overflow-x-auto rounded-lg border border-gray-200">
                 <table class="w-full" id="items-table">
-                    <thead>
+                    <thead class="bg-gray-50">
                         <tr class="bg-gray-800 text-white">
-                            <th class="p-3 photo-col" data-lang="photo">Photo</th>
-                            <th class="p-3 text-left rtl:text-right" data-lang="description">Description</th>
-                            <th class="p-3 w-24 text-center" data-lang="quantity">Quantity</th>
-                            <th class="p-3 w-32 text-right rtl:text-left" data-lang="unitPrice">Unit Price</th>
-                            <th class="p-3 w-32 text-right rtl:text-left" data-lang="total">Total</th>
-                            <th class="p-3 w-16 text-center no-print" data-lang="action">Action</th>
+                            <th class="p-3 photo-col text-left text-xs font-medium uppercase tracking-wider" data-lang="photo">Photo</th>
+                            <th class="p-3 text-left rtl:text-right text-xs font-medium uppercase tracking-wider" data-lang="description">Description</th>
+                            <th class="p-3 w-24 text-center text-xs font-medium uppercase tracking-wider" data-lang="quantity">Quantity</th>
+                            <th class="p-3 w-32 text-right rtl:text-left text-xs font-medium uppercase tracking-wider" data-lang="unitPrice">Unit Price</th>
+                            <th class="p-3 w-32 text-right rtl:text-left text-xs font-medium uppercase tracking-wider" data-lang="total">Total</th>
+                            <th class="p-3 w-16 text-center no-print text-xs font-medium uppercase tracking-wider" data-lang="action">Action</th>
                         </tr>
                     </thead>
-                    <tbody id="table-body"></tbody>
+                    <tbody id="table-body" class="bg-white divide-y divide-gray-200"></tbody>
                     <tfoot>
                         <tr>
-                            <td colspan="3" class="no-print">
-                                <button id="add-row" class="mt-4 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg flex items-center transition-colors"><span data-lang="addRow">Add Row</span></button>
+                            <td colspan="3" class="p-3 no-print">
+                                <button id="add-row" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg flex items-center transition-transform transform hover:scale-105"><span data-lang="addRow">Add Row</span></button>
                             </td>
                             <td class="text-right rtl:text-left font-bold p-3 border-t-2" data-lang="subtotal">SUBTOTAL</td>
                             <td class="text-right rtl:text-left p-3 border-t-2" id="subtotal">0.00</td>
@@ -171,11 +171,11 @@
             </div>
 
             <div class="mt-10 grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div class="bg-gray-50 p-4 rounded-lg">
+                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
                     <h3 class="font-bold text-gray-700 mb-2" data-lang="terms">Terms and Conditions</h3>
-                    <div class="editable text-sm" contenteditable="true" data-field="terms" data-en="<ul><li>50% Down payment</li><li>50% second payment upon delivery</li><li>Delivery within 20 to 30 days from down payment</li><li>3 years warranty on manufacturing defects</li></ul>" data-ar="<ul><li>دفعة أولى 50%</li><li>الدفعة الثانية 50% عند التسليم</li><li>التسليم في غضون 20 إلى 30 يومًا من الدفعة الأولى</li><li>ضمان 3 سنوات على عيوب التصنيع</li></ul>" spellcheck="false"><ul><li>50% Down payment</li><li>50% second payment upon delivery</li><li>Delivery within 20 to 30 days from down payment</li><li>3 years warranty on manufacturing defects</li></ul></div>
+                    <div class="editable text-sm" contenteditable="true" data-field="terms" data-en="<ul><li>50% Down payment</li><li>50% second payment upon delivery</li><li>Delivery within 20 to 30 days from down payment</li><li>3 years warranty on manufacturing defects</li></ul>" data-ar="<ul><li>دفعة أولى 50%</li><li>الدفعة الثانية 50% عند التسليم</li><li>التسليم في غضون 20 إلى 30 يومًا من الدفعة الأولى</li><li>ضمان 3 سنوات على عيوب التصنيع</li></ul>" spellcheck="false"></div>
                 </div>
-                <div class="bg-gray-50 p-4 rounded-lg">
+                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
                     <h3 class="font-bold text-gray-700 mb-2" data-lang="bankDetails">Bank Details</h3>
                     <div class="editable text-sm" contenteditable="true" data-field="bankDetails" spellcheck="false"></div>
                 </div>
@@ -207,7 +207,7 @@
             </div>
             <footer class="p-4 bg-gray-50 border-t flex justify-end gap-3">
                 <button onclick="closePreviewModal()" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg transition-colors" data-lang="cancel">Cancel</button>
-                <button id="download-pdf-btn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition-colors" data-lang="downloadPdf">Download PDF</button>
+                <button id="download-pdf-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors" data-lang="downloadPdf">Download PDF</button>
             </footer>
         </div>
     </div>
@@ -348,7 +348,7 @@
             document.getElementById('grand-total').textContent = grandTotal.toFixed(2);
         }
 
-        function addNewRow(item = { photo: '', desc_en: 'New Item', desc_ar: 'عنصر جديد', qty: 1, price: 0.00 }) {
+        function addNewRow(item = { photo: '', desc_en: 'New Item Description', desc_ar: 'وصف عنصر جديد', qty: 1, price: 0.00 }) {
             const tableBody = document.getElementById('table-body');
             const row = document.createElement('tr');
             row.className = 'border-b border-gray-200';
@@ -370,7 +370,7 @@
                 <td class="p-3"><input type="number" value="${item.price}" step="0.01" min="0" class="unit-price w-full text-right rtl:text-left bg-gray-50 rounded p-2"></td>
                 <td class="p-3 text-right rtl:text-left total">0.00</td>
                 <td class="p-3 text-center no-print">
-                    <button class="remove-row text-red-500 hover:text-red-700"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
+                    <button class="remove-row text-red-500 hover:text-red-700" aria-label="Remove item"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
                 </td>
             `;
             tableBody.appendChild(row);
@@ -472,15 +472,17 @@
 
         async function generatePDF() {
             syncUIData();
+            const pdfBtn = document.getElementById('generate-pdf-btn');
+            const originalBtnContent = pdfBtn.innerHTML;
+            pdfBtn.disabled = true;
+            pdfBtn.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Generating...`;
+
             if (document.activeElement) document.activeElement.blur();
             const { jsPDF } = window.jspdf;
             const quoteElement = document.getElementById('print-area');
             const printableClone = quoteElement.cloneNode(true);
             
-            // Force LTR direction for consistent block layout in PDF
             printableClone.dir = 'ltr';
-            
-            // Add a class to the clone to apply PDF-specific styles
             printableClone.classList.add('pdf-render-mode');
             
             printableClone.style.width = '1024px'; 
@@ -504,8 +506,6 @@
             });
             printableClone.querySelectorAll('.no-print').forEach(el => el.remove());
             
-            // The Base64 logos load instantly, so no need to wait for them.
-            // We just give a minimal timeout for the browser to apply styles.
             await new Promise(resolve => setTimeout(resolve, 50));
 
             try {
@@ -539,6 +539,8 @@
                 showNotification("Error generating PDF preview.", true);
             } finally {
                 document.body.removeChild(printableClone);
+                pdfBtn.disabled = false;
+                pdfBtn.innerHTML = originalBtnContent;
             }
         }
 
