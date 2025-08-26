@@ -1,474 +1,488 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quotation Application</title>
-    
-    <!-- Favicon and Meta Tags for Link Sharing -->
-    <link rel="icon" type="image/svg+xml" href="logo.svg">
-    <meta property="og:title" content="Quotation Application">
-    <meta property="og:description" content="Generate, save, and download professional quotations in English and Arabic.">
-    <meta property="og:image" content="logo.svg">
-
+    <title>Professional Quotation Generator</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        html[lang="ar"] body { font-family: 'Tajawal', sans-serif; }
-        .no-print { /* This class is used for elements hidden during PDF generation */ }
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .quotation-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            background-color: white;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .header-controls {
+            max-width: 800px;
+            margin: 1rem auto;
+            padding: 1rem;
+            background-color: #f8fafc;
+            border-radius: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .quotation-container, .quotation-container * {
+                visibility: visible;
+            }
+            .quotation-container {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                max-width: 100%;
+                margin: 0;
+                padding: 0;
+                border: none;
+                box-shadow: none;
+            }
+            .no-print {
+                display: none;
+            }
+        }
+        .rtl {
+            direction: rtl;
+        }
+        .ltr {
+            direction: ltr;
+        }
     </style>
 </head>
-<body class="bg-gray-100 p-2 sm:p-6 md:p-8">
+<body class="bg-gray-50">
 
-    <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg" id="quote-container">
-        <!-- Header with Action Buttons -->
-        <header class="bg-gray-800 text-white p-4 rounded-t-2xl flex flex-col md:flex-row justify-between items-center no-print gap-4">
-            <div class="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
-                <h1 class="text-lg sm:text-xl font-bold" data-lang="appTitle">Quotation Generator</h1>
-                <select id="company-selector" onchange="switchCompanyProfile(this.value)" class="bg-gray-700 text-white text-sm rounded-lg p-2 border-gray-600 focus:ring-blue-500 focus:border-blue-500 w-full sm:w-auto">
-                    <option value="wooden_pieces">Wooden Pieces EST.</option>
-                    <option value="rattan_palace">Rattan Palace</option>
-                </select>
-            </div>
-            <div class="flex items-center justify-center flex-wrap gap-2 w-full md:w-auto">
-                <!-- Language Switcher -->
-                <div class="flex space-x-1">
-                    <button onclick="setLanguage('en')" class="bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-3 rounded-lg text-xs md:text-sm">English</button>
-                    <button onclick="setLanguage('ar')" class="bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-3 rounded-lg text-xs md:text-sm">العربية</button>
-                </div>
-                 <!-- File Operations -->
-                <button onclick="document.getElementById('file-loader').click()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-3 rounded-lg flex items-center text-xs md:text-sm">
-                    <span data-lang="loadSource">Load</span>
-                </button>
-                <input type="file" id="file-loader" class="hidden" accept=".json" onchange="loadQuote(event)">
-                <button onclick="saveQuote()" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-3 rounded-lg flex items-center text-xs md:text-sm">
-                    <span data-lang="saveSource">Save</span>
-                </button>
-                 <button onclick="generatePDF()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-3 rounded-lg flex items-center text-xs md:text-sm">
-                    <span data-lang="downloadPdf">PDF</span>
-                </button>
-            </div>
-        </header>
-
-        <!-- Main Quotation Area -->
-        <main class="p-4 md:p-10 print-area">
-            <!-- Company Info and Logo -->
-            <div class="flex justify-between items-center mb-6 gap-4">
-                <div class="w-2/3">
-                    <h2 class="text-3xl font-bold text-gray-800 editable" contenteditable="true" data-field="companyName" spellcheck="false"></h2>
-                    <p class="text-sm text-gray-500 editable" contenteditable="true" data-field="companyCR" spellcheck="false"></p>
-                    <p class="text-sm text-gray-500 editable" contenteditable="true" data-field="companyVat" spellcheck="false"></p>
-                    <p class="text-sm text-gray-500 editable" contenteditable="true" data-field="companyAddress" spellcheck="false"></p>
-                </div>
-                <div class="w-1/3 flex justify-end">
-                     <img id="company-logo" src="logowooden.svg" onerror="this.onerror=null;this.src='https://placehold.co/180x100/e2e8f0/334155?text=Logo+Not+Found';" alt="Company Logo" class="w-52 h-auto">
-                </div>
-            </div>
-
-            <!-- Customer and Quote Details -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 mb-8">
-                <div class="bg-gray-50 p-4 rounded-lg">
-                    <h3 class="font-bold text-gray-700 mb-2" data-lang="customer">Customer</h3>
-                    <p class="editable" contenteditable="true" data-field="customerName" data-en="Customer Name" data-ar="اسم العميل" spellcheck="false"></p>
-                    <p class="editable" contenteditable="true" data-field="customerAddress" data-en="Customer Address" data-ar="عنوان العميل" spellcheck="false"></p>
-                    <p class="editable" contenteditable="true" data-field="customerCountry" data-en="Saudi Arabia" data-ar="المملكة العربية السعودية" spellcheck="false"></p>
-                </div>
-                <div class="bg-gray-50 p-4 rounded-lg text-left md:text-right">
-                    <p><span class="font-bold text-gray-700" data-lang="quoteNum">Quote #:</span> <span class="editable" contenteditable="true" data-field="quoteNum" data-en="S963" data-ar="S963" spellcheck="false"></span></p>
-                    <p><span class="font-bold text-gray-700" data-lang="date">Date:</span> <span id="quoteDate"></span></p>
-                    <p><span class="font-bold text-gray-700" data-lang="validUntil">Valid Until:</span> <span id="validDate"></span></p>
-                </div>
-            </div>
-            
-            <!-- Project Description -->
-            <div class="mb-8">
-                <h3 class="text-xl font-bold text-gray-800 mb-2" data-lang="projectDescription">Project Description</h3>
-                <p class="editable bg-gray-50 p-4 rounded-lg" contenteditable="true" data-field="projectDescription" data-en="Enter your project description here..." data-ar="أدخل وصف مشروعك هنا..." spellcheck="false"></p>
-            </div>
-
-            <!-- Items Table -->
-            <div class="overflow-x-auto">
-                <table class="w-full" id="items-table">
-                    <thead>
-                        <tr class="bg-gray-800 text-white">
-                            <th class="p-3 rounded-l-lg text-left" data-lang="description">Description</th>
-                            <th class="p-3 w-24 text-center" data-lang="quantity">Quantity</th>
-                            <th class="p-3 w-32 text-right" data-lang="unitPrice">Unit Price</th>
-                            <th class="p-3 w-32 text-right rounded-r-lg" data-lang="total">Total</th>
-                            <th class="p-3 w-16 text-center rounded-r-lg no-print" data-lang="action">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="table-body"></tbody>
-                    <tfoot>
-                        <tr>
-                            <td colspan="2" class="no-print">
-                                <button id="add-row" class="mt-4 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg flex items-center">
-                                    <span data-lang="addRow">Add Row</span>
-                                </button>
-                            </td>
-                            <td class="text-right font-bold p-3 border-t-2" data-lang="subtotal">SUBTOTAL</td>
-                            <td class="text-right p-3 border-t-2" id="subtotal">0.00</td>
-                            <td class="no-print border-t-2"></td>
-                        </tr>
-                        <tr>
-                            <td colspan="2"></td>
-                            <td class="text-right font-bold p-3" data-lang="vat">VAT (15%)</td>
-                            <td class="text-right p-3" id="vat">0.00</td>
-                            <td class="no-print"></td>
-                        </tr>
-                        <tr class="bg-gray-800 text-white font-bold text-lg">
-                            <td colspan="2"></td>
-                            <td class="text-right p-4 rounded-l-lg" data-lang="grandTotal">TOTAL</td>
-                            <td class="text-right p-4 rounded-r-lg" id="grand-total">0.00</td>
-                            <td class="no-print"></td>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
-
-            <!-- Terms and Bank Details -->
-            <div class="mt-10 grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div class="bg-gray-50 p-4 rounded-lg">
-                    <h3 class="font-bold text-gray-700 mb-2" data-lang="terms">Terms and Conditions</h3>
-                    <div class="editable" contenteditable="true" data-field="terms" data-en="<ul><li>50% Down payment</li><li>30% second payment upon delivery</li><li>20% third payment upon delivery</li><li>Delivery within 20 to 30 days from down payment</li><li>3 years warranty on manufacturing defects</li></ul>" data-ar="<ul><li>دفعة أولى 50%</li><li>الدفعة الثانية 30% عند التسليم</li><li>الدفعة الثالثة 20% عند التسليم</li><li>التسليم في غضون 20 إلى 30 يومًا</li><li>ضمان 3 سنوات على عيوب التصنيع</li></ul>" spellcheck="false"></div>
-                </div>
-                <div class="bg-gray-50 p-4 rounded-lg">
-                    <h3 class="font-bold text-gray-700 mb-2" data-lang="bankDetails">Bank Details</h3>
-                    <div class="editable" contenteditable="true" data-field="bankDetails" spellcheck="false"></div>
-                </div>
-            </div>
-
-            <!-- Signature -->
-            <div class="mt-12 pt-8 border-t-2 border-dashed">
-                 <div class="flex justify-between items-end">
-                    <div>
-                        <p class="font-bold text-gray-800" data-lang="thankYou">Thank you for your business!</p>
-                    </div>
-                    <div class="text-right">
-                        <div class="w-48 h-12 border-b-2 border-gray-300 mb-2"></div>
-                        <p class="font-bold text-gray-700" data-lang="signature">Signature</p>
-                    </div>
-                </div>
-            </div>
-        </main>
+    <div class="header-controls no-print">
+        <h1 class="text-xl font-bold text-gray-800">Quotation Generator</h1>
+        <div class="flex items-center space-x-2">
+            <select id="companySelector" class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                <option value="rattan">Rattan Palace (قصر الخيزران)</option>
+                <option value="wooden">Wooden Pieces EST.</option>
+            </select>
+            <button id="langBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg">
+                العربية
+            </button>
+            <button id="saveBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">
+                Save
+            </button>
+            <button id="loadBtn" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg">
+                Load
+            </button>
+            <button id="pdfBtn" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg">
+                PDF
+            </button>
+        </div>
     </div>
 
-    <footer class="text-center text-gray-500 text-sm py-4 no-print">
+    <div id="quotation" class="quotation-container">
+        <!-- Company Info -->
+        <div id="companyInfo" class="flex justify-between items-start mb-4">
+            <div class="flex items-center">
+                <img id="companyLogo" src="logo.svg" alt="Company Logo" class="h-20 mr-4">
+                <div>
+                    <h2 id="companyName" class="text-2xl font-bold">Rattan Palace</h2>
+                    <p id="companyNameAr" class="text-xl">قصر الخيزران</p>
+                    <div id="companyDetails" class="text-sm text-gray-600 mt-1">
+                        <p>VAT No: 313099850500003</p>
+                        <p>CR/License: 7050562888</p>
+                        <p>RFKB2501. AlQods st, Alkhaleej, P.O.Box: 2401</p>
+                        <p>RIYADH 13223, Kingdom of Saudi Arabia</p>
+                    </div>
+                </div>
+            </div>
+            <div class="text-right">
+                <h1 class="text-4xl font-bold text-gray-800" data-en="QUOTATION" data-ar="عرض سعر">QUOTATION</h1>
+                <div class="mt-2">
+                    <p><strong data-en="Quote #:" data-ar=":رقم العرض">Quote #:</strong> <span contenteditable="true">S963</span></p>
+                    <p><strong data-en="Date:" data-ar=":التاريخ">Date:</strong> <span contenteditable="true" id="quoteDate">2025-08-26</span></p>
+                    <p><strong data-en="Valid Until:" data-ar=":صالح حتى">Valid Until:</strong> <span contenteditable="true" id="validDate">2025-09-02</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Customer Info & Project Description -->
+        <div class="grid grid-cols-2 gap-8 mb-6">
+            <div class="bg-gray-100 p-4 rounded-lg">
+                 <h3 class="font-bold mb-2" data-en="Customer" data-ar="العميل">Customer</h3>
+                 <p contenteditable="true" id="customerName">Customer Name</p>
+                 <p contenteditable="true" id="customerAddress">Customer Address</p>
+                 <p contenteditable="true" id="customerCountry">Saudi Arabia</p>
+            </div>
+             <div>
+                <h3 class="font-bold mb-2" data-en="Project Description" data-ar="وصف المشروع">Project Description</h3>
+                <p contenteditable="true" id="projectDescription">Enter your project description here...</p>
+            </div>
+        </div>
+
+
+        <!-- Items Table -->
+        <table class="w-full mb-8">
+            <thead>
+                <tr class="bg-gray-800 text-white">
+                    <th class="p-2 text-left" data-en="Description" data-ar="الوصف">Description</th>
+                    <th class="p-2 text-center w-24" data-en="Quantity" data-ar="الكمية">Quantity</th>
+                    <th class="p-2 text-right w-32" data-en="Unit Price" data-ar="سعر الوحدة">Unit Price</th>
+                    <th class="p-2 text-right w-32" data-en="Total" data-ar="المجموع">Total</th>
+                    <th class="p-2 text-center w-16 no-print" data-en="Action" data-ar="إجراء">Action</th>
+                </tr>
+            </thead>
+            <tbody id="itemRows">
+                <!-- Rows will be added here dynamically -->
+            </tbody>
+        </table>
+        <button id="addRowBtn" class="no-print bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg mb-4" data-en="Add Row" data-ar="أضف صف">Add Row</button>
+
+        <!-- Totals -->
+        <div class="flex justify-end mb-8">
+            <div class="w-64">
+                <div class="flex justify-between">
+                    <span class="font-bold" data-en="SUBTOTAL" data-ar="المجموع الفرعي">SUBTOTAL</span>
+                    <span id="subtotal">0.00</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="font-bold" data-en="VAT (15%)" data-ar="ضريبة القيمة المضافة (15%)">VAT (15%)</span>
+                    <span id="vat">0.00</span>
+                </div>
+                <div class="flex justify-between font-bold text-xl mt-2 pt-2 border-t-2 border-gray-800">
+                    <span data-en="TOTAL" data-ar="المجموع الإجمالي">TOTAL</span>
+                    <span id="total">0.00</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Terms and Bank Details -->
+        <div class="grid grid-cols-2 gap-8 mb-8">
+            <div id="terms" class="bg-gray-100 p-4 rounded-lg">
+                <h4 class="font-bold mb-2" data-en="Terms and Conditions" data-ar="الشروط والأحكام">Terms and Conditions</h4>
+                <div contenteditable="true">
+                    <p>50% Down payment upon order confirmation</p>
+                    <p>30% second payment upon delivery</p>
+                    <p>20% third payment upon completion</p>
+                    <p>Delivery within 20 to 30 days from down payment</p>
+                    <p>3 years warranty on manufacturing defects</p>
+                </div>
+            </div>
+            <div id="bankDetails" class="bg-gray-100 p-4 rounded-lg">
+                 <h4 class="font-bold mb-2" data-en="Bank Details" data-ar="تفاصيل البنك">Bank Details</h4>
+                 <div contenteditable="true">
+                    <p><strong>Bank:</strong> <span id="bankName">Riyad Bank</span></p>
+                    <p><strong>IBAN:</strong> <span id="iban">SA3020000002126072249940</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center text-gray-600 mt-8 pt-4 border-t">
+            <p data-en="Thank you for your business!" data-ar="شكرا لتعاملكم معنا!">Thank you for your business!</p>
+        </div>
+        <div class="flex justify-end mt-16">
+            <div class="w-64 text-center">
+                <div class="border-t-2 border-gray-400 pt-2">
+                    <p data-en="Signature" data-ar="التوقيع">Signature</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="text-center text-gray-500 text-sm mt-4 pb-4 no-print">
         Made by Joseph HAMDY KAMAL
     </footer>
 
     <script>
-        // --- GLOBAL STATE ---
+        // --- DATA ---
+        const companyData = {
+            rattan: {
+                name: "Rattan Palace",
+                nameAr: "قصر الخيزران",
+                logo: "logo.svg",
+                details: [
+                    "VAT No: 313099850500003",
+                    "CR/License: 7050562888",
+                    "RFKB2501. AlQods st, Alkhaleej, P.O.Box: 2401",
+                    "RIYADH 13223, Kingdom of Saudi Arabia"
+                ],
+                bank: "Riyad Bank",
+                iban: "SA3020000002126072249940"
+            },
+            wooden: {
+                name: "Wooden Pieces EST.",
+                nameAr: "مؤسسة القطع الخشبية للتجارة",
+                logo: "logwooden.svg",
+                details: [
+                    "CR: 1010798529",
+                    "Vat No.: 310618978500003",
+                    "Short Address: RFKB2501. ALQods st, Alkhaleej, P.O.Box: 2401",
+                    "RIYADH 13223, Kingdom of Saudi Arabia"
+                ],
+                bank: "ALINMAA BANK",
+                iban: "SA0705000068203914512000"
+            }
+        };
+
         let currentLang = 'en';
 
-        // --- COMPANY PROFILES DATA ---
-        const companyProfiles = {
-            'wooden_pieces': {
-                logo: 'logowooden.svg',
-                name: { en: 'Wooden Pieces EST.', ar: 'مؤسسة القطع الخشبية' },
-                cr: { en: 'CR: 1010798529', ar: 'س.ت: 1010798529' },
-                vat: { en: 'Vat No.: 310618978500003', ar: 'الرقم الضريبي: 310618978500003' },
-                address: { en: 'RFKB2501. ALQods st, Alkhaleej, P.O.Box: 2401<br>RIYADH 13223, Kingdom of Saudi Arabia', ar: 'RFKB2501. شارع القدس, الخليج, ص.ب: 2401<br>الرياض 13223, المملكة العربية السعودية' },
-                bankDetails: {
-                    en: `<p><strong>Bank:</strong> ALINMAA BANK</p><p><strong>IBAN:</strong> SA0705000068203914512000</p>`,
-                    ar: `<p><strong>البنك:</strong> مصرف الإنماء</p><p><strong>الآيبان:</strong> SA0705000068203914512000</p>`
-                }
-            },
-            'rattan_palace': {
-                logo: 'logo.svg',
-                name: { en: 'Rattan Palace', ar: 'Kasr elKhizran' },
-                cr: { en: 'CR: 7050562888', ar: 'س.ت: 7050562888' },
-                vat: { en: 'Vat No.: 313099850500003', ar: 'الرقم الضريبي: 313099850500003' },
-                address: { en: 'RFKB2501. ALQods st, Alkhaleej, P.O.Box: 2401<br>RIYADH 13223, Kingdom of Saudi Arabia', ar: 'RFKB2501. شارع القدس, الخليج, ص.ب: 2401<br>الرياض 13223, المملكة العربية السعودية' },
-                bankDetails: {
-                    en: `<p><strong>Bank:</strong> Riyad Bank</p><p><strong>IBAN:</strong> SA3020000002126072249940</p>`,
-                    ar: `<p><strong>البنك:</strong> بنك الرياض</p><p><strong>الآيبان:</strong> SA3020000002126072249940</p>`
-                }
-            }
-        };
+        // --- ELEMENTS ---
+        const companySelector = document.getElementById('companySelector');
+        const companyLogo = document.getElementById('companyLogo');
+        const companyName = document.getElementById('companyName');
+        const companyNameAr = document.getElementById('companyNameAr');
+        const companyDetails = document.getElementById('companyDetails');
+        const bankName = document.getElementById('bankName');
+        const iban = document.getElementById('iban');
+        const itemRows = document.getElementById('itemRows');
+        const addRowBtn = document.getElementById('addRowBtn');
+        const subtotalEl = document.getElementById('subtotal');
+        const vatEl = document.getElementById('vat');
+        const totalEl = document.getElementById('total');
+        const pdfBtn = document.getElementById('pdfBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const loadBtn = document.getElementById('loadBtn');
+        const langBtn = document.getElementById('langBtn');
+        const quotationContainer = document.getElementById('quotation');
 
-        // --- TRANSLATION DATA ---
-        const translations = {
-            en: {
-                appTitle: "Quotation Generator", loadSource: "Load", saveSource: "Save", downloadPdf: "PDF", customer: "Customer", quoteNum: "Quote #:", date: "Date:", validUntil: "Valid Until:", projectDescription: "Project Description", description: "Description", quantity: "Quantity", unitPrice: "Unit Price", total: "Total", action: "Action", addRow: "Add Row", subtotal: "SUBTOTAL", vat: "VAT (15%)", grandTotal: "TOTAL", terms: "Terms and Conditions", bankDetails: "Bank Details", thankYou: "Thank you for your business!", signature: "Signature",
-            },
-            ar: {
-                appTitle: "مولد عروض الأسعار", loadSource: "تحميل", saveSource: "حفظ", downloadPdf: "PDF", customer: "العميل", quoteNum: "رقم عرض السعر:", date: "التاريخ:", validUntil: "صالح حتى:", projectDescription: "وصف المشروع", description: "الوصف", quantity: "الكمية", unitPrice: "سعر الوحدة", total: "المجموع", action: "إجراء", addRow: "أضف سطراً", subtotal: "المجموع الفرعي", vat: "ضريبة القيمة المضافة (15%)", grandTotal: "المجموع الإجمالي", terms: "الشروط والأحكام", bankDetails: "التفاصيل البنكية", thankYou: "شكرا لعملك معنا!", signature: "التوقيع",
-            }
-        };
+        // --- FUNCTIONS ---
 
-        // --- CORE FUNCTIONS ---
-
-        function switchCompanyProfile(profileKey) {
-            const profile = companyProfiles[profileKey];
-            if (!profile) return;
-
-            document.getElementById('company-logo').src = profile.logo;
-            document.querySelector('[data-field="companyName"]').dataset.en = profile.name.en;
-            document.querySelector('[data-field="companyName"]').dataset.ar = profile.name.ar;
-            document.querySelector('[data-field="companyCR"]').dataset.en = profile.cr.en;
-            document.querySelector('[data-field="companyCR"]').dataset.ar = profile.cr.ar;
-            document.querySelector('[data-field="companyVat"]').dataset.en = profile.vat.en;
-            document.querySelector('[data-field="companyVat"]').dataset.ar = profile.vat.ar;
-            document.querySelector('[data-field="companyAddress"]').dataset.en = profile.address.en;
-            document.querySelector('[data-field="companyAddress"]').dataset.ar = profile.address.ar;
-            document.querySelector('[data-field="bankDetails"]').dataset.en = profile.bankDetails.en;
-            document.querySelector('[data-field="bankDetails"]').dataset.ar = profile.bankDetails.ar;
-
-            setLanguage(currentLang);
+        /**
+         * Updates company information based on selection.
+         */
+        function updateCompanyInfo() {
+            const selectedCompany = companyData[companySelector.value];
+            companyLogo.src = selectedCompany.logo;
+            companyLogo.onerror = () => { companyLogo.src = 'https://placehold.co/100x100/ccc/fff?text=Logo'; };
+            companyName.textContent = selectedCompany.name;
+            companyNameAr.textContent = selectedCompany.nameAr;
+            companyDetails.innerHTML = selectedCompany.details.map(d => `<p>${d}</p>`).join('');
+            bankName.textContent = selectedCompany.bank;
+            iban.textContent = selectedCompany.iban;
         }
 
-        function setLanguage(lang) {
-            currentLang = lang;
-            document.documentElement.lang = lang;
-            document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
-            
-            document.querySelectorAll('[data-lang]').forEach(el => {
-                const key = el.getAttribute('data-lang');
-                if (translations[lang][key]) el.textContent = translations[lang][key];
-            });
-
-            document.querySelectorAll('.editable').forEach(el => {
-                el.innerHTML = el.dataset[lang] || '';
-            });
-
-            document.querySelectorAll('.item-description').forEach(el => {
-                el.innerHTML = el.dataset[lang] || '';
-            });
-        }
-
-        function updateEditableData(element) {
-            element.dataset[currentLang] = element.innerHTML;
-        }
-        
-        function syncUIData() {
-            document.querySelectorAll('.editable').forEach(el => updateEditableData(el));
-            document.querySelectorAll('.item-description').forEach(el => updateEditableData(el));
-        }
-
-        function updateTotals() {
-            let subtotal = 0;
-            document.querySelectorAll('#table-body tr').forEach(row => {
-                const quantity = parseFloat(row.querySelector('.quantity').value) || 0;
-                const unitPrice = parseFloat(row.querySelector('.unit-price').value) || 0;
-                const total = quantity * unitPrice;
-                row.querySelector('.total').textContent = total.toFixed(2);
-                subtotal += total;
-            });
-            const vat = subtotal * 0.15;
-            const grandTotal = subtotal + vat;
-            document.getElementById('subtotal').textContent = subtotal.toFixed(2);
-            document.getElementById('vat').textContent = vat.toFixed(2);
-            document.getElementById('grand-total').textContent = grandTotal.toFixed(2);
-        }
-
-        function addNewRow(item = { desc_en: 'New Item', desc_ar: 'عنصر جديد', qty: 1, price: 0.00 }) {
-            const tableBody = document.getElementById('table-body');
+        /**
+         * Adds a new item row to the table.
+         */
+        function addRow() {
             const row = document.createElement('tr');
-            row.className = 'border-b border-gray-200';
-            
+            row.className = 'border-b';
             row.innerHTML = `
-                <td class="p-3">
-                    <div class="w-full bg-gray-50 rounded p-2 item-description editable" contenteditable="true" data-en="${item.desc_en}" data-ar="${item.desc_ar}" spellcheck="false"></div>
-                </td>
-                <td class="p-3"><input type="number" value="${item.qty}" min="0" class="quantity w-full text-center bg-gray-50 rounded p-2"></td>
-                <td class="p-3"><input type="number" value="${item.price}" step="0.01" min="0" class="unit-price w-full text-right bg-gray-50 rounded p-2"></td>
-                <td class="p-3 text-right total">0.00</td>
-                <td class="p-3 text-center no-print">
-                    <button class="remove-row text-red-500 hover:text-red-700">
-                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                <td class="p-2"><div contenteditable="true">New Item</div></td>
+                <td class="p-2 text-center"><div contenteditable="true">1</div></td>
+                <td class="p-2 text-right"><div contenteditable="true">0.00</div></td>
+                <td class="p-2 text-right">0.00</td>
+                <td class="p-2 text-center no-print">
+                    <button class="text-red-500 hover:text-red-700 delete-row">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" />
+                        </svg>
                     </button>
                 </td>
             `;
-            tableBody.appendChild(row);
-            
-            const descDiv = row.querySelector('.item-description');
-            descDiv.innerHTML = descDiv.dataset[currentLang];
-            descDiv.addEventListener('input', () => updateEditableData(descDiv));
-            descDiv.addEventListener('blur', () => updateEditableData(descDiv));
-            row.querySelector('.quantity').addEventListener('input', updateTotals);
-            row.querySelector('.unit-price').addEventListener('input', updateTotals);
-            row.querySelector('.remove-row').addEventListener('click', () => { row.remove(); updateTotals(); });
-            
-            updateTotals();
+            itemRows.appendChild(row);
+            row.querySelectorAll('[contenteditable="true"]').forEach(el => {
+                el.addEventListener('input', calculateTotals);
+            });
+            row.querySelector('.delete-row').addEventListener('click', () => {
+                row.remove();
+                calculateTotals();
+            });
+            calculateTotals();
         }
 
-        // --- FILE & PDF OPERATIONS ---
-
-        function saveQuote() {
-            syncUIData();
-            const customerName = document.querySelector('[data-field="customerName"]').textContent.trim();
-            const sanitizedName = customerName.replace(/[^a-z0-9\u0600-\u06FF]/gi, '_');
-
-            const quoteData = {
-                lang: currentLang,
-                companyProfile: document.getElementById('company-selector').value,
-                fields: {},
-                items: []
-            };
-
-            document.querySelectorAll('.editable').forEach(el => {
-                const fieldName = el.dataset.field;
-                if (fieldName) {
-                    quoteData.fields[fieldName] = { en: el.dataset.en || '', ar: el.dataset.ar || '' };
-                }
+        /**
+         * Calculates all totals.
+         */
+        function calculateTotals() {
+            let subtotal = 0;
+            itemRows.querySelectorAll('tr').forEach(row => {
+                const quantity = parseFloat(row.children[1].textContent) || 0;
+                const unitPrice = parseFloat(row.children[2].textContent.replace(/,/g, '')) || 0;
+                const total = quantity * unitPrice;
+                row.children[3].textContent = total.toFixed(2);
+                subtotal += total;
             });
 
-            document.querySelectorAll('#table-body tr').forEach(row => {
-                const descEl = row.querySelector('.item-description');
-                quoteData.items.push({
-                    desc_en: descEl.dataset.en,
-                    desc_ar: descEl.dataset.ar,
-                    qty: row.querySelector('.quantity').value,
-                    price: row.querySelector('.unit-price').value
+            const vat = subtotal * 0.15;
+            const total = subtotal + vat;
+
+            subtotalEl.textContent = subtotal.toFixed(2);
+            vatEl.textContent = vat.toFixed(2);
+            totalEl.textContent = total.toFixed(2);
+        }
+
+        /**
+         * Generates and downloads a PDF of the quotation.
+         */
+        function generatePDF() {
+            const { jsPDF } = window.jspdf;
+            const quoteElement = document.getElementById('quotation');
+            const originalWidth = quoteElement.style.width;
+            quoteElement.style.width = '800px'; // Set a fixed width for consistent PDF output
+
+            html2canvas(quoteElement, {
+                scale: 2, // Higher scale for better quality
+                useCORS: true
+            }).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'px',
+                    format: [canvas.width, canvas.height]
+                });
+                pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+                pdf.save(`quotation-${Date.now()}.pdf`);
+                quoteElement.style.width = originalWidth; // Reset width
+            }).catch(err => {
+                console.error("Error generating PDF:", err);
+                quoteElement.style.width = originalWidth; // Reset width on error
+            });
+        }
+        
+        /**
+         * Saves the current quotation data to a JSON file.
+         */
+        function saveData() {
+            const data = {
+                company: companySelector.value,
+                quoteNumber: document.querySelector('[aria-label="Quote Number"]').textContent,
+                quoteDate: document.getElementById('quoteDate').textContent,
+                validDate: document.getElementById('validDate').textContent,
+                customerName: document.getElementById('customerName').textContent,
+                customerAddress: document.getElementById('customerAddress').textContent,
+                customerCountry: document.getElementById('customerCountry').textContent,
+                projectDescription: document.getElementById('projectDescription').textContent,
+                items: [],
+                terms: document.querySelector('#terms [contenteditable="true"]').innerHTML,
+                bankDetails: document.querySelector('#bankDetails [contenteditable="true"]').innerHTML,
+            };
+
+            itemRows.querySelectorAll('tr').forEach(row => {
+                data.items.push({
+                    description: row.children[0].textContent,
+                    quantity: row.children[1].textContent,
+                    unitPrice: row.children[2].textContent,
                 });
             });
 
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(quoteData, null, 2));
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
             const downloadAnchorNode = document.createElement('a');
             downloadAnchorNode.setAttribute("href", dataStr);
-            downloadAnchorNode.setAttribute("download", `Source_${sanitizedName || 'quotation'}.json`);
+            downloadAnchorNode.setAttribute("download", "quotation-data.json");
             document.body.appendChild(downloadAnchorNode);
             downloadAnchorNode.click();
             downloadAnchorNode.remove();
         }
 
-        function loadQuote(event) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    
-                    if (data.companyProfile) {
-                        document.getElementById('company-selector').value = data.companyProfile;
-                        switchCompanyProfile(data.companyProfile);
+        /**
+         * Loads quotation data from a file.
+         */
+        function loadData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = e => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.readAsText(file, 'UTF-8');
+                reader.onload = readerEvent => {
+                    const content = readerEvent.target.result;
+                    try {
+                        const data = JSON.parse(content);
+                        populateForm(data);
+                    } catch (err) {
+                        console.error("Error parsing JSON file:", err);
+                        alert("Invalid data file.");
                     }
-
-                    Object.keys(data.fields).forEach(fieldName => {
-                        const el = document.querySelector(`.editable[data-field="${fieldName}"]`);
-                        if (el) {
-                            el.dataset.en = data.fields[fieldName].en;
-                            el.dataset.ar = data.fields[fieldName].ar;
-                        }
-                    });
-
-                    document.getElementById('table-body').innerHTML = '';
-                    data.items.forEach(item => addNewRow(item));
-
-                    setLanguage(data.lang || 'en');
-                    updateTotals();
-                } catch (error) {
-                    console.error("Failed to parse JSON file:", error);
-                    alert("Error: Could not load the quote file. It may be corrupted.");
                 }
-            };
-            reader.readAsText(event.target.files[0]);
-            event.target.value = '';
-        }
-
-        function generatePDF() {
-            syncUIData();
-            const customerName = document.querySelector('[data-field="customerName"]').textContent.trim();
-            const sanitizedName = customerName.replace(/[^a-z0-9\u0600-\u06FF]/gi, '_');
-
-            const { jsPDF } = window.jspdf;
-            const quoteElement = document.querySelector('.print-area');
-            
-            const printableClone = quoteElement.cloneNode(true);
-            
-            // Apply desktop styles to the clone for PDF generation
-            const mainHeader = printableClone.querySelector('.flex.justify-between.items-center');
-            if(mainHeader) {
-                mainHeader.classList.remove('flex-col', 'sm:flex-row', 'items-start');
-                mainHeader.classList.add('items-center');
             }
-            printableClone.querySelectorAll('.grid').forEach(grid => {
-                if(!grid.closest('.mt-10')) { 
-                    grid.classList.remove('grid-cols-1', 'md:grid-cols-2');
-                    grid.classList.add('grid-cols-2');
-                }
-            });
-
-
-            printableClone.style.position = 'absolute';
-            printableClone.style.left = '-9999px';
-            printableClone.style.width = '1024px'; 
-            document.body.appendChild(printableClone);
-
-            printableClone.querySelectorAll('input.quantity, input.unit-price').forEach(input => {
-                const span = document.createElement('span');
-                span.textContent = input.value;
-                if (input.classList.contains('text-center')) span.classList.add('text-center');
-                if (input.classList.contains('text-right')) span.classList.add('text-right');
-                span.classList.add('w-full', 'block', 'p-2');
-                input.parentNode.replaceChild(span, input);
-            });
-            
-            printableClone.querySelectorAll('.bg-gray-50').forEach(el => {
-                el.classList.remove('bg-gray-50');
-            });
-
-
-            printableClone.querySelectorAll('.no-print').forEach(el => el.remove());
-            
-            html2canvas(printableClone, { scale: 3, useCORS: true, logging: false })
-                .then(canvas => {
-                    const imgData = canvas.toDataURL('image/png');
-                    const pdf = new jsPDF('p', 'mm', 'a4');
-                    const pdfWidth = pdf.internal.pageSize.getWidth();
-                    const pdfHeight = pdf.internal.pageSize.getHeight();
-                    
-                    const pageMargin = 15;
-                    const effectivePdfWidth = pdfWidth - (pageMargin * 2);
-                    const effectivePdfHeight = pdfHeight - (pageMargin * 2);
-                    
-                    const canvasRatio = canvas.width / canvas.height;
-                    
-                    let imgWidth, imgHeight;
-
-                    if ((effectivePdfWidth / effectivePdfHeight) > canvasRatio) {
-                        imgHeight = effectivePdfHeight;
-                        imgWidth = imgHeight * canvasRatio;
-                    } else {
-                        imgWidth = effectivePdfWidth;
-                        imgHeight = imgWidth / canvasRatio;
-                    }
-
-                    const x = (pdfWidth - imgWidth) / 2;
-                    const y = (pdfHeight - imgHeight) / 2;
-
-                    pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
-                    pdf.save(`Quotation_${sanitizedName || 'details'}.pdf`);
-                })
-                .finally(() => {
-                    document.body.removeChild(printableClone);
-                });
+            input.click();
         }
 
-        // --- INITIALIZATION ---
-        document.addEventListener('DOMContentLoaded', function () {
+        /**
+         * Populates the form with loaded data.
+         */
+        function populateForm(data) {
+            companySelector.value = data.company;
+            updateCompanyInfo();
+
+            document.querySelector('[aria-label="Quote Number"]').textContent = data.quoteNumber;
+            document.getElementById('quoteDate').textContent = data.quoteDate;
+            document.getElementById('validDate').textContent = data.validDate;
+            document.getElementById('customerName').textContent = data.customerName;
+            document.getElementById('customerAddress').textContent = data.customerAddress;
+            document.getElementById('customerCountry').textContent = data.customerCountry;
+            document.getElementById('projectDescription').textContent = data.projectDescription;
+            document.querySelector('#terms [contenteditable="true"]').innerHTML = data.terms;
+            document.querySelector('#bankDetails [contenteditable="true"]').innerHTML = data.bankDetails;
+            
+            itemRows.innerHTML = '';
+            data.items.forEach(item => {
+                addRow();
+                const newRow = itemRows.lastChild;
+                newRow.children[0].textContent = item.description;
+                newRow.children[1].textContent = item.quantity;
+                newRow.children[2].textContent = item.unitPrice;
+            });
+            calculateTotals();
+        }
+
+        /**
+         * Toggles language between English and Arabic.
+         */
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'ar' : 'en';
+            langBtn.textContent = currentLang === 'en' ? 'العربية' : 'English';
+            
+            quotationContainer.classList.toggle('rtl', currentLang === 'ar');
+            quotationContainer.classList.toggle('ltr', currentLang === 'en');
+            
+            document.querySelectorAll('[data-en]').forEach(el => {
+                el.textContent = el.dataset[currentLang];
+            });
+        }
+
+        /**
+         * Sets initial dates.
+         */
+        function setInitialDates() {
             const today = new Date();
-            document.getElementById('quoteDate').textContent = today.toLocaleDateString('en-CA');
             const validUntil = new Date();
             validUntil.setDate(today.getDate() + 7);
-            document.getElementById('validDate').textContent = validUntil.toLocaleDateString('en-CA');
+            
+            const formatDate = (date) => {
+                const yyyy = date.getFullYear();
+                const mm = String(date.getMonth() + 1).padStart(2, '0');
+                const dd = String(date.getDate()).padStart(2, '0');
+                return `${yyyy}-${mm}-${dd}`;
+            }
 
-            document.querySelectorAll('.editable').forEach(el => {
-                el.addEventListener('input', () => updateEditableData(el));
-                el.addEventListener('blur', () => updateEditableData(el));
-            });
+            document.getElementById('quoteDate').textContent = formatDate(today);
+            document.getElementById('validDate').textContent = formatDate(validUntil);
+        }
 
-            document.getElementById('add-row').addEventListener('click', () => addNewRow());
-
-            switchCompanyProfile('wooden_pieces');
-            addNewRow();
-            updateTotals();
+        // --- EVENT LISTENERS ---
+        companySelector.addEventListener('change', updateCompanyInfo);
+        addRowBtn.addEventListener('click', addRow);
+        pdfBtn.addEventListener('click', generatePDF);
+        saveBtn.addEventListener('click', saveData);
+        loadBtn.addEventListener('click', loadData);
+        langBtn.addEventListener('click', toggleLanguage);
+        
+        // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            updateCompanyInfo();
+            setInitialDates();
+            addRow(); // Start with one row
         });
+
     </script>
 </body>
 </html>
