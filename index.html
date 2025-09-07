@@ -206,7 +206,7 @@
         const companyProfiles = {
              'wooden_pieces': { 
                  acronym: 'WPE', 
-                 logo: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNTAiIGhlaWdodD0iNzUiIHZpZXdCb3g9IjAgMCAxNTAgNzUiPgo8cmVjdCB3aWR0aD0iMTUwIiBoZWlnaHQ9Ijc1IiBmaWxsPSIjZDZiYTg2IiAvPgo8dGV4dCB4PSI3NSIgeT0iNDUiIGZvbnQtZmFtaWx5PSJzZXJpZiIgZm9udC1zaXplPSIxNiIgZmlsbD0iIzMzMyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC13ZWlnaHQ9ImJvbGQiPldvb2Rlbjx0c3BhbiB4PSI3NSIgZHk9IjIwIj5QaWVjZXM8L3RzcGFuPjwvdGV4dD4KPC9zdmc+', 
+                 logo: 'logowooden.svg', 
                  name: { en: 'Wooden Pieces EST.', ar: 'مؤسسة القطع الخشبية' }, 
                  cr: { en: 'CR: 1010798529', ar: 'س.ت: 1010798529' }, 
                  vat: { en: 'Vat No.: 310618978500003', ar: 'الرقم الضريبي: 310618978500003' }, 
@@ -216,7 +216,7 @@
             },
              'rattan_palace': { 
                  acronym: 'RP', 
-                 logo: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNTAiIGhlaWdodD0iNzUiIHZpZXdCb3g9IjAgMCAxNTAgNzUiPgo8cmVjdCB3aWR0aD0iMTUwIiBoZWlnaHQ9Ijc1IiBmaWxsPSIjZjBlOWUwIiAvPgo8dGV4dCB4PSI3NSIgeT0iNDUiIGZvbnQtZmFtaWx5PSJzZXJpZiIgZm9udC1zaXplPSIxNiIgZmlsbD0iIzMzMyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC13ZWlnaHQ9ImJvbGQiPlJhdHRhbjx0c3BhbiB4PSI3NSIgZHk9IjIwIj5QYWxhY2U8L3RzcGFuPjwvdGV4dD4KPC9zdmc+',
+                 logo: 'logo.svg',
                  name: { en: 'Rattan Palace', ar: 'قصر الخيزران' }, 
                  cr: { en: 'CR: 7050562888', ar: 'س.ت: 7050562888' }, 
                  vat: { en: 'Vat No.: 313099850500003', ar: 'الرقم الضريبي: 313099850500003' }, 
@@ -232,6 +232,7 @@
         };
 
         function selectCompany(profileKey) {
+            document.body.dataset.activeProfile = profileKey;
             switchCompanyProfile(profileKey);
             document.getElementById('landing-page').classList.add('hidden');
             document.getElementById('editor-page').classList.remove('hidden');
@@ -397,7 +398,8 @@
             reader.onload = (e) => {
                 try {
                     const data = JSON.parse(e.target.result);
-                    selectCompany(data.companyProfile);
+                    document.body.dataset.activeProfile = data.companyProfile;
+                    switchCompanyProfile(data.companyProfile);
                     Object.keys(data.fields).forEach(fieldName => {
                         const el = document.querySelector(`.editable[data-field="${fieldName}"]`);
                         if (el) {
@@ -424,11 +426,10 @@
             if (document.activeElement) document.activeElement.blur();
             
             const { jsPDF } = window.jspdf;
-            const quoteElement = document.getElementById('editor-page'); // Capture the whole editor page for context
+            const quoteElement = document.getElementById('editor-page'); 
             const printableClone = quoteElement.cloneNode(true);
 
-            // Prepare the clone for rendering
-            printableClone.querySelector('header').classList.add('hidden'); // Hide the editor header
+            printableClone.querySelector('header').classList.add('hidden');
             printableClone.classList.add('pdf-render-mode');
             printableClone.style.width = '1024px';
             printableClone.style.position = 'absolute';
@@ -448,17 +449,13 @@
 
                 const canvas = await html2canvas(printableClone.querySelector('.print-area'), { scale: 3, useCORS: true, logging: false, backgroundColor: '#ffffff' });
                 
-                // Create a new canvas to add the ochre background
                 const finalCanvas = document.createElement('canvas');
-                finalCanvas.width = canvas.width + 120; // Add padding
+                finalCanvas.width = canvas.width + 120; 
                 finalCanvas.height = canvas.height + 120;
                 const ctx = finalCanvas.getContext('2d');
                 
-                // Draw background
                 ctx.fillStyle = '#d4b886';
                 ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
-                
-                // Draw quotation canvas on top
                 ctx.drawImage(canvas, 60, 60);
 
                 pdfImageData = finalCanvas.toDataURL('image/png');
