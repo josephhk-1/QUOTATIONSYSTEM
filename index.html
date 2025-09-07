@@ -206,7 +206,7 @@
         const companyProfiles = {
              'wooden_pieces': { 
                  acronym: 'WPE', 
-                 logo: 'logowooden.svg', 
+                 logo: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNTAiIGhlaWdodD0iNzUiIHZpZXdCb3g9IjAgMCAxNTAgNzUiPgo8cmVjdCB3aWR0aD0iMTUwIiBoZWlnaHQ9Ijc1IiBmaWxsPSIjZDZiYTg2IiAvPgo8dGV4dCB4PSI3NSIgeT0iNDUiIGZvbnQtZmFtaWx5PSJzZXJpZiIgZm9udC1zaXplPSIxNiIgZmlsbD0iIzMzMyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC13ZWlnaHQ9ImJvbGQiPldvb2Rlbjx0c3BhbiB4PSI3NSIgZHk9IjIwIj5QaWVjZXM8L3RzcGFuPjwvdGV4dD4KPC9zdmc+', 
                  name: { en: 'Wooden Pieces EST.', ar: 'مؤسسة القطع الخشبية' }, 
                  cr: { en: 'CR: 1010798529', ar: 'س.ت: 1010798529' }, 
                  vat: { en: 'Vat No.: 310618978500003', ar: 'الرقم الضريبي: 310618978500003' }, 
@@ -216,7 +216,7 @@
             },
              'rattan_palace': { 
                  acronym: 'RP', 
-                 logo: 'logo.svg',
+                 logo: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNTAiIGhlaWdodD0iNzUiIHZpZXdCb3g9IjAgMCAxNTAgNzUiPgo8cmVjdCB3aWR0aD0iMTUwIiBoZWlnaHQ9Ijc1IiBmaWxsPSIjZjBlOWUwIiAvPgo8dGV4dCB4PSI3NSIgeT0iNDUiIGZvbnQtZmFtaWx5PSJzZXJpZiIgZm9udC1zaXplPSIxNiIgZmlsbD0iIzMzMyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC13ZWlnaHQ9ImJvbGQiPlJhdHRhbjx0c3BhbiB4PSI3NSIgZHk9IjIwIj5QYWxhY2U8L3RzcGFuPjwvdGV4dD4KPC9zdmc+',
                  name: { en: 'Rattan Palace', ar: 'قصر الخيزران' }, 
                  cr: { en: 'CR: 7050562888', ar: 'س.ت: 7050562888' }, 
                  vat: { en: 'Vat No.: 313099850500003', ar: 'الرقم الضريبي: 313099850500003' }, 
@@ -445,7 +445,7 @@
             printableClone.querySelectorAll('.no-print').forEach(el => el.remove());
             
             try {
-                await new Promise(resolve => setTimeout(resolve, 100));
+                await new Promise(resolve => setTimeout(resolve, 200)); // Increased delay for rendering
 
                 const canvas = await html2canvas(printableClone.querySelector('.print-area'), { scale: 3, useCORS: true, logging: false, backgroundColor: '#ffffff' });
                 
