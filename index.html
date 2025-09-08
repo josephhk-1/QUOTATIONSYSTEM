@@ -1,17 +1,24 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
-<head>
+<html lang="en" dir="ltr"> <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quotation Manager Pro</title>
     
     <link rel="icon" type="image/svg+xml" href="logo.svg">
     <script>
-        tailwind.config = {
-            darkMode: 'class', // Active le mode sombre basé sur une classe
+        // Ce script doit être dans le <head> pour éviter le flash de couleur au chargement
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
         }
     </script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,10 +26,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="p-2 sm:p-6 md:p-8 bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200">
+<body class="p-2 sm:p-6 md:p-8 bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200 transition-colors duration-300">
 
     <div class="fixed top-4 right-4 z-50">
-        <button id="theme-toggle" class="p-2 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 shadow-md">
+        <button id="theme-toggle" class="p-2 rounded-full bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm text-slate-600 dark:text-slate-300 shadow-lg">
             </button>
     </div>
 
@@ -41,6 +48,43 @@
         </div>
     </div>
 
+    <div id="company-selection-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-xl company-chooser max-w-sm w-full animate-in">
+            <h2 class="text-2xl font-bold text-center mb-6 text-slate-800 dark:text-slate-100">Select a Company Profile</h2>
+            <div class="space-y-4">
+                <a href="#" onclick="createNewQuote('wooden_pieces')">Wooden Pieces EST.</a>
+                <a href="#" onclick="createNewQuote('rattan_palace')">Rattan Palace</a>
+            </div>
+            <button onclick="closeCompanyModal()" class="w-full mt-6 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 py-2 rounded-lg">Cancel</button>
+        </div>
+    </div>
+
+    <div id="editor-page" class="hidden">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-2">
+                <main class="p-6 md:p-10 print-area bg-white dark:bg-slate-800 shadow-xl rounded-2xl" id="print-area">
+                    </main>
+            </div>
+            <aside class="lg:col-span-1 space-y-6 no-print">
+                 <button id="back-to-dashboard-btn" class="w-full bg-slate-500 hover:bg-slate-600 text-white font-bold py-2 px-3 rounded-lg shadow transition-transform hover:scale-105">&larr; Back to Dashboard</button>
+                 </aside>
+        </div>
+    </div>
+    
+    <div id="selection-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-40 hidden no-print">
+         <div class="bg-white dark:bg-slate-800 rounded-lg shadow-2xl max-w-lg w-full max-h-[70vh] flex flex-col animate-in">
+             <header class="p-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
+                 <h2 id="modal-title" class="text-xl font-bold text-slate-800 dark:text-slate-100">Select an Item</h2>
+                 <button id="modal-close-btn" class="text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100 text-3xl">&times;</button>
+             </header>
+             <div class="p-4">
+                 <input type="text" id="modal-search" placeholder="Search..." class="w-full p-2 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+             </div>
+             <div id="modal-list" class="p-4 overflow-auto flex-grow bg-slate-50 dark:bg-slate-900/50 space-y-2">
+                 </div>
+         </div>
+     </div>
+    
     <script src="script.js"></script>
 </body>
 </html>
