@@ -1,4 +1,29 @@
 // ===============================================
+// FIREBASE SDKs & CONFIG
+// ===============================================
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, collection, onSnapshot, doc, getDoc, addDoc, setDoc, deleteDoc, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+    apiKey: "AIzaSyAcMI9tp51br8JPJrkRoIhGpS8jWlUEgOE",
+    authDomain: "my-quotation-system-e3135.firebaseapp.com",
+    projectId: "my-quotation-system-e3135",
+    storageBucket: "my-quotation-system-e3135.appspot.com",
+    messagingSenderId: "733892069861",
+    appId: "1:733892069861:web:c619b6218852050b4b870c",
+    measurementId: "G-61TP42SNMV"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const appId = 'my-quotation-system'; // A unique ID for your app's data collections
+
+// ===============================================
 // DARK MODE LOGIC
 // ===============================================
 const themeToggleBtn = document.getElementById('theme-toggle');
@@ -18,7 +43,8 @@ themeToggleBtn.addEventListener('click', () => {
 // GLOBAL STATE & DATA
 // ===============================================
 let currentLang = localStorage.getItem('language') || 'en';
-let pdfImageData = null, savedQuotes = [], products = [], clients = [], currentlyEditingQuoteId = null;
+let savedQuotes = [], products = [], clients = [];
+let currentlyEditingQuoteId = null;
 
 const companyProfiles = {
      'wooden_pieces': { 
@@ -159,27 +185,27 @@ const controlsHTML = `
 // DASHBOARD & NAVIGATION
 // ===============================================
 
-function saveAllQuotes() { localStorage.setItem('savedQuotes', JSON.stringify(savedQuotes)); }
-function loadAllQuotes() { savedQuotes = JSON.parse(localStorage.getItem('savedQuotes')) || []; }
-
 function renderDashboard() {
     const container = document.getElementById('quote-list-container');
     if (savedQuotes.length === 0) {
         container.innerHTML = `<div class="empty-state"><p class="font-semibold text-slate-600 dark:text-slate-300" data-lang="noQuotes"></p><p class="text-sm text-slate-500 dark:text-slate-400" data-lang="clickNew"></p></div>`;
+        setLanguage(currentLang);
         return;
     }
-    container.innerHTML = `<div class="quote-list-item quote-list-header text-sm"><span class="text-slate-600 dark:text-slate-300">CLIENT / QUOTE #</span><span class="text-slate-600 dark:text-slate-300">DATE</span><span class="text-slate-600 dark:text-slate-300">TOTAL</span><span class="text-slate-600 dark:text-slate-300">ACTIONS</span></div><div id="quote-list"></div>`;
+    container.innerHTML = `<div class="quote-list-item quote-list-header text-sm"><span>CLIENT / QUOTE #</span><span>DATE</span><span>TOTAL</span><span>ACTIONS</span></div><div id="quote-list"></div>`;
     const list = document.getElementById('quote-list');
     list.innerHTML = '';
-    savedQuotes.sort((a, b) => new Date(b.meta.savedAt) - new Date(a.meta.savedAt));
-    savedQuotes.forEach(quote => {
+    
+    const sortedQuotes = [...savedQuotes].sort((a, b) => b.meta.savedAt.toMillis() - a.meta.savedAt.toMillis());
+
+    sortedQuotes.forEach(quote => {
         const item = document.createElement('div');
         item.className = 'quote-list-item text-sm';
         const clientName = quote.fields.customerName[currentLang] || quote.fields.customerName['en'] || 'N/A';
         const quoteNum = quote.fields.quoteNum?.en || 'N/A';
-        const date = new Date(quote.meta.savedAt).toLocaleDateString('en-CA');
+        const date = quote.meta.savedAt.toDate().toLocaleDateString('en-CA');
         const total = parseFloat(quote.totals.grandTotal).toFixed(2);
-        item.innerHTML = `<div><p class="font-bold text-slate-800 dark:text-slate-100">${clientName}</p><p class="text-xs text-slate-500 dark:text-slate-400">${quoteNum}</p></div><span class="text-slate-600 dark:text-slate-300">${date}</span><span class="font-semibold text-slate-800 dark:text-slate-100">${total} SAR</span><div class="quote-actions"><button class="load-btn" onclick="loadQuoteForEditing('${quote.meta.id}')">Edit</button><button class="delete-quote-btn" onclick="deleteQuote('${quote.meta.id}')">Delete</button></div>`;
+        item.innerHTML = `<div><p class="font-bold text-slate-800 dark:text-slate-100">${clientName}</p><p class="text-xs text-slate-500 dark:text-slate-400">${quoteNum}</p></div><span class="text-slate-600 dark:text-slate-300">${date}</span><span class="font-semibold text-slate-800 dark:text-slate-100">${total} SAR</span><div class="quote-actions"><button class="load-btn" onclick="window.loadQuoteForEditing('${quote.id}')">Edit</button><button class="delete-quote-btn" onclick="window.deleteQuote('${quote.id}')">Delete</button></div>`;
         list.appendChild(item);
     });
 }
@@ -187,7 +213,6 @@ function renderDashboard() {
 function showDashboard() {
     document.getElementById('dashboard-page').classList.remove('hidden');
     document.getElementById('editor-page').classList.add('hidden');
-    renderDashboard();
     setLanguage(currentLang);
 }
 
@@ -200,57 +225,66 @@ function openCompanyModal() { document.getElementById('company-selection-modal')
 function closeCompanyModal() { document.getElementById('company-selection-modal').classList.add('hidden'); }
 
 // ===============================================
-// QUOTE MANAGEMENT
+// QUOTE MANAGEMENT (FIREBASE)
 // ===============================================
+const getCollectionRef = (name) => collection(db, `artifacts/${appId}/public/data/${name}`);
 
-function createNewQuote(companyProfile) {
+window.createNewQuote = (companyProfile) => {
     closeCompanyModal();
     currentlyEditingQuoteId = null;
     applyQuoteData(getEmptyQuoteData(companyProfile));
     showEditor();
 }
 
-function loadQuoteForEditing(quoteId) {
-    const quoteData = savedQuotes.find(q => q.meta.id === quoteId);
-    if (quoteData) {
-        currentlyEditingQuoteId = quoteId;
-        applyQuoteData(quoteData);
-        showEditor();
-    }
+window.loadQuoteForEditing = async (quoteId) => {
+    try {
+        const docRef = doc(getCollectionRef('quotations'), quoteId);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+            currentlyEditingQuoteId = quoteId;
+            applyQuoteData(docSnap.data());
+            showEditor();
+        }
+    } catch(e) { console.error("Error loading quote:", e); }
 }
 
-function saveCurrentQuote() {
+window.saveCurrentQuote = async () => {
     const quoteData = captureQuoteData();
     const customerName = quoteData.fields.customerName?.en || quoteData.fields.customerName?.ar;
     if (!customerName || customerName.trim() === 'Customer Name' || customerName.trim() === '') {
         alert("Please enter a customer name before saving.");
         return;
     }
-    const existingIndex = savedQuotes.findIndex(q => q.meta.id === currentlyEditingQuoteId);
-    if (existingIndex > -1) {
-        savedQuotes[existingIndex] = quoteData;
-    } else {
-        savedQuotes.push(quoteData);
-    }
-    saveAllQuotes();
-    alert('Quotation saved!');
-    showDashboard();
+    try {
+        if (currentlyEditingQuoteId) {
+            const docRef = doc(getCollectionRef('quotations'), currentlyEditingQuoteId);
+            await setDoc(docRef, quoteData, { merge: true });
+        } else {
+            await addDoc(getCollectionRef('quotations'), quoteData);
+        }
+        alert('Quotation saved online!');
+        showDashboard();
+    } catch(e) { console.error("Error saving quote:", e); }
 }
 
-function deleteQuote(quoteId) {
-    if (confirm('Are you sure you want to delete this quotation?')) {
-        savedQuotes = savedQuotes.filter(q => q.meta.id !== quoteId);
-        saveAllQuotes();
-        renderDashboard();
+window.deleteQuote = async (quoteId) => {
+    if (confirm('Are you sure you want to delete this quotation from the online database?')) {
+        try {
+            await deleteDoc(doc(getCollectionRef('quotations'), quoteId));
+        } catch(e) { console.error("Error deleting quote:", e); }
     }
 }
+
+// ===============================================
+// DATA CAPTURE & APPLY
+// ===============================================
 
 function captureQuoteData() {
     syncUIData();
     const data = {
         lang: currentLang, companyProfile: document.body.dataset.activeProfile,
         fields: {}, items: [],
-        meta: { id: currentlyEditingQuoteId || `quote_${Date.now()}`, savedAt: new Date().toISOString() },
+        meta: { savedAt: serverTimestamp() },
         totals: { subtotal: document.getElementById('subtotal').textContent, vat: document.getElementById('vat').textContent, grandTotal: document.getElementById('grand-total').textContent }
     };
     document.querySelectorAll('#editor-page .editable').forEach(el => {
@@ -376,7 +410,7 @@ function setLanguage(lang) {
             btn.classList.remove('active-lang');
         }
     });
-    if(document.getElementById('dashboard-page').classList.contains('hidden') === false){
+    if(document.getElementById('dashboard-page') && !document.getElementById('dashboard-page').classList.contains('hidden')){
         renderDashboard();
     }
 }
@@ -436,10 +470,10 @@ function addNewRow(item = { photo: '', desc_en: '', desc_ar: '', qty: 1, price: 
     });
     
     row.querySelector('.load-product-btn').addEventListener('click', () => {
-        openModal('Select a Product', products, (p) => `<strong>${p.desc_en || p.desc_ar}</strong> - Price: ${p.price}`, (product) => {
+        openModal('Select a Product', products, (p) => `<strong>${p[currentLang] || p['en']}</strong> - Price: ${p.price}`, (product) => {
             const desc = row.querySelector('.item-description');
-            desc.dataset.en = product.desc_en;
-            desc.dataset.ar = product.desc_ar;
+            desc.dataset.en = product.en;
+            desc.dataset.ar = product.ar;
             desc.innerHTML = desc.dataset[currentLang];
             row.querySelector('.unit-price').value = product.price;
             updateTotals();
@@ -449,67 +483,39 @@ function addNewRow(item = { photo: '', desc_en: '', desc_ar: '', qty: 1, price: 
 }
 
 // ===============================================
-// LIBRARIES (Products & Clients)
+// LIBRARIES (Products & Clients) - FIREBASE
 // ===============================================
-function saveProducts() { localStorage.setItem('products', JSON.stringify(products)); }
-function loadProducts() { products = JSON.parse(localStorage.getItem('products')) || []; }
-function renderProducts() {
-    const list = document.getElementById('product-list');
-    if(!list) return;
-    list.innerHTML = '';
-    products.forEach((p, index) => {
-        const item = document.createElement('div');
-        item.className = 'list-item text-sm';
-        item.innerHTML = `<span>${p.desc_en || p.desc_ar} - <strong>${p.price}</strong></span><button class="delete-btn" data-index="${index}">&times;</button>`;
-        list.appendChild(item);
-    });
-    list.querySelectorAll('.delete-btn').forEach(btn => btn.addEventListener('click', deleteProduct));
-}
-function addProduct() {
+window.addProduct = async () => {
     const desc_en = document.getElementById('new-product-desc-en').value;
     const desc_ar = document.getElementById('new-product-desc-ar').value;
     const price = parseFloat(document.getElementById('new-product-price').value);
     if ((desc_en || desc_ar) && !isNaN(price)) {
-        products.push({ desc_en, desc_ar, price });
-        saveProducts();
-        renderProducts();
-        document.getElementById('new-product-desc-en').value = '';
-        document.getElementById('new-product-desc-ar').value = '';
-        document.getElementById('new-product-price').value = '';
+        try {
+            await addDoc(getCollectionRef('products'), { en: desc_en, ar: desc_ar, price });
+            document.getElementById('new-product-desc-en').value = '';
+            document.getElementById('new-product-desc-ar').value = '';
+            document.getElementById('new-product-price').value = '';
+        } catch(e) { console.error("Error adding product:", e); }
     }
 }
-function deleteProduct(e) { products.splice(e.target.dataset.index, 1); saveProducts(); renderProducts(); }
+window.deleteProduct = async (id) => { await deleteDoc(doc(getCollectionRef('products'), id)); }
 
-function saveClients() { localStorage.setItem('clients', JSON.stringify(clients)); }
-function loadClients() { clients = JSON.parse(localStorage.getItem('clients')) || []; }
-function renderClients() {
-    const list = document.getElementById('client-list');
-    if(!list) return;
-    list.innerHTML = '';
-    clients.forEach((c, index) => {
-        const item = document.createElement('div');
-        item.className = 'list-item text-sm';
-        item.innerHTML = `<span>${c.name_en || c.name_ar}</span><button class="delete-btn" data-index="${index}">&times;</button>`;
-        list.appendChild(item);
-    });
-    list.querySelectorAll('.delete-btn').forEach(btn => btn.addEventListener('click', deleteClient));
-}
-function addClient() {
+window.addClient = async () => {
     const name_en = document.getElementById('new-client-name-en').value;
     const name_ar = document.getElementById('new-client-name-ar').value;
     const address_en = document.getElementById('new-client-address-en').value;
     const address_ar = document.getElementById('new-client-address-ar').value;
     if (name_en || name_ar) {
-        clients.push({ name_en, name_ar, address_en, address_ar });
-        saveClients();
-        renderClients();
-        document.getElementById('new-client-name-en').value = '';
-        document.getElementById('new-client-name-ar').value = '';
-        document.getElementById('new-client-address-en').value = '';
-        document.getElementById('new-client-address-ar').value = '';
+        try {
+            await addDoc(getCollectionRef('clients'), { en: name_en, ar: name_ar, address_en, address_ar });
+            document.getElementById('new-client-name-en').value = '';
+            document.getElementById('new-client-name-ar').value = '';
+            document.getElementById('new-client-address-en').value = '';
+            document.getElementById('new-client-address-ar').value = '';
+        } catch(e) { console.error("Error adding client:", e); }
     }
 }
-function deleteClient(e) { clients.splice(e.target.dataset.index, 1); saveClients(); renderClients(); }
+window.deleteClient = async (id) => { await deleteDoc(doc(getCollectionRef('clients'), id)); }
 
 // ===============================================
 // MODALS
@@ -547,22 +553,14 @@ async function generatePDF() {
     const { jsPDF } = window.jspdf;
     const quoteElement = document.getElementById('print-area');
     const clone = quoteElement.cloneNode(true);
-    
     clone.classList.remove('dark');
-    if (currentLang === 'ar') {
-        clone.setAttribute('dir', 'rtl');
-        clone.style.fontFamily = 'Cairo, sans-serif';
-    } else {
-         clone.style.fontFamily = 'Inter, sans-serif';
-    }
-
+    if (currentLang === 'ar') { clone.setAttribute('dir', 'rtl'); clone.style.fontFamily = 'Cairo, sans-serif'; } 
+    else { clone.style.fontFamily = 'Inter, sans-serif'; }
     clone.querySelectorAll('.placeholder-icon').forEach(icon => {
         const photoContainer = icon.closest('.photo-upload-container');
         if (photoContainer) {
              const img = photoContainer.querySelector('img');
-             if (!img || !img.dataset.photoBase64) {
-                photoContainer.style.display = 'none';
-             }
+             if (!img || !img.dataset.photoBase64) { photoContainer.style.display = 'none'; }
         }
     });
     clone.style.width = '1024px';
@@ -570,7 +568,6 @@ async function generatePDF() {
     clone.style.left = '-9999px';
     clone.style.top = '0';
     document.body.appendChild(clone);
-
     clone.querySelectorAll('input.quantity, input.unit-price').forEach(input => {
         const span = document.createElement('span');
         span.textContent = input.value;
@@ -579,9 +576,7 @@ async function generatePDF() {
         input.parentNode.replaceChild(span, input);
     });
     clone.querySelectorAll('.no-print').forEach(el => el.remove());
-    
     await document.fonts.ready;
-
     try {
         const canvas = await html2canvas(clone, { scale: 3, useCORS: true });
         const imgData = canvas.toDataURL('image/png', 1.0);
@@ -598,56 +593,45 @@ async function generatePDF() {
             pdf.save(`Quotation_${customerName||'details'}.pdf`);
             closePreviewModal();
         };
-    } catch(e) {
-        console.error("PDF generation failed:", e);
-        alert("PDF generation failed.");
-    } finally {
-        document.body.removeChild(clone);
-    }
+    } catch(e) { console.error("PDF generation failed:", e); alert("PDF generation failed."); } 
+    finally { document.body.removeChild(clone); }
 }
 
 // ===============================================
 // APP INITIALIZATION
 // ===============================================
 function attachEditorEventListeners() {
-    document.getElementById('save-quote-btn').addEventListener('click', saveCurrentQuote);
+    document.getElementById('save-quote-btn').addEventListener('click', window.saveCurrentQuote);
     document.getElementById('preview-pdf-btn').addEventListener('click', generatePDF);
     document.getElementById('add-row').addEventListener('click', () => addNewRow());
-    document.getElementById('add-product-btn').addEventListener('click', addProduct);
-    document.getElementById('add-client-btn').addEventListener('click', addClient);
+    document.getElementById('add-product-btn').addEventListener('click', window.addProduct);
+    document.getElementById('add-client-btn').addEventListener('click', window.addClient);
     document.querySelector('.load-customer-btn').addEventListener('click', () => {
-         openModal('Select a Client', clients, (c) => `<strong>${c.name_en || c.name_ar}</strong>`, (client) => {
+         openModal('Select a Client', clients, (c) => `<strong>${c[currentLang] || c['en']}</strong>`, (client) => {
             const nameEl = document.querySelector('#editor-page .editable[data-field="customerName"]');
             const addressEl = document.querySelector('#editor-page .editable[data-field="customerAddress"]');
-            nameEl.dataset.en = client.name_en; nameEl.dataset.ar = client.name_ar;
+            nameEl.dataset.en = client.en; nameEl.dataset.ar = client.ar;
             addressEl.dataset.en = client.address_en; addressEl.dataset.ar = client.address_ar;
             setLanguage(currentLang);
         });
     });
     document.querySelectorAll('.tab-btn').forEach(button => {
-        button.addEventListener('click', () => {
+        button.addEventListener('click', (e) => {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            button.classList.add('active');
-            const tabId = `tab-${button.dataset.tab}`;
-            document.getElementById(tabId).classList.remove('hidden');
+            e.currentTarget.classList.add('active');
+            document.getElementById(`tab-${e.currentTarget.dataset.tab}`).classList.remove('hidden');
         });
     });
     document.querySelectorAll('#editor-page .editable').forEach(el => el.addEventListener('blur', syncUIData));
-    
     document.getElementById('company-selector').addEventListener('change', (e) => {
         switchCompanyProfile(e.target.value);
     });
-
-    renderProducts();
-    renderClients();
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+async function main() {
     applyTheme();
-    loadAllQuotes();
-    loadProducts();
-    loadClients();
+    setLanguage(currentLang);
     
     document.querySelectorAll('.language-btn').forEach(btn => {
         btn.addEventListener('click', () => setLanguage(btn.dataset.langSwitch));
@@ -656,7 +640,26 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('new-quote-btn').addEventListener('click', openCompanyModal);
     document.getElementById('close-company-modal-btn').addEventListener('click', closeCompanyModal);
     document.getElementById('back-to-dashboard-btn').addEventListener('click', showDashboard);
+    document.getElementById('cancel-pdf-btn').addEventListener('click', closePreviewModal);
+    document.getElementById('close-pdf-modal-btn').addEventListener('click', closePreviewModal);
     
     showDashboard();
-});
+
+    await signInAnonymously(auth);
+
+    onSnapshot(query(getCollectionRef('quotations'), orderBy("meta.savedAt", "desc")), (snapshot) => {
+        savedQuotes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        renderDashboard();
+    });
+    onSnapshot(getCollectionRef('products'), (snapshot) => {
+        products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        if(document.getElementById('product-list')) renderProducts();
+    });
+    onSnapshot(getCollectionRef('clients'), (snapshot) => {
+        clients = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        if(document.getElementById('client-list')) renderClients();
+    });
+}
+
+main();
 
