@@ -89,9 +89,11 @@ html[lang="ar"] body {
 .tab-btn.active { color: #2b6cb0; border-bottom-color: #2b6cb0; }
 .dark .tab-btn.active { color: #63b3ed; border-bottom-color: #63b3ed; }
 
-.language-btn { transition: background-color 0.2s ease; }
+.language-btn { transition: background-color 0.2s ease; color: #4a5568; }
+.dark .language-btn { color: #cbd5e0 }
 .language-btn.active-lang { background-color: #3b82f6; color: white; }
-.dark .language-btn.active-lang { background-color: #2563eb; }
+.dark .language-btn.active-lang { background-color: #2563eb; color: white; }
+
 
 .photo-upload-container {
     position: relative; width: 80px; height: 80px; background-color: #f7fafc;
