@@ -45,116 +45,6 @@ const translations = {
     ar: { dashboardTitle: "عروضي", newQuoteBtn: "+ عرض سعر جديد", selectProfileTitle: "اختر ملف الشركة", backToDashboardBtn: "→ العودة للرئيسية", appTitle: "محرر عروض الأسعار", loadSource: "تحميل", saveSource: "حفظ", previewPdf: "معاينة PDF", downloadPdf: "تحميل PDF", customer: "العميل", quoteNum: "رقم العرض:", date: "التاريخ:", validUntil: "صالح حتى:", projectDescription: "وصف المشروع", photo: "صورة", description: "البند", quantity: "الكمية", unitPrice: "سعر الوحدة", total: "المجموع", action: "إجراء", addRow: "+ أضف سطراً", subtotal: "المجموع الفرعي", vat: "الضريبة (15%)", grandTotal: "الإجمالي", terms: "الشروط والأحكام", bankDetails: "التفاصيل البنكية", signature: "التوقيع", pdfPreviewTitle: "معاينة PDF", cancel: "إلغاء", fileLoadError: "خطأ: لا يمكن تحميل الملف.", quotationTitle: "عرض سعر", closingPhrase: "شكراً لثقتكم. نتطلع للعمل معكم." }
 };
 
-const editorHTML = `
-    <h1 class="text-4xl font-bold text-center mb-10 tracking-wider" data-lang="quotationTitle">QUOTATION</h1>
-    <div class="text-center mb-10">
-        <img id="company-logo" src="" alt="Company Logo" class="w-64 h-auto mx-auto mb-2">
-        <div class="company-info">
-            <h2 class="text-3xl font-bold text-slate-800 dark:text-slate-100 editable" contenteditable="true" data-field="companyName" spellcheck="false"></h2>
-            <p class="text-sm text-slate-500 dark:text-slate-400 editable" contenteditable="true" data-field="companyCR" spellcheck="false"></p>
-            <p class="text-sm text-slate-500 dark:text-slate-400 editable" contenteditable="true" data-field="companyVat" spellcheck="false"></p>
-            <p class="text-sm text-slate-500 dark:text-slate-400 editable" contenteditable="true" data-field="companyAddress" spellcheck="false"></p>
-        </div>
-    </div>
-    <div class="grid grid-cols-2 gap-6 mb-8 pb-6 border-b border-slate-200 dark:border-slate-700">
-        <div class="p-4 rounded-lg text-left bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-700 relative">
-            <div class="flex justify-between items-center mb-2">
-                <h3 class="font-bold text-slate-700 dark:text-slate-200" data-lang="customer">Customer</h3>
-                <button class="load-customer-btn text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 text-xs font-bold no-print">Load Client</button>
-            </div>
-            <p class="editable text-sm" contenteditable="true" data-field="customerName" data-en="Customer Name" data-ar="اسم العميل" spellcheck="false"></p>
-            <p class="editable text-sm" contenteditable="true" data-field="customerAddress" data-en="Customer Address" data-ar="عنوان العميل" spellcheck="false"></p>
-            <p class="editable text-sm" contenteditable="true" data-field="customerCountry" data-en="Saudi Arabia" data-ar="المملكة العربية السعودية" spellcheck="false"></p>
-        </div>
-        <div class="p-4 rounded-lg text-right bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-700">
-            <div class="text-sm inline-block text-left">
-                <p><span class="font-bold" data-lang="quoteNum">Quote #:</span> <span class="editable" contenteditable="true" data-field="quoteNum" spellcheck="false"></span></p>
-                <p><span class="font-bold" data-lang="date">Date:</span> <span id="quoteDate"></span></p>
-                <p><span class="font-bold" data-lang="validUntil">Valid Until:</span> <span id="validDate"></span></p>
-            </div>
-        </div>
-    </div>
-    <div class="mb-8">
-        <h3 class="font-bold text-lg text-slate-800 dark:text-slate-100 mb-4 pb-2 border-b border-slate-200 dark:border-slate-700" data-lang="projectDescription">Project Description</h3>
-        <div class="editable text-sm p-4 rounded-lg bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-700" contenteditable="true" data-field="projectDescription" data-en="Enter project description..." data-ar="أدخل وصف المشروع..." spellcheck="false"></div>
-    </div>
-    <table class="w-full text-sm" id="items-table">
-        <thead class="text-slate-700 dark:text-slate-300">
-            <tr class="border-b-2 border-slate-300 dark:border-slate-600">
-                <th class="p-2 w-24 text-left font-semibold" data-lang="photo">Photo</th>
-                <th class="p-2 text-left font-semibold" data-lang="description">Item</th>
-                <th class="p-2 w-24 text-center font-semibold" data-lang="quantity">Quantity</th>
-                <th class="p-2 w-32 text-right font-semibold" data-lang="unitPrice">Unit Price</th>
-                <th class="p-2 w-32 text-right font-semibold" data-lang="total">Total</th>
-                <th class="p-2 w-16 text-center no-print font-semibold" data-lang="action">Action</th>
-            </tr>
-        </thead>
-        <tbody id="table-body"></tbody>
-    </table>
-    <button id="add-row" class="mt-4 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 font-bold py-2 px-4 rounded-lg no-print"><span data-lang="addRow">+ Add Row</span></button>
-    <div class="flex justify-end mt-8">
-        <div class="w-full max-w-sm text-slate-800 dark:text-slate-200">
-            <div class="flex justify-between py-2 border-b border-slate-200 dark:border-slate-700"><span class="font-semibold" data-lang="subtotal">Subtotal</span><span id="subtotal">0.00</span></div>
-            <div class="flex justify-between py-2 border-b border-slate-200 dark:border-slate-700"><span class="font-semibold" data-lang="vat">VAT (15%)</span><span id="vat">0.00</span></div>
-            <div class="flex justify-between py-3 text-xl font-bold bg-blue-50 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200 px-4 rounded-lg mt-2"><span data-lang="grandTotal">TOTAL</span><span id="grand-total">0.00</span></div>
-        </div>
-    </div>
-    <div class="mt-12 pt-6 border-t border-slate-200 dark:border-slate-700 grid grid-cols-1 md:grid-cols-2 gap-8 text-xs">
-        <div><h3 class="font-bold text-base text-slate-800 dark:text-slate-100 mb-3 text-center" data-lang="terms">Terms & Conditions</h3><div class="editable text-justify p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg" contenteditable="true" data-field="terms" spellcheck="false"></div></div>
-        <div><h3 class="font-bold text-base text-slate-800 dark:text-slate-100 mb-3 text-center" data-lang="bankDetails">Bank Details</h3><div class="editable text-justify p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg" contenteditable="true" data-field="bankDetails" spellcheck="false"></div></div>
-    </div>
-    <div class="mt-16 pt-10 border-t border-slate-200 dark:border-slate-700 text-center">
-        <div class="w-64 h-16 border-b-2 border-slate-300 dark:border-slate-600 inline-block"></div>
-        <p class="font-semibold mt-2" data-lang="signature">Signature</p>
-    </div>
-    <div class="text-center mt-6">
-        <p class="font-semibold text-slate-700 dark:text-slate-300 editable" data-field="closingPhrase" spellcheck="false"></p>
-    </div>
-`;
-
-const controlsHTML = `
-    <div class="control-panel-card bg-white dark:bg-slate-800">
-        <h2 class="font-bold text-lg text-slate-700 dark:text-slate-200 border-b border-slate-200 dark:border-slate-700 pb-3 mb-4">Company Profile</h2>
-        <select id="company-selector" class="w-full p-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200">
-            <option value="wooden_pieces">Wooden Pieces EST.</option>
-            <option value="rattan_palace">Rattan Palace</option>
-        </select>
-    </div>
-    <div class="control-panel-card bg-white dark:bg-slate-800">
-        <div class="flex border-b border-slate-200 dark:border-slate-700">
-            <button class="tab-btn active" data-tab="actions">Actions</button>
-            <button class="tab-btn" data-tab="products">Products</button>
-            <button class="tab-btn" data-tab="clients">Clients</button>
-        </div>
-        <div id="tab-actions" class="tab-content active pt-4">
-            <div class="grid grid-cols-2 gap-3">
-                <button id="save-quote-btn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-3 rounded-lg"></button>
-                <button id="preview-pdf-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 rounded-lg"><span data-lang="previewPdf">Preview PDF</span></button>
-            </div>
-        </div>
-        <div id="tab-products" class="tab-content hidden pt-4">
-            <div id="product-list" class="max-h-60 overflow-y-auto space-y-2"></div>
-            <div class="mt-4 space-y-2">
-                <input type="text" id="new-product-desc-en" placeholder="Product Name (EN)" class="w-full p-2 border rounded bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600">
-                <input type="text" id="new-product-desc-ar" placeholder="اسم المنتج (AR)" class="w-full p-2 border rounded bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600">
-                <input type="number" id="new-product-price" placeholder="Unit Price" class="w-full p-2 border rounded bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600">
-                <button id="add-product-btn" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-3 rounded-lg">Add Product</button>
-            </div>
-        </div>
-        <div id="tab-clients" class="tab-content hidden pt-4">
-            <div id="client-list" class="max-h-60 overflow-y-auto space-y-2"></div>
-            <div class="mt-4 space-y-2">
-                 <input type="text" id="new-client-name-en" placeholder="Client Name (EN)" class="w-full p-2 border rounded bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600">
-                 <input type="text" id="new-client-name-ar" placeholder="اسم العميل (AR)" class="w-full p-2 border rounded bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600">
-                 <textarea id="new-client-address-en" placeholder="Address (EN)" class="w-full p-2 border rounded bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600" rows="2"></textarea>
-                 <textarea id="new-client-address-ar" placeholder="العنوان (AR)" class="w-full p-2 border rounded bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600" rows="2"></textarea>
-                <button id="add-client-btn" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-3 rounded-lg">Add Client</button>
-            </div>
-        </div>
-    </div>
-`;
-
-
 // ===============================================
 // DASHBOARD & NAVIGATION
 // ===============================================
@@ -271,11 +161,7 @@ function captureQuoteData() {
 
 function applyQuoteData(data) {
     document.body.dataset.activeProfile = data.companyProfile;
-    document.getElementById('print-area').innerHTML = editorHTML;
-    document.getElementById('controls-panel-container').innerHTML = controlsHTML;
     
-    document.getElementById('company-selector').value = data.companyProfile;
-
     if (data.fields) {
         Object.keys(data.fields).forEach(field => {
             const el = document.querySelector(`#editor-page .editable[data-field="${field}"]`);
@@ -293,6 +179,7 @@ function applyQuoteData(data) {
         addNewRow();
     }
     
+    document.getElementById('company-selector').value = data.companyProfile;
     const today = new Date();
     document.getElementById('quoteDate').textContent = today.toLocaleDateString('en-CA');
     const validUntil = new Date();
@@ -300,9 +187,8 @@ function applyQuoteData(data) {
     document.getElementById('validDate').textContent = validUntil.toLocaleDateString('en-CA');
     document.getElementById('save-quote-btn').textContent = "Save & Close";
 
-    setLanguage(data.lang || currentLang);
+    setLanguage(data.lang || currentLang); // This will update all text fields
     updateTotals();
-    attachEditorEventListeners();
 }
 
 function getEmptyQuoteData(profileKey) {
@@ -341,9 +227,9 @@ function switchCompanyProfile(profileKey) {
         if (el) {
             el.dataset.en = dataMap[field].en;
             el.dataset.ar = dataMap[field].ar;
+            el.innerHTML = dataMap[field][currentLang];
         }
     });
-    setLanguage(currentLang);
 }
 
 function syncUIData() {
@@ -399,7 +285,7 @@ function addNewRow(item = { photo: '', desc_en: '', desc_ar: '', qty: 1, price: 
     row.className = 'border-b border-slate-200 dark:border-slate-700';
     
     row.innerHTML = `
-        <td class="p-2 align-top"><div class="photo-upload-container"><img src="${item.photo||'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" class="${item.photo?'':'hidden'}" data-photo-base64="${item.photo||''}"><div class="placeholder-icon ${item.photo?'':'hidden'}"><svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div><input type="file" class="hidden" accept="image/*"></div></td>
+        <td class="p-2 align-top"><div class="photo-upload-container"><img src="${item.photo||'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" class="${item.photo?'':'hidden'}" data-photo-base64="${item.photo||''}"><div class="placeholder-icon ${!item.photo?'':'hidden'}"><svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div><input type="file" class="hidden" accept="image/*"></div></td>
         <td class="p-2 align-top relative"><div class="w-full p-2 editable item-description" contenteditable="true" data-en="${item.desc_en}" data-ar="${item.desc_ar}" spellcheck="false"></div><button class="load-product-btn absolute top-1 right-1 text-blue-500 no-print p-1 leading-none">...</button></td>
         <td class="p-2 align-top"><input type="number" value="${item.qty}" class="quantity w-full text-center p-2 border rounded bg-slate-50 dark:bg-slate-700 border-slate-300 dark:border-slate-600"></td>
         <td class="p-2 align-top"><input type="number" value="${item.price}" step="0.01" class="unit-price w-full text-right p-2 border rounded bg-slate-50 dark:bg-slate-700 border-slate-300 dark:border-slate-600"></td>
@@ -441,7 +327,6 @@ function addNewRow(item = { photo: '', desc_en: '', desc_ar: '', qty: 1, price: 
             updateTotals();
         });
     });
-    updateTotals();
 }
 
 // ===============================================
@@ -548,7 +433,10 @@ async function generatePDF() {
     if (currentLang === 'ar') {
         clone.setAttribute('dir', 'rtl');
     }
-    clone.querySelectorAll('.placeholder-icon').forEach(icon => icon.parentElement.style.display = 'none');
+    clone.querySelectorAll('.placeholder-icon').forEach(icon => {
+        const photoContainer = icon.closest('.photo-upload-container');
+        if (photoContainer) photoContainer.style.display = 'none';
+    });
     clone.style.width = '1024px';
     clone.style.position = 'absolute';
     clone.style.left = '-9999px';
@@ -564,7 +452,6 @@ async function generatePDF() {
     });
     clone.querySelectorAll('.no-print').forEach(el => el.remove());
     
-    // Ensure fonts are loaded before capturing
     await document.fonts.ready;
 
     try {
