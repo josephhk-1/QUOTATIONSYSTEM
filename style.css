@@ -1,54 +1,65 @@
-/* ... (tous vos styles existants) ... */
-
-/* Nouveaux styles pour les onglets et les listes */
-.tab-btn {
-    flex: 1;
-    padding: 0.75rem 0.5rem;
-    border: none;
-    background-color: transparent;
-    font-weight: 600;
-    color: #4a5568;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    border-bottom: 3px solid transparent;
+body { 
+    font-family: 'Inter', sans-serif; 
+    background-color: #f0f2f5; 
 }
 
-.tab-btn.active {
-    color: #2b6cb0;
-    border-bottom-color: #2b6cb0;
+html[lang="ar"] body { 
+    font-family: 'Cairo', sans-serif; 
 }
 
-.tab-content {
-    animation: fadeIn 0.3s;
-}
+/* ... (tous vos styles existants pour .company-chooser, .control-panel-card, etc.) ... */
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.list-item {
-    display: flex;
-    justify-content: space-between;
+/* Styles pour le tableau de bord */
+.quote-list-item {
+    display: grid;
+    grid-template-columns: 3fr 1fr 1fr 1.5fr; /* Ajusté pour les actions */
+    gap: 1rem;
+    padding: 1rem;
+    border-bottom: 1px solid #e2e8f0;
     align-items: center;
-    padding: 0.5rem 0.75rem;
+    transition: background-color 0.2s ease;
+}
+
+.quote-list-item:hover {
     background-color: #f7fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 0.5rem;
 }
 
-.list-item .delete-btn {
-    background: none;
+.quote-list-item:last-child {
+    border-bottom: none;
+}
+
+.quote-list-header {
+    font-weight: 700;
+    color: #4a5568;
+    background-color: #f7fafc;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.quote-actions button {
+    margin-right: 0.5rem;
+    padding: 0.25rem 0.75rem; /* Plus large */
+    border-radius: 0.375rem; /* Plus arrondi */
+    color: white;
     border: none;
-    color: #ef4444;
     cursor: pointer;
-    font-weight: bold;
-    padding: 0.25rem 0.5rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
 }
 
-/* ... (tous vos styles existants) ... */
+.quote-actions button:hover {
+    opacity: 0.85;
+}
 
-/* Styles pour la fenêtre modale de sélection */
+.load-btn { background-color: #3b82f6; } /* Bleu */
+.delete-quote-btn { background-color: #ef4444; } /* Rouge */
+
+#quote-list-container .empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: #64748b;
+}
+
+/* Styles pour les modales de sélection */
 .modal-list-item {
     padding: 0.75rem;
     background-color: white;
@@ -62,4 +73,13 @@
     background-color: #ebf8ff;
     border-color: #4299e1;
     transform: translateX(5px);
+}
+
+.animate-in {
+    animation: fadeInScale 0.3s ease-out;
+}
+
+@keyframes fadeInScale {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
 }
