@@ -27,7 +27,7 @@ const companyProfiles = {
          vat: { en: 'Vat No.: 310618978500003', ar: 'الرقم الضريبي: 310618978500003' }, 
          address: { en: 'Alkhaleej, RIYADH 13223, Saudi Arabia', ar: 'الخليج, الرياض 13223, المملكة العربية السعودية' }, 
          bankDetails: { en: `<p><strong>Bank:</strong> ALINMAA BANK</p><p><strong>IBAN:</strong> SA0705000068203914512000</p>`, ar: `<p><strong>البنك:</strong> مصرف الإنماء</p><p><strong>الآيبان:</strong> SA0705000068203914512000</p>` },
-         terms: { en: `<ul><li>50% Down payment</li><li>50% After delivery</li><li>Delivery within 20-30 days</li></ul>`, ar: `<ul><li>دفعة أولى 50%</li><li>50% بعد التسليم</li><li>التسليم خلال 20-30 يوم</li></ul>` }
+         terms: { en: `<ul><li>50% advance payment upon confirmation.</li><li>50% upon completion and delivery.</li><li>Delivery within 20 to 30 business days.</li><li>Includes a 3-year warranty on manufacturing defects.</li></ul>`, ar: `<ul><li>50% دفعة مقدمة عند تأكيد الطلب.</li><li>50% عند الإنجاز والتسليم.</li><li>التسليم خلال 20 إلى 30 يوم عمل.</li><li>ضمان لمدة 3 سنوات على عيوب التصنيع.</li></ul>` }
     },
      'rattan_palace': { 
          acronym: 'RP', logo: 'logo.png',
@@ -36,7 +36,7 @@ const companyProfiles = {
          vat: { en: 'Vat No.: 313099850500003', ar: 'الرقم الضريبي: 313099850500003' }, 
          address: { en: 'Alkhaleej, RIYADH 13223, Saudi Arabia', ar: 'الخليج, الرياض 13223, المملكة العربية السعودية' }, 
          bankDetails: { en: `<p><strong>Bank:</strong> Riyad Bank</p><p><strong>IBAN:</strong> SA3020000002126072249940</p>`, ar: `<p><strong>البنك:</strong> بنك الرياض</p><p><strong>الآيبان:</strong> SA3020000002126072249940</p>` },
-         terms: { en: `<ul><li>50% Down payment</li><li>50% After delivery</li><li>Delivery within 20-30 days</li></ul>`, ar: `<ul><li>دفعة أولى 50%</li><li>50% بعد التسليم</li><li>التسليم خلال 20-30 يوم</li></ul>` }
+         terms: { en: `<ul><li>50% advance payment upon confirmation.</li><li>50% upon completion and delivery.</li><li>Delivery within 20 to 30 business days.</li><li>Includes a 3-year warranty on manufacturing defects.</li></ul>`, ar: `<ul><li>50% دفعة مقدمة عند تأكيد الطلب.</li><li>50% عند الإنجاز والتسليم.</li><li>التسليم خلال 20 إلى 30 يوم عمل.</li><li>ضمان لمدة 3 سنوات على عيوب التصنيع.</li></ul>` }
     }
 };
 const translations = {
@@ -217,20 +217,25 @@ function switchCompanyProfile(profileKey) {
     if (!profile) return;
 
     document.getElementById('company-logo').src = profile.logo;
-    const fieldsToUpdate = ['companyName', 'companyCR', 'companyVat', 'companyAddress', 'bankDetails', 'terms'];
+    
     const dataMap = {
-        companyName: profile.name, companyCR: profile.cr, companyVat: profile.vat,
-        companyAddress: profile.address, bankDetails: profile.bankDetails, terms: profile.terms
+        companyName: profile.name,
+        companyCR: profile.cr,
+        companyVat: profile.vat,
+        companyAddress: profile.address,
+        bankDetails: profile.bankDetails,
+        terms: profile.terms
     };
 
-    fieldsToUpdate.forEach(field => {
-        const el = document.querySelector(`.editable[data-field="${field}"]`);
+    // Update the data attributes and the visible HTML content directly
+    Object.keys(dataMap).forEach(field => {
+        const el = document.querySelector(`#editor-page .editable[data-field="${field}"]`);
         if (el) {
             el.dataset.en = dataMap[field].en;
             el.dataset.ar = dataMap[field].ar;
+            el.innerHTML = dataMap[field][currentLang]; // This line directly fixes the bug
         }
     });
-    setLanguage(currentLang);
 }
 
 function syncUIData() {
@@ -513,4 +518,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
     showDashboard();
 });
+
 
