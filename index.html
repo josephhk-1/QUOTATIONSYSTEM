@@ -24,52 +24,32 @@
         .quotation-card { background-color: #ffffff; }
 
         .company-chooser a {
-            display: block;
-            padding: 1rem;
-            border: 1px solid #ccc;
-            border-radius: 0.5rem;
-            text-align: center;
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: #333;
-            background-color: #fff;
+            display: block; padding: 1rem; border: 1px solid #ccc;
+            border-radius: 0.5rem; text-align: center; font-size: 1.25rem;
+            font-weight: 600; color: #333; background-color: #fff;
             transition: all 0.2s ease-in-out;
         }
         .company-chooser a:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+            transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
             background-color: #f7f3ed;
         }
 
-        /* Styles for photo upload */
         .photo-col { width: 100px; }
         .photo-upload-container {
-            position: relative; width: 80px; height: 80px;
-            background-color: #f9fafb; border: 2px dashed #d1d5db;
-            border-radius: 0.5rem; cursor: pointer; display: flex;
-            align-items: center; justify-content: center; overflow: hidden;
+            position: relative; width: 80px; height: 80px; background-color: #f9fafb;
+            border: 2px dashed #d1d5db; border-radius: 0.5rem; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; overflow: hidden;
         }
         .photo-upload-container img { width: 100%; height: 100%; object-fit: cover; }
-        .photo-upload-container .placeholder-icon { color: #9ca3af; }
-        .hide-photos .photo-col { display: none; }
         
-        /* Force layout for PDF rendering */
-        .pdf-render-mode {
-            background-color: #d4b886 !important;
-        }
-        .pdf-render-mode .quotation-card {
-             box-shadow: none !important;
-        }
-        .pdf-render-mode .grid { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
-        .pdf-render-mode .flex.justify-between { display: flex !important; justify-content: space-between !important; align-items: flex-start !important; }
-        .pdf-render-mode #company-logo {
-            width: 150px !important; /* Larger logo for PDF */
-        }
+        .pdf-render-mode { background-color: #d4b886 !important; }
+        .pdf-render-mode .quotation-card { box-shadow: none !important; }
+        .pdf-render-mode #company-logo { width: 250px !important; /* Even larger logo for PDF */ }
     </style>
 </head>
 <body class="p-2 sm:p-6 md:p-8">
 
-    <!-- Landing Page / Company Chooser -->
+    <!-- Landing Page -->
     <div id="landing-page" class="max-w-xl mx-auto text-center">
         <h1 class="text-4xl font-bold text-gray-800 mb-8">QUOTATION GENERATOR</h1>
         <div class="bg-white p-8 rounded-2xl shadow-lg company-chooser">
@@ -84,11 +64,9 @@
         </footer>
     </div>
 
-
     <!-- Quotation Editor -->
     <div id="editor-page" class="hidden">
         <div class="max-w-4xl mx-auto rounded-2xl shadow-lg quotation-bg p-2" id="quote-container">
-             <!-- Header with Action Buttons -->
             <header class="bg-white/60 backdrop-blur-sm text-gray-800 p-2 md:p-4 rounded-t-2xl flex flex-col md:flex-row justify-between items-center no-print gap-4 sticky top-0 z-10">
                  <div class="flex items-center gap-4">
                      <button onclick="showLandingPage()" class="text-gray-600 hover:text-black">&larr; Back</button>
@@ -104,24 +82,26 @@
                 </div>
             </header>
 
-            <!-- Main Quotation Area -->
             <main class="p-4 md:p-8 print-area quotation-card" id="print-area">
-                <div class="flex justify-between items-start mb-6 gap-4">
-                    <div>
-                        <img id="company-logo" src="" alt="Company Logo" class="w-32 h-auto mb-4">
-                        <h2 class="text-2xl font-bold text-gray-800 editable" contenteditable="true" data-field="companyName" spellcheck="false"></h2>
-                        <p class="text-xs text-gray-600 editable" contenteditable="true" data-field="companyCR" spellcheck="false"></p>
-                        <p class="text-xs text-gray-600 editable" contenteditable="true" data-field="companyVat" spellcheck="false"></p>
-                        <p class="text-xs text-gray-600 editable" contenteditable="true" data-field="companyAddress" spellcheck="false"></p>
+                <div class="text-center mb-8">
+                    <img id="company-logo" src="" alt="Company Logo" class="w-56 h-auto mx-auto mb-4">
+                    <h2 class="text-3xl font-bold text-gray-800 editable" contenteditable="true" data-field="companyName" spellcheck="false"></h2>
+                    <p class="text-sm text-gray-600 editable" contenteditable="true" data-field="companyCR" spellcheck="false"></p>
+                    <p class="text-sm text-gray-600 editable" contenteditable="true" data-field="companyVat" spellcheck="false"></p>
+                    <p class="text-sm text-gray-600 editable" contenteditable="true" data-field="companyAddress" spellcheck="false"></p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-8 mb-8 pb-4 border-b">
+                     <!-- Left Column: Customer Info -->
+                     <div class="border p-4 rounded-lg text-left">
+                        <h3 class="font-bold text-gray-700 mb-2" data-lang="customer">Customer</h3>
+                        <p class="editable text-sm" contenteditable="true" data-field="customerName" data-en="Customer Name" data-ar="اسم العميل"></p>
+                        <p class="editable text-sm" contenteditable="true" data-field="customerAddress" data-en="Customer Address" data-ar="عنوان العميل"></p>
+                        <p class="editable text-sm" contenteditable="true" data-field="customerCountry" data-en="Saudi Arabia" data-ar="المملكة العربية السعودية"></p>
                     </div>
-                    <div class="text-right flex-shrink-0">
-                         <div class="border p-4 rounded-lg">
-                            <h3 class="font-bold text-gray-700 mb-2" data-lang="customer">Customer</h3>
-                            <p class="editable text-sm" contenteditable="true" data-field="customerName" data-en="Customer Name" data-ar="اسم العميل"></p>
-                            <p class="editable text-sm" contenteditable="true" data-field="customerAddress" data-en="Customer Address" data-ar="عنوان العميل"></p>
-                            <p class="editable text-sm" contenteditable="true" data-field="customerCountry" data-en="Saudi Arabia" data-ar="المملكة العربية السعودية"></p>
-                        </div>
-                         <div class="mt-4 text-sm">
+                    <!-- Right Column: Quote Info -->
+                    <div class="text-right">
+                         <div class="text-sm inline-block text-left">
                             <p><span class="font-bold" data-lang="quoteNum">Quote #:</span> <span class="editable" contenteditable="true" data-field="quoteNum"></span></p>
                             <p><span class="font-bold" data-lang="date">Date:</span> <span id="quoteDate"></span></p>
                             <p><span class="font-bold" data-lang="validUntil">Valid Until:</span> <span id="validDate"></span></p>
@@ -166,7 +146,6 @@
                     </div>
                 </div>
 
-                <!-- Terms and Bank Details -->
                 <div class="mt-12 pt-8 border-t grid grid-cols-1 md:grid-cols-2 gap-8 text-xs">
                     <div>
                         <h3 class="font-bold text-gray-800 mb-2" data-lang="terms">Terms & Conditions</h3>
@@ -177,7 +156,11 @@
                         <div class="editable" contenteditable="true" data-field="bankDetails" spellcheck="false"></div>
                     </div>
                 </div>
-
+                
+                 <div class="mt-12 pt-8 border-t text-right">
+                    <div class="w-64 h-16 border-b-2 inline-block"></div>
+                    <p class="font-semibold" data-lang="signature">Signature</p>
+                </div>
             </main>
         </div>
     </div>
@@ -227,8 +210,8 @@
         };
 
         const translations = {
-             en: { appTitle: "Quotation Editor", loadSource: "Load", saveSource: "Save", previewPdf: "Preview PDF", downloadPdf: "Download PDF", customer: "Customer", quoteNum: "Quote #:", date: "Date:", validUntil: "Valid Until:", projectDescription: "Project Description", photo: "Photo", description: "Item", quantity: "Quantity", unitPrice: "Unit Price", total: "Total", action: "Action", addRow: "+ Add Row", subtotal: "Subtotal", vat: "VAT (15%)", grandTotal: "TOTAL", terms: "Terms & Conditions", bankDetails: "Bank Details", pdfPreviewTitle: "PDF Preview", cancel: "Cancel", fileLoadError: "Error: Could not load file." },
-             ar: { appTitle: "محرر عروض الأسعار", loadSource: "تحميل", saveSource: "حفظ", previewPdf: "معاينة PDF", downloadPdf: "تحميل PDF", customer: "العميل", quoteNum: "رقم العرض:", date: "التاريخ:", validUntil: "صالح حتى:", projectDescription: "وصف المشروع", photo: "صورة", description: "البند", quantity: "الكمية", unitPrice: "سعر الوحدة", total: "المجموع", action: "إجراء", addRow: "+ أضف سطراً", subtotal: "المجموع الفرعي", vat: "الضريبة (15%)", grandTotal: "الإجمالي", terms: "الشروط والأحكام", bankDetails: "التفاصيل البنكية", pdfPreviewTitle: "معاينة PDF", cancel: "إلغاء", fileLoadError: "خطأ: لا يمكن تحميل الملف." }
+             en: { appTitle: "Quotation Editor", loadSource: "Load", saveSource: "Save", previewPdf: "Preview PDF", downloadPdf: "Download PDF", customer: "Customer", quoteNum: "Quote #:", date: "Date:", validUntil: "Valid Until:", projectDescription: "Project Description", photo: "Photo", description: "Item", quantity: "Quantity", unitPrice: "Unit Price", total: "Total", action: "Action", addRow: "+ Add Row", subtotal: "Subtotal", vat: "VAT (15%)", grandTotal: "TOTAL", terms: "Terms & Conditions", bankDetails: "Bank Details", signature: "Signature", pdfPreviewTitle: "PDF Preview", cancel: "Cancel", fileLoadError: "Error: Could not load file." },
+             ar: { appTitle: "محرر عروض الأسعار", loadSource: "تحميل", saveSource: "حفظ", previewPdf: "معاينة PDF", downloadPdf: "تحميل PDF", customer: "العميل", quoteNum: "رقم العرض:", date: "التاريخ:", validUntil: "صالح حتى:", projectDescription: "وصف المشروع", photo: "صورة", description: "البند", quantity: "الكمية", unitPrice: "سعر الوحدة", total: "المجموع", action: "إجراء", addRow: "+ أضف سطراً", subtotal: "المجموع الفرعي", vat: "الضريبة (15%)", grandTotal: "الإجمالي", terms: "الشروط والأحكام", bankDetails: "التفاصيل البنكية", signature: "التوقيع", pdfPreviewTitle: "معاينة PDF", cancel: "إلغاء", fileLoadError: "خطأ: لا يمكن تحميل الملف." }
         };
 
         function selectCompany(profileKey) {
@@ -445,7 +428,7 @@
             printableClone.querySelectorAll('.no-print').forEach(el => el.remove());
             
             try {
-                await new Promise(resolve => setTimeout(resolve, 200)); // Increased delay for rendering
+                await new Promise(resolve => setTimeout(resolve, 500)); // Increased delay for external images
 
                 const canvas = await html2canvas(printableClone.querySelector('.print-area'), { scale: 3, useCORS: true, logging: false, backgroundColor: '#ffffff' });
                 
@@ -515,7 +498,4 @@
     </script>
 </body>
 </html>
-
-
-
 
