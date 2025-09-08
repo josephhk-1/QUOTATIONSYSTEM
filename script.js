@@ -108,7 +108,7 @@ const editorHTML = `
         <p class="font-semibold mt-2" data-lang="signature">Signature</p>
     </div>
     <div class="text-center mt-6">
-        <p class="font-semibold text-slate-700 dark:text-slate-300 editable" data-field="closingPhrase" data-en="Thank you for your business. We look forward to working with you." data-ar="شكراً لثقتكم. نتطلع للعمل معكم." spellcheck="false"></p>
+        <p class="font-semibold text-slate-700 dark:text-slate-300 editable" data-field="closingPhrase" spellcheck="false"></p>
     </div>
 `;
 
@@ -153,6 +153,7 @@ const controlsHTML = `
         </div>
     </div>
 `;
+
 
 // ===============================================
 // DASHBOARD & NAVIGATION
@@ -274,7 +275,6 @@ function applyQuoteData(data) {
     document.getElementById('controls-panel-container').innerHTML = controlsHTML;
     
     document.getElementById('company-selector').value = data.companyProfile;
-    switchCompanyProfile(data.companyProfile);
 
     if (data.fields) {
         Object.keys(data.fields).forEach(field => {
@@ -308,7 +308,7 @@ function applyQuoteData(data) {
 function getEmptyQuoteData(profileKey) {
     const profile = companyProfiles[profileKey];
     const now = new Date();
-    const quoteNumber = `Q-${profile.acronym}-${now.getDate()}${now.getMonth()+1}${String(now.getFullYear()).slice(-2)}`;
+    const quoteNumber = `Q-${profile.acronym}-${now.getDate()}${(now.getMonth()+1).toString().padStart(2,'0')}${String(now.getFullYear()).slice(-2)}`;
     return {
         companyProfile: profileKey, lang: currentLang,
         fields: {
@@ -374,7 +374,7 @@ function setLanguage(lang) {
             btn.classList.remove('active-lang');
         }
     });
-    renderDashboard(); // Re-render dashboard to show names in correct language
+    renderDashboard();
 }
 
 function updateTotals() {
@@ -432,7 +432,7 @@ function addNewRow(item = { photo: '', desc_en: '', desc_ar: '', qty: 1, price: 
     });
     
     row.querySelector('.load-product-btn').addEventListener('click', () => {
-        openModal('Select a Product', products, (p) => `<strong>${p[currentLang] || p.en}</strong> - Price: ${p.price}`, (product) => {
+        openModal('Select a Product', products, (p) => `<strong>${p.desc_en || p.desc_ar}</strong> - Price: ${p.price}`, (product) => {
             const desc = row.querySelector('.item-description');
             desc.dataset.en = product.desc_en;
             desc.dataset.ar = product.desc_ar;
@@ -441,6 +441,7 @@ function addNewRow(item = { photo: '', desc_en: '', desc_ar: '', qty: 1, price: 
             updateTotals();
         });
     });
+    updateTotals();
 }
 
 // ===============================================
@@ -539,18 +540,21 @@ function closePreviewModal() { document.getElementById('pdf-preview-modal').clas
 
 async function generatePDF() {
     syncUIData();
-    if (document.activeElement) document.activeElement.blur();
     const { jsPDF } = window.jspdf;
-    const quoteElement = document.getElementById('print-area'); 
+    const quoteElement = document.getElementById('print-area');
     const clone = quoteElement.cloneNode(true);
     
     clone.classList.remove('dark');
+    if (currentLang === 'ar') {
+        clone.setAttribute('dir', 'rtl');
+    }
     clone.querySelectorAll('.placeholder-icon').forEach(icon => icon.parentElement.style.display = 'none');
     clone.style.width = '1024px';
     clone.style.position = 'absolute';
     clone.style.left = '-9999px';
     clone.style.top = '0';
     document.body.appendChild(clone);
+
     clone.querySelectorAll('input.quantity, input.unit-price').forEach(input => {
         const span = document.createElement('span');
         span.textContent = input.value;
@@ -559,8 +563,11 @@ async function generatePDF() {
         input.parentNode.replaceChild(span, input);
     });
     clone.querySelectorAll('.no-print').forEach(el => el.remove());
+    
+    // Ensure fonts are loaded before capturing
+    await document.fonts.ready;
+
     try {
-        await new Promise(r => setTimeout(r, 200));
         const canvas = await html2canvas(clone, { scale: 3, useCORS: true });
         const imgData = canvas.toDataURL('image/png', 1.0);
         document.getElementById('pdf-preview-image').src = imgData;
