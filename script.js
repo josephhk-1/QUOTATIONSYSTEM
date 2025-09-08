@@ -5,7 +5,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore, collection, onSnapshot, doc, getDoc, addDoc, setDoc, deleteDoc, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// Your web app's Firebase configuration
 const firebaseConfig = {
     apiKey: "AIzaSyAcMI9tp51br8JPJrkRoIhGpS8jWlUEgOE",
     authDomain: "my-quotation-system-e3135.firebaseapp.com",
@@ -16,12 +15,10 @@ const firebaseConfig = {
     measurementId: "G-61TP42SNMV"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-
-const appId = 'my-quotation-system'; // A unique ID for your app's data collections
+const appId = 'my-quotation-system';
 
 // ===============================================
 // DARK MODE LOGIC
@@ -189,7 +186,6 @@ function renderDashboard() {
     const container = document.getElementById('quote-list-container');
     if (savedQuotes.length === 0) {
         container.innerHTML = `<div class="empty-state"><p class="font-semibold text-slate-600 dark:text-slate-300" data-lang="noQuotes"></p><p class="text-sm text-slate-500 dark:text-slate-400" data-lang="clickNew"></p></div>`;
-        setLanguage(currentLang);
         return;
     }
     container.innerHTML = `<div class="quote-list-item quote-list-header text-sm"><span>CLIENT / QUOTE #</span><span>DATE</span><span>TOTAL</span><span>ACTIONS</span></div><div id="quote-list"></div>`;
@@ -205,7 +201,7 @@ function renderDashboard() {
         const quoteNum = quote.fields.quoteNum?.en || 'N/A';
         const date = quote.meta.savedAt.toDate().toLocaleDateString('en-CA');
         const total = parseFloat(quote.totals.grandTotal).toFixed(2);
-        item.innerHTML = `<div><p class="font-bold text-slate-800 dark:text-slate-100">${clientName}</p><p class="text-xs text-slate-500 dark:text-slate-400">${quoteNum}</p></div><span class="text-slate-600 dark:text-slate-300">${date}</span><span class="font-semibold text-slate-800 dark:text-slate-100">${total} SAR</span><div class="quote-actions"><button class="load-btn" onclick="window.loadQuoteForEditing('${quote.id}')">Edit</button><button class="delete-quote-btn" onclick="window.deleteQuote('${quote.id}')">Delete</button></div>`;
+        item.innerHTML = `<div><p class="font-bold text-slate-800 dark:text-slate-100">${clientName}</p><p class="text-xs text-slate-500 dark:text-slate-400">${quoteNum}</p></div><span class="text-slate-600 dark:text-slate-300">${date}</span><span class="font-semibold text-slate-800 dark:text-slate-100">${total} SAR</span><div class="quote-actions"><button class="load-btn" onclick="window.app.loadQuoteForEditing('${quote.id}')">Edit</button><button class="delete-quote-btn" onclick="window.app.deleteQuote('${quote.id}')">Delete</button></div>`;
         list.appendChild(item);
     });
 }
@@ -229,51 +225,55 @@ function closeCompanyModal() { document.getElementById('company-selection-modal'
 // ===============================================
 const getCollectionRef = (name) => collection(db, `artifacts/${appId}/public/data/${name}`);
 
-window.createNewQuote = (companyProfile) => {
-    closeCompanyModal();
-    currentlyEditingQuoteId = null;
-    applyQuoteData(getEmptyQuoteData(companyProfile));
-    showEditor();
-}
+const appFunctions = {
+    createNewQuote: (companyProfile) => {
+        closeCompanyModal();
+        currentlyEditingQuoteId = null;
+        applyQuoteData(getEmptyQuoteData(companyProfile));
+        showEditor();
+    },
 
-window.loadQuoteForEditing = async (quoteId) => {
-    try {
-        const docRef = doc(getCollectionRef('quotations'), quoteId);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-            currentlyEditingQuoteId = quoteId;
-            applyQuoteData(docSnap.data());
-            showEditor();
-        }
-    } catch(e) { console.error("Error loading quote:", e); }
-}
-
-window.saveCurrentQuote = async () => {
-    const quoteData = captureQuoteData();
-    const customerName = quoteData.fields.customerName?.en || quoteData.fields.customerName?.ar;
-    if (!customerName || customerName.trim() === 'Customer Name' || customerName.trim() === '') {
-        alert("Please enter a customer name before saving.");
-        return;
-    }
-    try {
-        if (currentlyEditingQuoteId) {
-            const docRef = doc(getCollectionRef('quotations'), currentlyEditingQuoteId);
-            await setDoc(docRef, quoteData, { merge: true });
-        } else {
-            await addDoc(getCollectionRef('quotations'), quoteData);
-        }
-        alert('Quotation saved online!');
-        showDashboard();
-    } catch(e) { console.error("Error saving quote:", e); }
-}
-
-window.deleteQuote = async (quoteId) => {
-    if (confirm('Are you sure you want to delete this quotation from the online database?')) {
+    loadQuoteForEditing: async (quoteId) => {
         try {
-            await deleteDoc(doc(getCollectionRef('quotations'), quoteId));
-        } catch(e) { console.error("Error deleting quote:", e); }
+            const docRef = doc(getCollectionRef('quotations'), quoteId);
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                currentlyEditingQuoteId = quoteId;
+                applyQuoteData(docSnap.data());
+                showEditor();
+            }
+        } catch(e) { console.error("Error loading quote:", e); }
+    },
+
+    saveCurrentQuote: async () => {
+        const quoteData = captureQuoteData();
+        const customerName = quoteData.fields.customerName?.en || quoteData.fields.customerName?.ar;
+        if (!customerName || customerName.trim() === 'Customer Name' || customerName.trim() === '') {
+            alert("Please enter a customer name before saving.");
+            return;
+        }
+        try {
+            if (currentlyEditingQuoteId) {
+                const docRef = doc(getCollectionRef('quotations'), currentlyEditingQuoteId);
+                await setDoc(docRef, quoteData, { merge: true });
+            } else {
+                await addDoc(getCollectionRef('quotations'), quoteData);
+            }
+            alert('Quotation saved online!');
+            showDashboard();
+        } catch(e) { console.error("Error saving quote:", e); }
+    },
+
+    deleteQuote: async (quoteId) => {
+        if (confirm('Are you sure you want to delete this quotation from the online database?')) {
+            try {
+                await deleteDoc(doc(getCollectionRef('quotations'), quoteId));
+            } catch(e) { console.error("Error deleting quote:", e); }
+        }
     }
-}
+};
+window.app = appFunctions;
+
 
 // ===============================================
 // DATA CAPTURE & APPLY
@@ -485,7 +485,18 @@ function addNewRow(item = { photo: '', desc_en: '', desc_ar: '', qty: 1, price: 
 // ===============================================
 // LIBRARIES (Products & Clients) - FIREBASE
 // ===============================================
-window.addProduct = async () => {
+function renderProducts() {
+    const list = document.getElementById('product-list');
+    if(!list) return;
+    list.innerHTML = '';
+    products.forEach((p) => {
+        const item = document.createElement('div');
+        item.className = 'list-item text-sm';
+        item.innerHTML = `<span>${p[currentLang] || p['en']} - <strong>${p.price}</strong></span><button class="delete-btn" onclick="window.app.deleteProduct('${p.id}')">&times;</button>`;
+        list.appendChild(item);
+    });
+}
+appFunctions.addProduct = async () => {
     const desc_en = document.getElementById('new-product-desc-en').value;
     const desc_ar = document.getElementById('new-product-desc-ar').value;
     const price = parseFloat(document.getElementById('new-product-price').value);
@@ -498,9 +509,20 @@ window.addProduct = async () => {
         } catch(e) { console.error("Error adding product:", e); }
     }
 }
-window.deleteProduct = async (id) => { await deleteDoc(doc(getCollectionRef('products'), id)); }
+appFunctions.deleteProduct = async (id) => { await deleteDoc(doc(getCollectionRef('products'), id)); }
 
-window.addClient = async () => {
+function renderClients() {
+    const list = document.getElementById('client-list');
+    if(!list) return;
+    list.innerHTML = '';
+    clients.forEach((c) => {
+        const item = document.createElement('div');
+        item.className = 'list-item text-sm';
+        item.innerHTML = `<span>${c[currentLang] || c['en']}</span><button class="delete-btn" onclick="window.app.deleteClient('${c.id}')">&times;</button>`;
+        list.appendChild(item);
+    });
+}
+appFunctions.addClient = async () => {
     const name_en = document.getElementById('new-client-name-en').value;
     const name_ar = document.getElementById('new-client-name-ar').value;
     const address_en = document.getElementById('new-client-address-en').value;
@@ -515,7 +537,7 @@ window.addClient = async () => {
         } catch(e) { console.error("Error adding client:", e); }
     }
 }
-window.deleteClient = async (id) => { await deleteDoc(doc(getCollectionRef('clients'), id)); }
+appFunctions.deleteClient = async (id) => { await deleteDoc(doc(getCollectionRef('clients'), id)); }
 
 // ===============================================
 // MODALS
@@ -601,11 +623,11 @@ async function generatePDF() {
 // APP INITIALIZATION
 // ===============================================
 function attachEditorEventListeners() {
-    document.getElementById('save-quote-btn').addEventListener('click', window.saveCurrentQuote);
+    document.getElementById('save-quote-btn').addEventListener('click', window.app.saveCurrentQuote);
     document.getElementById('preview-pdf-btn').addEventListener('click', generatePDF);
     document.getElementById('add-row').addEventListener('click', () => addNewRow());
-    document.getElementById('add-product-btn').addEventListener('click', window.addProduct);
-    document.getElementById('add-client-btn').addEventListener('click', window.addClient);
+    document.getElementById('add-product-btn').addEventListener('click', window.app.addProduct);
+    document.getElementById('add-client-btn').addEventListener('click', window.app.addClient);
     document.querySelector('.load-customer-btn').addEventListener('click', () => {
          openModal('Select a Client', clients, (c) => `<strong>${c[currentLang] || c['en']}</strong>`, (client) => {
             const nameEl = document.querySelector('#editor-page .editable[data-field="customerName"]');
@@ -631,7 +653,6 @@ function attachEditorEventListeners() {
 
 async function main() {
     applyTheme();
-    setLanguage(currentLang);
     
     document.querySelectorAll('.language-btn').forEach(btn => {
         btn.addEventListener('click', () => setLanguage(btn.dataset.langSwitch));
