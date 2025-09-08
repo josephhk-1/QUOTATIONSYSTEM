@@ -16,6 +16,7 @@
     <script>
         tailwind.config = { darkMode: 'class' }
     </script>
+    <!-- We will now load the main script as a module to support Firebase -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -41,7 +42,9 @@
                 <button id="new-quote-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-transform hover:scale-105" data-lang="newQuoteBtn">+ New Quotation</button>
             </div>
             <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-xl">
-                <div id="quote-list-container"></div>
+                <div id="quote-list-container">
+                    <div class="text-center p-8 text-slate-500">Connecting to the live database...</div>
+                </div>
             </div>
         </div>
     </div>
@@ -51,8 +54,8 @@
         <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-xl company-chooser max-w-sm w-full animate-in">
             <h2 class="text-2xl font-bold text-center mb-6 text-slate-800 dark:text-slate-100" data-lang="selectProfileTitle">Select a Company Profile</h2>
             <div class="space-y-4">
-                <a href="#" onclick="createNewQuote('wooden_pieces')">Wooden Pieces EST.</a>
-                <a href="#" onclick="createNewQuote('rattan_palace')">Rattan Palace</a>
+                <a href="#" onclick="window.createNewQuote('wooden_pieces')">Wooden Pieces EST.</a>
+                <a href="#" onclick="window.createNewQuote('rattan_palace')">Rattan Palace</a>
             </div>
             <button id="close-company-modal-btn" class="w-full mt-6 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 py-2 rounded-lg" data-lang="cancel">Cancel</button>
         </div>
@@ -85,13 +88,13 @@
      </div>
     <div id="pdf-preview-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden no-print">
          <div class="bg-white rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col animate-in">
-             <header class="p-4 border-b flex justify-between items-center"><h2 class="text-xl font-bold" data-lang="pdfPreviewTitle">PDF Preview</h2><button onclick="closePreviewModal()" class="text-slate-500 hover:text-slate-800 text-3xl">&times;</button></header>
+             <header class="p-4 border-b flex justify-between items-center"><h2 class="text-xl font-bold" data-lang="pdfPreviewTitle">PDF Preview</h2><button id="close-pdf-modal-btn" class="text-slate-500 hover:text-slate-800 text-3xl">&times;</button></header>
              <div class="p-4 overflow-auto flex-grow bg-slate-100"><img id="pdf-preview-image" src="" alt="PDF Preview" class="w-full h-auto border shadow-lg"></div>
-             <footer class="p-4 bg-slate-50 border-t flex justify-end gap-3"><button onclick="closePreviewModal()" class="bg-slate-500 hover:bg-slate-600 text-white font-bold py-2 px-4 rounded-lg" data-lang="cancel">Cancel</button><button id="download-pdf-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg" data-lang="downloadPdf">Download PDF</button></footer>
+             <footer class="p-4 bg-slate-50 border-t flex justify-end gap-3"><button id="cancel-pdf-btn" class="bg-slate-500 hover:bg-slate-600 text-white font-bold py-2 px-4 rounded-lg" data-lang="cancel">Cancel</button><button id="download-pdf-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg" data-lang="downloadPdf">Download PDF</button></footer>
          </div>
      </div>
 
-    <script src="script.js"></script>
+    <script type="module" src="script.js"></script>
 </body>
 </html>
 
