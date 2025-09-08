@@ -15,98 +15,94 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Cairo:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f0e9e0; }
-        html[lang="ar"] body { font-family: 'Tajawal', sans-serif; }
+        body { font-family: 'Montserrat', sans-serif; background-color: #F5F2EC; /* Warm Beige Background */ }
+        html[lang="ar"] body { font-family: 'Cairo', sans-serif; }
         
-        .quotation-bg { background-color: #d4b886; }
-        .quotation-card { background-color: #ffffff; }
-
         .company-chooser a {
-            display: block; padding: 1rem; border: 1px solid #ccc;
+            display: block; padding: 1rem; border: 1px solid #e7e5e4;
             border-radius: 0.5rem; text-align: center; font-size: 1.25rem;
-            font-weight: 600; color: #333; background-color: #fff;
+            font-weight: 600; color: #36454F; /* Charcoal */ background-color: #fff;
             transition: all 0.2s ease-in-out;
         }
         .company-chooser a:hover {
             transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
-            background-color: #f7f3ed;
+            background-color: #FDFBF6; /* Lighter Cream */
         }
 
         .photo-col { width: 100px; }
         .photo-upload-container {
-            position: relative; width: 80px; height: 80px; background-color: #f9fafb;
-            border: 2px dashed #d1d5db; border-radius: 0.5rem; cursor: pointer;
+            position: relative; width: 80px; height: 80px; background-color: #FDFBF6;
+            border: 2px dashed #d6d3d1; border-radius: 0.5rem; cursor: pointer;
             display: flex; align-items: center; justify-content: center; overflow: hidden;
         }
         .photo-upload-container img { width: 100%; height: 100%; object-fit: cover; }
         
         /* PDF Export Specific Styles */
-        .pdf-render-mode .quotation-card { box-shadow: none !important; }
-        .pdf-render-mode #company-logo { width: 250px !important; }
-        /* Tighter spacing for PDF */
-        .pdf-render-mode .mb-8 { margin-bottom: 1rem !important; }
-        .pdf-render-mode .mt-8 { margin-top: 1rem !important; }
-        .pdf-render-mode .mt-12 { margin-top: 1.5rem !important; }
-        .pdf-render-mode .pt-8 { padding-top: 1rem !important; }
-        .pdf-render-mode .gap-8 { gap: 1rem !important; }
+        .pdf-render-mode #company-logo { width: 220px !important; }
+        .pdf-render-mode .company-info { margin-top: -0.75rem !important; }
+        .pdf-render-mode .mb-6 { margin-bottom: 1rem !important; }
+        .pdf-render-mode .mb-8 { margin-bottom: 1.25rem !important; }
+        .pdf-render-mode .mt-8 { margin-top: 1.25rem !important; }
+        .pdf-render-mode .mt-12 { margin-top: 2rem !important; }
+        .pdf-render-mode .pt-8 { padding-top: 1.25rem !important; }
     </style>
 </head>
 <body class="p-2 sm:p-6 md:p-8">
 
     <!-- Landing Page -->
     <div id="landing-page" class="max-w-xl mx-auto text-center">
-        <h1 class="text-4xl font-bold text-gray-800 mb-8">QUOTATION GENERATOR</h1>
+        <h1 class="text-4xl font-bold text-slate-800 mb-8">QUOTATION GENERATOR</h1>
         <div class="bg-white p-8 rounded-2xl shadow-lg company-chooser">
-             <h2 class="text-2xl font-semibold text-gray-700 mb-6">Choose the company</h2>
+             <h2 class="text-2xl font-semibold text-slate-700 mb-6">Choose the company</h2>
              <div class="space-y-4">
                 <a href="#" onclick="selectCompany('wooden_pieces')">Wooden Pieces EST.</a>
                 <a href="#" onclick="selectCompany('rattan_palace')">Rattan Palace</a>
              </div>
         </div>
-        <footer class="text-center text-gray-500 text-sm py-4 mt-4">
+        <footer class="text-center text-slate-500 text-sm py-4 mt-4">
              Created by JOSEPH HAMDY KAMAL
         </footer>
     </div>
 
     <!-- Quotation Editor -->
     <div id="editor-page" class="hidden">
-        <div class="max-w-4xl mx-auto rounded-2xl shadow-lg quotation-bg p-2" id="quote-container">
-            <header class="bg-white/60 backdrop-blur-sm text-gray-800 p-2 md:p-4 rounded-t-2xl flex flex-col md:flex-row justify-between items-center no-print gap-4 sticky top-0 z-10">
+        <div class="max-w-4xl mx-auto">
+            <header class="bg-white/80 backdrop-blur-sm text-slate-800 p-3 md:p-4 rounded-t-2xl flex flex-col md:flex-row justify-between items-center no-print gap-4 sticky top-4 z-10 border border-slate-200 shadow-sm">
                  <div class="flex items-center gap-4">
-                     <button onclick="showLandingPage()" class="text-gray-600 hover:text-black">&larr; Back</button>
+                     <button onclick="showLandingPage()" class="text-slate-600 hover:text-black">&larr; Back</button>
                      <h1 class="text-lg sm:text-xl font-bold" data-lang="appTitle">Quotation Editor</h1>
                  </div>
                  <div class="flex items-center justify-center flex-wrap gap-2">
-                    <button onclick="setLanguage('en')" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-3 rounded-lg text-xs md:text-sm">English</button>
-                    <button onclick="setLanguage('ar')" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-3 rounded-lg text-xs md:text-sm">العربية</button>
-                    <button onclick="document.getElementById('file-loader').click()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-3 rounded-lg text-xs md:text-sm"><span data-lang="loadSource">Load</span></button>
+                    <button onclick="setLanguage('en')" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-2 px-3 rounded-lg text-xs md:text-sm">English</button>
+                    <button onclick="setLanguage('ar')" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-2 px-3 rounded-lg text-xs md:text-sm">العربية</button>
+                    <button onclick="document.getElementById('file-loader').click()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded-lg text-xs md:text-sm"><span data-lang="loadSource">Load</span></button>
                     <input type="file" id="file-loader" class="hidden" accept=".json" onchange="loadQuote(event)">
-                    <button onclick="saveQuote()" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-3 rounded-lg text-xs md:text-sm"><span data-lang="saveSource">Save</span></button>
-                    <button onclick="generatePDF()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-3 rounded-lg text-xs md:text-sm"><span data-lang="previewPdf">Preview PDF</span></button>
+                    <button onclick="saveQuote()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-3 rounded-lg text-xs md:text-sm"><span data-lang="saveSource">Save</span></button>
+                    <button onclick="generatePDF()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 rounded-lg text-xs md:text-sm"><span data-lang="previewPdf">Preview PDF</span></button>
                 </div>
             </header>
 
-            <main class="p-4 md:p-8 print-area quotation-card" id="print-area">
+            <main class="p-6 md:p-10 print-area bg-white shadow-lg rounded-b-2xl" id="print-area">
                 <div class="text-center mb-8">
-                    <img id="company-logo" src="" alt="Company Logo" class="w-56 h-auto mx-auto mb-4">
-                    <h2 class="text-3xl font-bold text-gray-800 editable" contenteditable="true" data-field="companyName" spellcheck="false"></h2>
-                    <p class="text-sm text-gray-600 editable" contenteditable="true" data-field="companyCR" spellcheck="false"></p>
-                    <p class="text-sm text-gray-600 editable" contenteditable="true" data-field="companyVat" spellcheck="false"></p>
-                    <p class="text-sm text-gray-600 editable" contenteditable="true" data-field="companyAddress" spellcheck="false"></p>
+                    <img id="company-logo" src="" alt="Company Logo" class="w-56 h-auto mx-auto mb-2">
+                    <div class="company-info">
+                        <h2 class="text-3xl font-bold text-slate-800 editable" contenteditable="true" data-field="companyName" spellcheck="false"></h2>
+                        <p class="text-sm text-slate-500 editable" contenteditable="true" data-field="companyCR" spellcheck="false"></p>
+                        <p class="text-sm text-slate-500 editable" contenteditable="true" data-field="companyVat" spellcheck="false"></p>
+                        <p class="text-sm text-slate-500 editable" contenteditable="true" data-field="companyAddress" spellcheck="false"></p>
+                    </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-8 mb-8 pb-4 border-b border-gray-200">
-                     <!-- Left Column: Customer Info -->
-                     <div class="border border-gray-200 p-4 rounded-lg text-left">
-                        <h3 class="font-bold text-gray-700 mb-2" data-lang="customer">Customer</h3>
+                <div class="grid grid-cols-2 gap-6 mb-8 pb-4 border-b border-slate-200">
+                     <div class="border border-slate-200 p-4 rounded-lg text-left bg-slate-50">
+                        <h3 class="font-bold text-slate-700 mb-2" data-lang="customer">Customer</h3>
                         <p class="editable text-sm" contenteditable="true" data-field="customerName" data-en="Customer Name" data-ar="اسم العميل" spellcheck="false"></p>
                         <p class="editable text-sm" contenteditable="true" data-field="customerAddress" data-en="Customer Address" data-ar="عنوان العميل" spellcheck="false"></p>
                         <p class="editable text-sm" contenteditable="true" data-field="customerCountry" data-en="Saudi Arabia" data-ar="المملكة العربية السعودية" spellcheck="false"></p>
                     </div>
-                    <!-- Right Column: Quote Info -->
-                    <div class="text-right">
+                    <div class="border border-slate-200 p-4 rounded-lg text-right bg-slate-50">
                          <div class="text-sm inline-block text-left">
                             <p><span class="font-bold" data-lang="quoteNum">Quote #:</span> <span class="editable" contenteditable="true" data-field="quoteNum" spellcheck="false"></span></p>
                             <p><span class="font-bold" data-lang="date">Date:</span> <span id="quoteDate"></span></p>
@@ -115,14 +111,14 @@
                     </div>
                 </div>
                 
-                <div class="mb-8 border border-gray-200 p-4 rounded-lg">
-                    <h3 class="font-bold text-gray-800 mb-2" data-lang="projectDescription">Project Description</h3>
-                    <p class="editable text-sm" contenteditable="true" data-field="projectDescription" data-en="Enter project description..." data-ar="أدخل وصف المشروع..." spellcheck="false"></p>
+                <div class="mb-8">
+                    <h3 class="font-bold text-slate-800 mb-2" data-lang="projectDescription">Project Description</h3>
+                    <div class="editable text-sm p-4 border border-slate-200 rounded-lg bg-slate-50" contenteditable="true" data-field="projectDescription" data-en="Enter project description..." data-ar="أدخل وصف المشروع..." spellcheck="false"></div>
                 </div>
 
                 <table class="w-full text-sm" id="items-table">
                     <thead>
-                        <tr class="border-b-2 border-gray-400 text-gray-800">
+                        <tr class="border-b-2 border-slate-300 text-slate-700">
                             <th class="p-2 photo-col text-left font-semibold" data-lang="photo">Photo</th>
                             <th class="p-2 text-left font-semibold" data-lang="description">Item</th>
                             <th class="p-2 w-24 text-center font-semibold" data-lang="quantity">Quantity</th>
@@ -133,10 +129,10 @@
                     </thead>
                     <tbody id="table-body"></tbody>
                 </table>
-                 <button id="add-row" class="mt-4 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg no-print"><span data-lang="addRow">+ Add Row</span></button>
+                 <button id="add-row" class="mt-4 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-2 px-4 rounded-lg no-print"><span data-lang="addRow">+ Add Row</span></button>
 
                 <div class="flex justify-end mt-8">
-                    <div class="w-full max-w-xs">
+                    <div class="w-full max-w-xs text-slate-800">
                         <div class="flex justify-between py-2 border-b">
                             <span class="font-semibold" data-lang="subtotal">Subtotal</span>
                             <span id="subtotal">0.00</span>
@@ -145,7 +141,7 @@
                             <span class="font-semibold" data-lang="vat">VAT (15%)</span>
                             <span id="vat">0.00</span>
                         </div>
-                         <div class="flex justify-between py-2 text-xl font-bold text-gray-800">
+                         <div class="flex justify-between py-2 text-xl font-bold">
                             <span data-lang="grandTotal">TOTAL</span>
                             <span id="grand-total">0.00</span>
                         </div>
@@ -154,18 +150,21 @@
 
                 <div class="mt-12 pt-8 border-t grid grid-cols-1 md:grid-cols-2 gap-8 text-xs">
                     <div>
-                        <h3 class="font-bold text-gray-800 mb-2" data-lang="terms">Terms & Conditions</h3>
-                        <div class="editable" contenteditable="true" data-field="terms" spellcheck="false"></div>
+                        <h3 class="font-bold text-slate-800 mb-2 text-center" data-lang="terms">Terms & Conditions</h3>
+                        <div class="editable text-justify" contenteditable="true" data-field="terms" spellcheck="false"></div>
                     </div>
                      <div>
-                        <h3 class="font-bold text-gray-800 mb-2" data-lang="bankDetails">Bank Details</h3>
-                        <div class="editable" contenteditable="true" data-field="bankDetails" spellcheck="false"></div>
+                        <h3 class="font-bold text-slate-800 mb-2 text-center" data-lang="bankDetails">Bank Details</h3>
+                        <div class="editable text-justify" contenteditable="true" data-field="bankDetails" spellcheck="false"></div>
                     </div>
                 </div>
                 
                  <div class="mt-12 pt-8 border-t text-right">
                     <div class="w-64 h-16 border-b-2 inline-block"></div>
                     <p class="font-semibold" data-lang="signature">Signature</p>
+                </div>
+                <div class="text-center mt-4">
+                     <p class="font-semibold text-slate-700 editable" data-field="thankYouNote" data-en="We appreciate your business and look forward to working with you." data-ar="نقدر ثقتكم ونتطلع للعمل معكم." spellcheck="false"></p>
                 </div>
             </main>
         </div>
@@ -176,14 +175,14 @@
          <div class="bg-white rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col">
              <header class="p-4 border-b flex justify-between items-center">
                  <h2 class="text-xl font-bold" data-lang="pdfPreviewTitle">PDF Preview</h2>
-                 <button onclick="closePreviewModal()" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button>
+                 <button onclick="closePreviewModal()" class="text-slate-500 hover:text-slate-800 text-3xl">&times;</button>
              </header>
-             <div class="p-4 overflow-auto flex-grow bg-gray-100">
+             <div class="p-4 overflow-auto flex-grow bg-slate-100">
                  <img id="pdf-preview-image" src="" alt="PDF Preview" class="w-full h-auto border shadow-lg">
              </div>
-             <footer class="p-4 bg-gray-50 border-t flex justify-end gap-3">
-                 <button onclick="closePreviewModal()" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg" data-lang="cancel">Cancel</button>
-                 <button id="download-pdf-btn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg" data-lang="downloadPdf">Download PDF</button>
+             <footer class="p-4 bg-slate-50 border-t flex justify-end gap-3">
+                 <button onclick="closePreviewModal()" class="bg-slate-500 hover:bg-slate-600 text-white font-bold py-2 px-4 rounded-lg" data-lang="cancel">Cancel</button>
+                 <button id="download-pdf-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg" data-lang="downloadPdf">Download PDF</button>
              </footer>
          </div>
      </div>
@@ -201,7 +200,7 @@
                  vat: { en: 'Vat No.: 310618978500003', ar: 'الرقم الضريبي: 310618978500003' }, 
                  address: { en: 'RFKB2501. ALQods st, Alkhaleej, P.O.Box: 2401, RIYADH 13223, Kingdom of Saudi Arabia', ar: 'RFKB2501. شارع القدس, الخليج, ص.ب: 2401, الرياض 13223, المملكة العربية السعودية' }, 
                  bankDetails: { en: `<p><strong>Bank:</strong> ALINMAA BANK</p><p><strong>IBAN:</strong> SA0705000068203914512000</p>`, ar: `<p><strong>البنك:</strong> مصرف الإنماء</p><p><strong>الآيبان:</strong> SA0705000068203914512000</p>` },
-                 terms: { en: `<ul><li>50% Down payment</li><li>30% second payment upon delivery</li><li>20% third payment upon delivery</li><li>Delivery within 20 to 30 days from down payment</li><li>3 years warranty on manufacturing defects</li></ul>`, ar: `<ul><li>دفعة أولى 50%</li><li>الدفعة الثانية 30% عند التسليم</li><li>الدفعة الثالثة 20% عند التسليم</li><li>التسليم في غضون 20 إلى 30 يومًا</li><li>ضمان 3 سنوات على عيوب التصنيع</li></ul>` }
+                 terms: { en: `<ul><li>50% Down payment</li><li>50% After delivery</li><li>Delivery within 20 to 30 days from down payment</li><li>3 years warranty on manufacturing defects</li></ul>`, ar: `<ul><li>دفعة أولى 50%</li><li>50% بعد التسليم</li><li>التسليم في غضون 20 إلى 30 يومًا</li><li>ضمان 3 سنوات على عيوب التصنيع</li></ul>` }
             },
              'rattan_palace': { 
                  acronym: 'RP', 
@@ -211,7 +210,7 @@
                  vat: { en: 'Vat No.: 313099850500003', ar: 'الرقم الضريبي: 313099850500003' }, 
                  address: { en: 'RFKB2501. ALQods st, Alkhaleej, P.O.Box: 2401, RIYADH 13223, Kingdom of Saudi Arabia', ar: 'RFKB2501. شارع القدس, الخليج, ص.ب: 2401, الرياض 13223, المملكة العربية السعودية' }, 
                  bankDetails: { en: `<p><strong>Bank:</strong> Riyad Bank</p><p><strong>IBAN:</strong> SA3020000002126072249940</p>`, ar: `<p><strong>البنك:</strong> بنك الرياض</p><p><strong>الآيبان:</strong> SA3020000002126072249940</p>` },
-                 terms: { en: `<ul><li>50% Down payment</li><li>50% upon delivery</li><li>Delivery within 20 to 30 days</li><li>3 years warranty</li></ul>`, ar: `<ul><li>دفعة أولى 50%</li><li>50% عند التسليم</li><li>التسليم خلال 20-30 يوم</li><li>ضمان 3 سنوات</li></ul>` }
+                 terms: { en: `<ul><li>50% Down payment</li><li>50% After delivery</li><li>Delivery within 20 to 30 days</li><li>3 years warranty</li></ul>`, ar: `<ul><li>دفعة أولى 50%</li><li>50% بعد التسليم</li><li>التسليم خلال 20-30 يوم</li><li>ضمان 3 سنوات</li></ul>` }
             }
         };
 
@@ -433,14 +432,13 @@
             printableClone.querySelectorAll('.no-print').forEach(el => el.remove());
             
             try {
-                // Wait for images to load before capturing canvas
                 const images = printableClone.getElementsByTagName('img');
                 const promises = [...images].map(img => new Promise(resolve => {
-                    if (img.complete) return resolve();
+                    if (img.complete && img.naturalHeight !== 0) return resolve();
                     img.onload = img.onerror = resolve;
                 }));
                 await Promise.all(promises);
-                await new Promise(resolve => setTimeout(resolve, 100)); // Extra safety delay
+                await new Promise(resolve => setTimeout(resolve, 200));
 
                 const canvas = await html2canvas(printableClone, { scale: 3, useCORS: true, logging: false, backgroundColor: '#ffffff' });
                 
@@ -453,21 +451,16 @@
                     const sanitizedName = customerName.replace(/[^a-z0-9\u0600-\u06FF]/gi, '_');
                     const pdf = new jsPDF('p', 'mm', 'a4');
                     const pdfWidth = pdf.internal.pageSize.getWidth();
+                    const pdfHeight = pdf.internal.pageSize.getHeight();
                     
-                    const container = document.getElementById('quote-container');
-                    const tempBg = document.createElement('div');
-                    tempBg.style.backgroundColor = '#d4b886';
-                    tempBg.style.width = `${pdf.internal.pageSize.getWidth()}mm`;
-                    tempBg.style.height = `${pdf.internal.pageSize.getHeight()}mm`;
-                    document.body.appendChild(tempBg);
-
                     const imgProps = pdf.getImageProperties(pdfImageData);
-                    const margin = 10; // 10mm margin
+                    const margin = 10;
                     const contentWidth = pdfWidth - (margin * 2);
-                    const contentHeight = (contentWidth * imgProps.height) / imgProps.width;
-
-                    pdf.setFillColor('#d4b886');
-                    pdf.rect(0, 0, pdf.internal.pageSize.getWidth(), pdf.internal.pageSize.getHeight(), 'F');
+                    let contentHeight = (contentWidth * imgProps.height) / imgProps.width;
+                    
+                    if (contentHeight > pdfHeight - (margin * 2)) {
+                        contentHeight = pdfHeight - (margin * 2);
+                    }
                     
                     pdf.addImage(pdfImageData, 'PNG', margin, margin, contentWidth, contentHeight);
                     pdf.save(`Quotation_${sanitizedName || 'details'}.pdf`);
@@ -478,7 +471,9 @@
                 console.error("PDF generation failed:", e);
                 alert("An error occurred during PDF generation.");
             } finally {
-                document.body.removeChild(printableClone);
+                if (document.body.contains(printableClone)) {
+                    document.body.removeChild(printableClone);
+                }
             }
         }
 
