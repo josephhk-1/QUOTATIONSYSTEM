@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr"> <head>
+<html lang="en" dir="ltr">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quotation Manager Pro</title>
     
     <link rel="icon" type="image/svg+xml" href="logo.svg">
     <script>
-        // Ce script doit être dans le <head> pour éviter le flash de couleur au chargement
         if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
         } else {
@@ -29,21 +29,17 @@
 <body class="p-2 sm:p-6 md:p-8 bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200 transition-colors duration-300">
 
     <div class="fixed top-4 right-4 z-50">
-        <button id="theme-toggle" class="p-2 rounded-full bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm text-slate-600 dark:text-slate-300 shadow-lg">
-            </button>
+        <button id="theme-toggle" class="p-2 rounded-full bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm text-slate-600 dark:text-slate-300 shadow-lg"></button>
     </div>
 
     <div id="dashboard-page">
         <div class="max-w-5xl mx-auto">
             <div class="flex justify-between items-center mb-6">
                 <h1 class="text-3xl font-bold text-slate-800 dark:text-slate-100">My Quotations</h1>
-                <button id="new-quote-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-transform hover:scale-105">
-                    + New Quotation
-                </button>
+                <button id="new-quote-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-transform hover:scale-105">+ New Quotation</button>
             </div>
             <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-xl">
-                <div id="quote-list-container">
-                    </div>
+                <div id="quote-list-container"></div>
             </div>
         </div>
     </div>
@@ -61,13 +57,13 @@
 
     <div id="editor-page" class="hidden">
         <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="lg:col-span-2">
-                <main class="p-6 md:p-10 print-area bg-white dark:bg-slate-800 shadow-xl rounded-2xl" id="print-area">
-                    </main>
+            <div class="lg-col-span-2">
+                <main class="p-6 md:p-10 print-area bg-white dark:bg-slate-800 shadow-xl rounded-2xl" id="print-area"></main>
             </div>
-            <aside class="lg:col-span-1 space-y-6 no-print">
-                 <button id="back-to-dashboard-btn" class="w-full bg-slate-500 hover:bg-slate-600 text-white font-bold py-2 px-3 rounded-lg shadow transition-transform hover:scale-105">&larr; Back to Dashboard</button>
-                 </aside>
+            <aside class="lg-col-span-1 space-y-6 no-print">
+                <button id="back-to-dashboard-btn" class="w-full bg-slate-500 hover:bg-slate-600 text-white font-bold py-2 px-3 rounded-lg shadow transition-transform hover:scale-105">&larr; Back to Dashboard</button>
+                <div id="controls-panel"></div>
+            </aside>
         </div>
     </div>
     
@@ -80,11 +76,26 @@
              <div class="p-4">
                  <input type="text" id="modal-search" placeholder="Search..." class="w-full p-2 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
              </div>
-             <div id="modal-list" class="p-4 overflow-auto flex-grow bg-slate-50 dark:bg-slate-900/50 space-y-2">
-                 </div>
+             <div id="modal-list" class="p-4 overflow-auto flex-grow bg-slate-50 dark:bg-slate-900/50 space-y-2"></div>
          </div>
      </div>
-    
+
+    <div id="pdf-preview-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden no-print">
+         <div class="bg-white rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col animate-in">
+             <header class="p-4 border-b flex justify-between items-center">
+                 <h2 class="text-xl font-bold" data-lang="pdfPreviewTitle">PDF Preview</h2>
+                 <button onclick="closePreviewModal()" class="text-slate-500 hover:text-slate-800 text-3xl">&times;</button>
+             </header>
+             <div class="p-4 overflow-auto flex-grow bg-slate-100">
+                 <img id="pdf-preview-image" src="" alt="PDF Preview" class="w-full h-auto border shadow-lg">
+             </div>
+             <footer class="p-4 bg-slate-50 border-t flex justify-end gap-3">
+                 <button onclick="closePreviewModal()" class="bg-slate-500 hover:bg-slate-600 text-white font-bold py-2 px-4 rounded-lg" data-lang="cancel">Cancel</button>
+                 <button id="download-pdf-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg" data-lang="downloadPdf">Download PDF</button>
+             </footer>
+         </div>
+     </div>
+
     <script src="script.js"></script>
 </body>
 </html>
