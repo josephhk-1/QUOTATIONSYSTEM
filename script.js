@@ -159,13 +159,10 @@ function captureQuoteData() {
 
 function applyQuoteData(data) {
     document.body.dataset.activeProfile = data.companyProfile;
-    
-    // Attach event listeners for the editor's interactive elements
     attachEditorEventListeners();
-
+    
     document.getElementById('company-selector').value = data.companyProfile;
-    const profile = companyProfiles[data.companyProfile];
-    document.getElementById('company-logo').src = profile.logo;
+    switchCompanyProfile(data.companyProfile);
 
     if (data.fields) {
         Object.keys(data.fields).forEach(field => {
@@ -213,6 +210,29 @@ function getEmptyQuoteData(profileKey) {
 // ===============================================
 // EDITOR FUNCTIONS
 // ===============================================
+
+function switchCompanyProfile(profileKey) {
+    document.body.dataset.activeProfile = profileKey;
+    const profile = companyProfiles[profileKey];
+    if (!profile) return;
+
+    document.getElementById('company-logo').src = profile.logo;
+    const fieldsToUpdate = ['companyName', 'companyCR', 'companyVat', 'companyAddress', 'bankDetails', 'terms'];
+    const dataMap = {
+        companyName: profile.name, companyCR: profile.cr, companyVat: profile.vat,
+        companyAddress: profile.address, bankDetails: profile.bankDetails, terms: profile.terms
+    };
+
+    fieldsToUpdate.forEach(field => {
+        const el = document.querySelector(`.editable[data-field="${field}"]`);
+        if (el) {
+            el.dataset.en = dataMap[field].en;
+            el.dataset.ar = dataMap[field].ar;
+        }
+    });
+    setLanguage(currentLang);
+}
+
 function syncUIData() {
     document.querySelectorAll('#editor-page .editable').forEach(el => {
         if(document.activeElement === el) {
@@ -267,7 +287,7 @@ function addNewRow(item = { photo: '', desc_en: '', desc_ar: '', qty: 1, price: 
     row.querySelector('.item-description').innerHTML = item.desc_en;
     
     const descEl = row.querySelector('.item-description');
-    descEl.addEventListener('input', syncUIData);
+    descEl.addEventListener('blur', syncUIData);
     row.querySelectorAll('input').forEach(input => input.addEventListener('input', updateTotals));
     row.querySelector('.remove-row').addEventListener('click', () => { row.remove(); updateTotals(); });
 
@@ -400,6 +420,11 @@ async function generatePDF() {
     const { jsPDF } = window.jspdf;
     const quoteElement = document.getElementById('print-area'); 
     const clone = quoteElement.cloneNode(true);
+    
+    // PDF FIXES
+    clone.classList.remove('dark'); // Force light mode
+    clone.querySelectorAll('.placeholder-icon').forEach(icon => icon.style.display = 'none'); // Hide placeholders
+
     clone.style.width = '1024px';
     clone.style.position = 'absolute';
     clone.style.left = '-9999px';
@@ -466,7 +491,13 @@ function attachEditorEventListeners() {
             document.getElementById(tabId).classList.remove('hidden');
         });
     });
-    document.querySelectorAll('#editor-page .editable').forEach(el => el.addEventListener('input', syncUIData));
+    document.querySelectorAll('#editor-page .editable').forEach(el => el.addEventListener('blur', syncUIData));
+    
+    // COMPANY SELECTOR FIX
+    document.getElementById('company-selector').addEventListener('change', (e) => {
+        switchCompanyProfile(e.target.value);
+    });
+
     renderProducts();
     renderClients();
 }
@@ -482,3 +513,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
     showDashboard();
 });
+
