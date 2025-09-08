@@ -176,4 +176,105 @@ function addNewRow(item = { photo: '', desc_en: '', desc_ar: '', qty: 1, price: 
             updateTotals();
         }
     });
+
+    // ... (tout votre code JS existant) ...
+
+// --- DEBUT : Logique de la Fenêtre Modale de Sélection ---
+const modal = document.getElementById('selection-modal');
+const modalTitle = document.getElementById('modal-title');
+const modalList = document.getElementById('modal-list');
+const modalSearch = document.getElementById('modal-search');
+const modalCloseBtn = document.getElementById('modal-close-btn');
+
+let currentSelectionCallback = null;
+
+function openModal(title, items, renderItem, onSelect) {
+    modalTitle.textContent = title;
+    currentSelectionCallback = onSelect;
+    
+    const render = (filter = '') => {
+        modalList.innerHTML = '';
+        items.forEach((item, index) => {
+            if (renderItem(item).toLowerCase().includes(filter.toLowerCase())) {
+                const itemEl = document.createElement('div');
+                itemEl.className = 'modal-list-item';
+                itemEl.innerHTML = renderItem(item);
+                itemEl.onclick = () => {
+                    currentSelectionCallback(item);
+                    closeModal();
+                };
+                modalList.appendChild(itemEl);
+            }
+        });
+    };
+    
+    render();
+    modalSearch.value = '';
+    modalSearch.onkeyup = () => render(modalSearch.value);
+    
+    modal.classList.remove('hidden');
+}
+
+function closeModal() {
+    modal.classList.add('hidden');
+    modalList.innerHTML = '';
+    modalSearch.onkeyup = null;
+}
+
+modalCloseBtn.onclick = closeModal;
+// Fermer aussi si on clique sur le fond noir
+modal.onclick = (e) => {
+    if (e.target === modal) {
+        closeModal();
+    }
+};
+
+// --- FIN : Logique de la Fenêtre Modale ---
+
+// MODIFIER les listeners dans DOMContentLoaded
+document.addEventListener('DOMContentLoaded', function () {
+    // ... (tout le reste de votre code DOMContentLoaded) ...
+    document.querySelector('.load-customer-btn').addEventListener('click', () => {
+        openModal(
+            'Select a Client',
+            clients,
+            (client) => `<strong>${client.name_en || client.name_ar}</strong><br><small>${client.address_en || client.address_ar}</small>`,
+            (client) => {
+                const nameEl = document.querySelector('[data-field="customerName"]');
+                const addressEl = document.querySelector('[data-field="customerAddress"]');
+                nameEl.dataset.en = client.name_en;
+                nameEl.dataset.ar = client.name_ar;
+                addressEl.dataset.en = client.address_en;
+                addressEl.dataset.ar = client.address_ar;
+                setLanguage(currentLang); // Met à jour l'affichage
+            }
+        );
+    });
+});
+
+
+// MODIFIER la fonction addNewRow
+function addNewRow(item = { photo: '', desc_en: '', desc_ar: '', qty: 1, price: 0 }) {
+    // ... (votre code existant dans addNewRow) ...
+    // ... (ne changez PAS la partie row.innerHTML) ...
+    
+    // REMPLACER l'ancien listener par le nouveau
+    const row = tableBody.lastChild; // Récupère la ligne qu'on vient d'ajouter
+    row.querySelector('.load-product-btn').addEventListener('click', () => {
+        openModal(
+            'Select a Product',
+            products,
+            (product) => `<strong>${product.desc_en || product.desc_ar}</strong> - Price: ${product.price}`,
+            (product) => {
+                const descEl = row.querySelector('.item-description');
+                descEl.dataset.en = product.desc_en;
+                descEl.dataset.ar = product.desc_ar;
+                row.querySelector('.unit-price').value = product.price;
+                setLanguage(currentLang); // Met à jour la description
+                updateTotals(); // Met à jour les totaux
+                autoSaveQuote(); // Sauvegarde les changements
+            }
+        );
+    });
+}
 }
