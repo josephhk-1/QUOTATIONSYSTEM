@@ -1,280 +1,179 @@
-// ... (tout votre code JS existant jusqu'à DOMContentLoaded) ...
+// ===============================================
+// DÉCLARATIONS GLOBALES ET PROFILS D'ENTREPRISE
+// ===============================================
 
-// --- DEBUT : Logique de la Bibliothèque de Produits ---
+let currentLang = 'en';
+let pdfImageData = null;
+let savedQuotes = [];
 let products = [];
-
-function saveProducts() {
-    localStorage.setItem('products', JSON.stringify(products));
-}
-
-function loadProducts() {
-    const savedProducts = localStorage.getItem('products');
-    if (savedProducts) {
-        products = JSON.parse(savedProducts);
-    }
-    renderProducts();
-}
-
-function renderProducts() {
-    const productList = document.getElementById('product-list');
-    productList.innerHTML = '';
-    products.forEach((product, index) => {
-        const item = document.createElement('div');
-        item.className = 'list-item text-sm';
-        item.innerHTML = `
-            <span>${product.desc_en} / ${product.desc_ar} - <strong>${product.price}</strong></span>
-            <button class="delete-btn" data-index="${index}">&times;</button>
-        `;
-        productList.appendChild(item);
-    });
-    // Attacher les listeners pour la suppression
-    document.querySelectorAll('.delete-btn').forEach(btn => btn.addEventListener('click', deleteProduct));
-}
-
-function addProduct() {
-    const desc_en = document.getElementById('new-product-desc-en').value;
-    const desc_ar = document.getElementById('new-product-desc-ar').value;
-    const price = parseFloat(document.getElementById('new-product-price').value);
-    if ((desc_en || desc_ar) && !isNaN(price)) {
-        products.push({ desc_en, desc_ar, price });
-        saveProducts();
-        renderProducts();
-        // Vider les champs
-        document.getElementById('new-product-desc-en').value = '';
-        document.getElementById('new-product-desc-ar').value = '';
-        document.getElementById('new-product-price').value = '';
-    } else {
-        alert('Please fill in at least one description and a valid price.');
-    }
-}
-
-function deleteProduct(event) {
-    const index = event.target.dataset.index;
-    products.splice(index, 1);
-    saveProducts();
-    renderProducts();
-}
-
-// --- FIN : Logique de la Bibliothèque de Produits ---
-
-
-// --- DEBUT : Logique du Gestionnaire de Clients ---
 let clients = [];
+let currentlyEditingQuoteId = null;
 
-function saveClients() {
-    localStorage.setItem('clients', JSON.stringify(clients));
+// ... (Copiez ici vos objets 'companyProfiles' et 'translations' existants) ...
+
+
+// ===============================================
+// FONCTIONS DU TABLEAU DE BORD (DASHBOARD)
+// ===============================================
+
+function saveAllQuotes() {
+    localStorage.setItem('savedQuotes', JSON.stringify(savedQuotes));
 }
 
-function loadClients() {
-    const savedClients = localStorage.getItem('clients');
-    if (savedClients) {
-        clients = JSON.parse(savedClients);
+function loadAllQuotes() {
+    const data = localStorage.getItem('savedQuotes');
+    savedQuotes = data ? JSON.parse(data) : [];
+}
+
+function renderDashboard() {
+    const container = document.getElementById('quote-list-container');
+    if (savedQuotes.length === 0) {
+        container.innerHTML = `<div class="empty-state"><p class="font-semibold">No quotations found.</p><p class="text-sm">Click "+ New Quotation" to get started.</p></div>`;
+        return;
     }
-    renderClients();
-}
 
-function renderClients() {
-    const clientList = document.getElementById('client-list');
-    clientList.innerHTML = '';
-    clients.forEach((client, index) => {
+    container.innerHTML = `
+        <div class="quote-list-item quote-list-header text-sm">
+            <span>CLIENT / QUOTE #</span><span>DATE</span><span>TOTAL</span><span>ACTIONS</span>
+        </div>
+        <div id="quote-list"></div>`;
+    const list = document.getElementById('quote-list');
+    list.innerHTML = '';
+    savedQuotes.sort((a, b) => new Date(b.meta.savedAt) - new Date(a.meta.savedAt)); // Trie du plus récent au plus ancien
+
+    savedQuotes.forEach(quote => {
         const item = document.createElement('div');
-        item.className = 'list-item text-sm';
+        item.className = 'quote-list-item text-sm';
+        const clientName = quote.fields.customerName?.en || quote.fields.customerName?.ar || 'N/A';
+        const quoteNum = quote.fields.quoteNum?.en || 'N/A';
+        const date = new Date(quote.meta.savedAt).toLocaleDateString('en-CA');
+        const total = parseFloat(quote.totals.grandTotal).toFixed(2);
+
         item.innerHTML = `
-            <span>${client.name_en} / ${client.name_ar}</span>
-            <button class="delete-client-btn" data-index="${index}">&times;</button>
-        `;
-        clientList.appendChild(item);
+            <div><p class="font-bold text-slate-800">${clientName}</p><p class="text-xs text-slate-500">${quoteNum}</p></div>
+            <span class="text-slate-600">${date}</span>
+            <span class="font-semibold text-slate-800">${total} SAR</span>
+            <div class="quote-actions">
+                <button class="load-btn" onclick="loadQuoteForEditing('${quote.meta.id}')">Edit</button>
+                <button class="delete-quote-btn" onclick="deleteQuote('${quote.meta.id}')">Delete</button>
+            </div>`;
+        list.appendChild(item);
     });
-    document.querySelectorAll('.delete-client-btn').forEach(btn => btn.addEventListener('click', deleteClient));
 }
 
-function addClient() {
-    const name_en = document.getElementById('new-client-name-en').value;
-    const name_ar = document.getElementById('new-client-name-ar').value;
-    const address_en = document.getElementById('new-client-address-en').value;
-    const address_ar = document.getElementById('new-client-address-ar').value;
-    if (name_en || name_ar) {
-        clients.push({ name_en, name_ar, address_en, address_ar });
-        saveClients();
-        renderClients();
-        // Vider les champs
-        document.getElementById('new-client-name-en').value = '';
-        document.getElementById('new-client-name-ar').value = '';
-        document.getElementById('new-client-address-en').value = '';
-        document.getElementById('new-client-address-ar').value = '';
-    } else {
-        alert('Please fill in at least one client name.');
+function deleteQuote(quoteId) {
+    if (confirm('Are you sure you want to delete this quotation permanently?')) {
+        savedQuotes = savedQuotes.filter(q => q.meta.id !== quoteId);
+        saveAllQuotes();
+        renderDashboard();
     }
 }
 
-function deleteClient(event) {
-    const index = event.target.dataset.index;
-    clients.splice(index, 1);
-    saveClients();
-    renderClients();
+// ===============================================
+// NAVIGATION ENTRE LES PAGES
+// ===============================================
+
+function showDashboard() {
+    document.getElementById('dashboard-page').classList.remove('hidden');
+    document.getElementById('editor-page').classList.add('hidden');
+    renderDashboard();
 }
 
-// --- FIN : Logique du Gestionnaire de Clients ---
+function showEditor() {
+    document.getElementById('dashboard-page').classList.add('hidden');
+    document.getElementById('editor-page').classList.remove('hidden');
+}
+
+function openCompanyModal() {
+    document.getElementById('company-selection-modal').classList.remove('hidden');
+}
+function closeCompanyModal() {
+    document.getElementById('company-selection-modal').classList.add('hidden');
+}
+
+// ===============================================
+// GESTION DES DEVIS (CRÉER, CHARGER, SAUVEGARDER)
+// ===============================================
+
+function createNewQuote(companyProfile) {
+    closeCompanyModal();
+    currentlyEditingQuoteId = null; // C'est un nouveau devis
+    applyQuoteData(getEmptyQuoteData(companyProfile)); // Applique un template vide
+    showEditor();
+}
+
+function loadQuoteForEditing(quoteId) {
+    const quoteData = savedQuotes.find(q => q.meta.id === quoteId);
+    if (quoteData) {
+        currentlyEditingQuoteId = quoteId;
+        applyQuoteData(quoteData);
+        showEditor();
+    }
+}
+
+function saveCurrentQuote() {
+    const quoteData = captureQuoteData();
+    if (!quoteData.fields.customerName?.en && !quoteData.fields.customerName?.ar) {
+        alert("Please enter a customer name before saving.");
+        return;
+    }
+    
+    const existingIndex = savedQuotes.findIndex(q => q.meta.id === currentlyEditingQuoteId);
+    if (existingIndex > -1) { // Mise à jour d'un devis existant
+        savedQuotes[existingIndex] = quoteData;
+    } else { // Ajout d'un nouveau devis
+        savedQuotes.push(quoteData);
+    }
+
+    saveAllQuotes();
+    alert('Quotation saved successfully!');
+    showDashboard();
+}
+
+function captureQuoteData() {
+    syncUIData();
+    const quoteData = { 
+        lang: currentLang, 
+        companyProfile: document.body.dataset.activeProfile,
+        fields: {}, 
+        items: [],
+        meta: {
+            id: currentlyEditingQuoteId || `quote_${new Date().getTime()}`,
+            savedAt: new Date().toISOString()
+        },
+        totals: {
+            subtotal: document.getElementById('subtotal').textContent,
+            vat: document.getElementById('vat').textContent,
+            grandTotal: document.getElementById('grand-total').textContent
+        }
+    };
+    // ... (le reste de la fonction pour remplir `fields` et `items` est inchangé) ...
+    return quoteData;
+}
+
+// ... (Incluez ici TOUTES vos autres fonctions : applyQuoteData, getEmptyQuoteData, addNewRow, updateTotals, setLanguage, generatePDF, etc.) ...
+// ... (Ainsi que toute la logique pour les produits, clients et la modale de sélection) ...
 
 
-// Événements
+// ===============================================
+// INITIALISATION DE L'APPLICATION
+// ===============================================
+
 document.addEventListener('DOMContentLoaded', function () {
-    // ... (votre code DOMContentLoaded existant) ...
-
-    // Chargement initial des données
+    loadAllQuotes();
     loadProducts();
     loadClients();
+    showDashboard(); // Démarrer sur le tableau de bord
 
-    // Listeners pour les nouveaux boutons
-    document.getElementById('add-product-btn').addEventListener('click', addProduct);
-    document.getElementById('add-client-btn').addEventListener('click', addClient);
+    // Listeners principaux
+    document.getElementById('new-quote-btn').addEventListener('click', openCompanyModal);
+    document.getElementById('back-to-dashboard-btn').addEventListener('click', showDashboard);
     
-    // Logique des onglets
-    document.querySelectorAll('.tab-btn').forEach(button => {
-        button.addEventListener('click', () => {
-            document.querySelectorAll('.tab-btn, .tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            
-            button.classList.add('active');
-            document.getElementById(`tab-${button.dataset.tab}`).classList.remove('hidden');
-            document.getElementById(`tab-${button.dataset.tab}`).classList.add('active');
-        });
-    });
-});
-
-// MODIFIER la fonction addNewRow pour inclure le chargement de produit
-function addNewRow(item = { photo: '', desc_en: '', desc_ar: '', qty: 1, price: 0 }) {
-    // ... (votre code existant dans addNewRow) ...
-    // REMPLACER la ligne `row.innerHTML = ...` par ceci :
-    row.innerHTML = `
-        <td class="p-2 photo-col">
-            </td>
-        <td class="p-2 relative">
-            <div class="w-full p-2 editable item-description" contenteditable="true" data-en="${item.desc_en}" data-ar="${item.desc_ar}" spellcheck="false"></div>
-            <button class="load-product-btn absolute top-1 right-1 text-blue-500 no-print">...</button>
-        </td>
-        <td class="p-2"><input type="number" value="${item.qty}" class="quantity w-full text-center p-2 border rounded"></td>
-        <td class="p-2"><input type="number" value="${item.price}" step="0.01" class="unit-price w-full text-right p-2 border rounded"></td>
-        <td class="p-2 text-right total">0.00</td>
-        <td class="p-2 text-center no-print"><button class="remove-row text-red-500 hover:text-red-700 text-2xl font-bold">&times;</button></td>
-    `;
-    
-    // ... (le reste de votre code dans addNewRow) ...
-
-    // Ajouter le listener pour le nouveau bouton "..."
-    row.querySelector('.load-product-btn').addEventListener('click', (e) => {
-        // Logique pour afficher une liste de produits et remplir la ligne
-        // (Pour l'instant, on peut mettre une simple prompt box)
-        const productIndex = prompt(`Enter product number (1 to ${products.length})`);
-        if (productIndex && products[productIndex - 1]) {
-            const product = products[productIndex - 1];
-            const descEl = row.querySelector('.item-description');
-            descEl.dataset.en = product.desc_en;
-            descEl.dataset.ar = product.desc_ar;
-            descEl.innerHTML = descEl.dataset[currentLang];
-            row.querySelector('.unit-price').value = product.price;
-            updateTotals();
-        }
-    });
-
-    // ... (tout votre code JS existant) ...
-
-// --- DEBUT : Logique de la Fenêtre Modale de Sélection ---
-const modal = document.getElementById('selection-modal');
-const modalTitle = document.getElementById('modal-title');
-const modalList = document.getElementById('modal-list');
-const modalSearch = document.getElementById('modal-search');
-const modalCloseBtn = document.getElementById('modal-close-btn');
-
-let currentSelectionCallback = null;
-
-function openModal(title, items, renderItem, onSelect) {
-    modalTitle.textContent = title;
-    currentSelectionCallback = onSelect;
-    
-    const render = (filter = '') => {
-        modalList.innerHTML = '';
-        items.forEach((item, index) => {
-            if (renderItem(item).toLowerCase().includes(filter.toLowerCase())) {
-                const itemEl = document.createElement('div');
-                itemEl.className = 'modal-list-item';
-                itemEl.innerHTML = renderItem(item);
-                itemEl.onclick = () => {
-                    currentSelectionCallback(item);
-                    closeModal();
-                };
-                modalList.appendChild(itemEl);
-            }
-        });
-    };
-    
-    render();
-    modalSearch.value = '';
-    modalSearch.onkeyup = () => render(modalSearch.value);
-    
-    modal.classList.remove('hidden');
-}
-
-function closeModal() {
-    modal.classList.add('hidden');
-    modalList.innerHTML = '';
-    modalSearch.onkeyup = null;
-}
-
-modalCloseBtn.onclick = closeModal;
-// Fermer aussi si on clique sur le fond noir
-modal.onclick = (e) => {
-    if (e.target === modal) {
-        closeModal();
+    const saveBtn = document.getElementById('save-quote-btn');
+    if(saveBtn) {
+        saveBtn.innerHTML = "Save & Close";
+        saveBtn.onclick = saveCurrentQuote;
     }
-};
-
-// --- FIN : Logique de la Fenêtre Modale ---
-
-// MODIFIER les listeners dans DOMContentLoaded
-document.addEventListener('DOMContentLoaded', function () {
-    // ... (tout le reste de votre code DOMContentLoaded) ...
-    document.querySelector('.load-customer-btn').addEventListener('click', () => {
-        openModal(
-            'Select a Client',
-            clients,
-            (client) => `<strong>${client.name_en || client.name_ar}</strong><br><small>${client.address_en || client.address_ar}</small>`,
-            (client) => {
-                const nameEl = document.querySelector('[data-field="customerName"]');
-                const addressEl = document.querySelector('[data-field="customerAddress"]');
-                nameEl.dataset.en = client.name_en;
-                nameEl.dataset.ar = client.name_ar;
-                addressEl.dataset.en = client.address_en;
-                addressEl.dataset.ar = client.address_ar;
-                setLanguage(currentLang); // Met à jour l'affichage
-            }
-        );
-    });
-});
-
-
-// MODIFIER la fonction addNewRow
-function addNewRow(item = { photo: '', desc_en: '', desc_ar: '', qty: 1, price: 0 }) {
-    // ... (votre code existant dans addNewRow) ...
-    // ... (ne changez PAS la partie row.innerHTML) ...
     
-    // REMPLACER l'ancien listener par le nouveau
-    const row = tableBody.lastChild; // Récupère la ligne qu'on vient d'ajouter
-    row.querySelector('.load-product-btn').addEventListener('click', () => {
-        openModal(
-            'Select a Product',
-            products,
-            (product) => `<strong>${product.desc_en || product.desc_ar}</strong> - Price: ${product.price}`,
-            (product) => {
-                const descEl = row.querySelector('.item-description');
-                descEl.dataset.en = product.desc_en;
-                descEl.dataset.ar = product.desc_ar;
-                row.querySelector('.unit-price').value = product.price;
-                setLanguage(currentLang); // Met à jour la description
-                updateTotals(); // Met à jour les totaux
-                autoSaveQuote(); // Sauvegarde les changements
-            }
-        );
-    });
-}
-}
+    // ... (le reste de vos listeners existants pour PDF, langue, produits, clients, etc.) ...
+});
