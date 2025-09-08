@@ -114,3 +114,281 @@ function renderDashboard() {
                 <p class="text-xs text-slate-500 dark:text-slate-400">${quoteNum}</p>
             </div>
             <span class="text-slate-600 dark:text-slate-300">${date}
+
+            // ===============================================
+// CAPTURE ET APPLICATION DES DONNÉES
+// ===============================================
+
+function captureQuoteData() {
+    syncUIData();
+    const quoteData = { 
+        lang: currentLang, 
+        companyProfile: document.body.dataset.activeProfile,
+        fields: {}, 
+        items: [],
+        meta: {
+            id: currentlyEditingQuoteId || `quote_${new Date().getTime()}`,
+            savedAt: new Date().toISOString()
+        },
+        totals: {
+            subtotal: document.getElementById('subtotal').textContent,
+            vat: document.getElementById('vat').textContent,
+            grandTotal: document.getElementById('grand-total').textContent
+        }
+    };
+
+    document.querySelectorAll('.editable').forEach(el => {
+        const fieldName = el.dataset.field;
+        if(fieldName) quoteData.fields[fieldName] = { en: el.dataset.en || '', ar: el.dataset.ar || '' };
+    });
+
+    document.querySelectorAll('#table-body tr').forEach(row => {
+        const descEl = row.querySelector('.item-description');
+        const imgEl = row.querySelector('img');
+        quoteData.items.push({
+            photo: imgEl.dataset.photoBase64 || '',
+            desc_en: descEl.dataset.en || '', desc_ar: descEl.dataset.ar || '',
+            qty: row.querySelector('.quantity').value, price: row.querySelector('.unit-price').value
+        });
+    });
+    return quoteData;
+}
+
+function applyQuoteData(data) {
+    document.body.dataset.activeProfile = data.companyProfile;
+    switchCompanyProfile(data.companyProfile);
+    if(data.fields) {
+        Object.keys(data.fields).forEach(fieldName => {
+            const el = document.querySelector(`.editable[data-field="${fieldName}"]`);
+            if (el) {
+                el.dataset.en = data.fields[fieldName].en;
+                el.dataset.ar = data.fields[fieldName].ar;
+            }
+        });
+    }
+    document.getElementById('table-body').innerHTML = '';
+    if(data.items) {
+        data.items.forEach(item => addNewRow(item));
+    }
+    setLanguage(data.lang || 'en');
+    updateTotals();
+}
+
+function getEmptyQuoteData(profileKey) {
+    const profile = companyProfiles[profileKey];
+    const emptyData = {
+        companyProfile: profileKey,
+        lang: 'en',
+        fields: {
+            companyName: profile.name,
+            companyCR: profile.cr,
+            companyVat: profile.vat,
+            companyAddress: profile.address,
+            bankDetails: profile.bankDetails,
+            terms: profile.terms,
+        },
+        items: []
+    };
+    // Générer un numéro de devis pour le nouveau devis
+    const now = new Date();
+    const day = String(now.getDate()).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const year = String(now.getFullYear()).slice(-2);
+    const quoteNumber = `Q-${profile.acronym}-${day}${month}${year}`;
+    emptyData.fields.quoteNum = { en: quoteNumber, ar: quoteNumber };
+
+    return emptyData;
+}
+
+
+// ===============================================
+// FONCTIONS DE L'ÉDITEUR
+// ===============================================
+
+function switchCompanyProfile(profileKey) {
+    const profile = companyProfiles[profileKey];
+    if (!profile) return;
+    document.body.dataset.activeProfile = profileKey;
+    document.getElementById('company-logo').src = profile.logo;
+    
+    const fieldMapping = {
+        name: 'companyName', cr: 'companyCR', vat: 'companyVat',
+        address: 'companyAddress', bankDetails: 'bankDetails', terms: 'terms'
+    };
+
+    for (const key in fieldMapping) {
+        const el = document.querySelector(`[data-field="${fieldMapping[key]}"]`);
+        if (el && profile[key]) {
+            el.dataset.en = profile[key].en;
+            el.dataset.ar = profile[key].ar;
+        }
+    }
+    setLanguage(currentLang);
+}
+
+function setLanguage(lang) {
+    currentLang = lang;
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+    document.querySelectorAll('[data-lang]').forEach(el => {
+        const key = el.getAttribute('data-lang');
+        if (translations[lang][key]) el.textContent = translations[lang][key];
+    });
+    document.querySelectorAll('.editable').forEach(el => {
+        el.innerHTML = el.dataset[lang] || '';
+    });
+}
+
+function syncUIData() { 
+    document.querySelectorAll('.editable').forEach(el => {
+        el.dataset[currentLang] = el.innerHTML;
+    }); 
+}
+
+function updateTotals() {
+    let subtotal = 0;
+    document.querySelectorAll('#table-body tr').forEach(row => {
+        const quantity = parseFloat(row.querySelector('.quantity').value) || 0;
+        const unitPrice = parseFloat(row.querySelector('.unit-price').value) || 0;
+        const total = quantity * unitPrice;
+        row.querySelector('.total').textContent = total.toFixed(2);
+        subtotal += total;
+    });
+    const vat = subtotal * 0.15;
+    const grandTotal = subtotal + vat;
+    document.getElementById('subtotal').textContent = subtotal.toFixed(2);
+    document.getElementById('vat').textContent = vat.toFixed(2);
+    document.getElementById('grand-total').textContent = grandTotal.toFixed(2);
+}
+
+function addNewRow(item = { photo: '', desc_en: '', desc_ar: '', qty: 1, price: 0 }) {
+    const tableBody = document.getElementById('table-body');
+    const row = document.createElement('tr');
+    row.className = 'border-b border-slate-200 dark:border-slate-700';
+    
+    row.innerHTML = `
+        <td class="p-2 photo-col">
+            <div class="photo-upload-container">
+                <img src="${item.photo || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" class="${item.photo ? '' : 'hidden'}" data-photo-base64="${item.photo || ''}">
+                <div class="placeholder-icon ${item.photo ? 'hidden' : ''}"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div>
+                <input type="file" class="hidden" accept="image/*">
+            </div>
+        </td>
+        <td class="p-2 relative"><div class="w-full p-2 editable item-description" contenteditable="true" data-en="${item.desc_en}" data-ar="${item.desc_ar}" spellcheck="false"></div><button class="load-product-btn absolute top-1 right-1 text-blue-500 no-print">...</button></td>
+        <td class="p-2"><input type="number" value="${item.qty}" class="quantity w-full text-center p-2 border rounded bg-slate-50 dark:bg-slate-700 border-slate-300 dark:border-slate-600"></td>
+        <td class="p-2"><input type="number" value="${item.price}" step="0.01" class="unit-price w-full text-right p-2 border rounded bg-slate-50 dark:bg-slate-700 border-slate-300 dark:border-slate-600"></td>
+        <td class="p-2 text-right total">0.00</td>
+        <td class="p-2 text-center no-print"><button class="remove-row text-red-500 hover:text-red-700 text-2xl font-bold">&times;</button></td>
+    `;
+    tableBody.appendChild(row);
+
+    const descDiv = row.querySelector('.item-description');
+    descDiv.innerHTML = descDiv.dataset[currentLang];
+    descDiv.addEventListener('input', () => syncUIData());
+    
+    row.querySelectorAll('input.quantity, input.unit-price').forEach(input => input.addEventListener('input', updateTotals));
+    row.querySelector('.remove-row').addEventListener('click', () => { row.remove(); updateTotals(); });
+
+    const photoContainer = row.querySelector('.photo-upload-container');
+    const fileInput = row.querySelector('input[type="file"]');
+    const imgEl = row.querySelector('img');
+    const placeholder = row.querySelector('.placeholder-icon');
+
+    photoContainer.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                imgEl.src = e.target.result;
+                imgEl.dataset.photoBase64 = e.target.result;
+                imgEl.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+    updateTotals();
+}
+
+// ===============================================
+// BIBLIOTHÈQUES (PRODUITS & CLIENTS)
+// ===============================================
+function saveProducts() { localStorage.setItem('products', JSON.stringify(products)); }
+function loadProducts() { products = JSON.parse(localStorage.getItem('products')) || []; renderProducts(); }
+function renderProducts() { /* ... */ } // Placeholder, la vraie fonction est plus bas
+function addProduct() { /* ... */ }
+function deleteProduct(event) { /* ... */ }
+// ... Idem pour les clients
+
+// ===============================================
+// MODALES
+// ===============================================
+const modal = document.getElementById('selection-modal');
+const modalTitle = document.getElementById('modal-title');
+const modalList = document.getElementById('modal-list');
+const modalSearch = document.getElementById('modal-search');
+const modalCloseBtn = document.getElementById('modal-close-btn');
+let currentSelectionCallback = null;
+
+function openModal(title, items, renderItem, onSelect) {
+    modalTitle.textContent = title;
+    currentSelectionCallback = onSelect;
+    
+    const render = (filter = '') => {
+        modalList.innerHTML = '';
+        items.forEach((item, index) => {
+            if (renderItem(item).toLowerCase().includes(filter.toLowerCase())) {
+                const itemEl = document.createElement('div');
+                itemEl.className = 'modal-list-item';
+                itemEl.innerHTML = renderItem(item);
+                itemEl.onclick = () => {
+                    currentSelectionCallback(item);
+                    closeModal();
+                };
+                modalList.appendChild(itemEl);
+            }
+        });
+    };
+    
+    render();
+    modalSearch.value = '';
+    modalSearch.onkeyup = () => render(modalSearch.value);
+    
+    modal.classList.remove('hidden');
+}
+
+function closeModal() {
+    modal.classList.add('hidden');
+}
+
+modalCloseBtn.onclick = closeModal;
+modal.onclick = (e) => { if (e.target === modal) closeModal(); };
+
+async function generatePDF() { /* ... */ } // Placeholder
+function closePreviewModal() {
+    document.getElementById('pdf-preview-modal').classList.add('hidden');
+    pdfImageData = null;
+}
+
+// ===============================================
+// INITIALISATION
+// ===============================================
+document.addEventListener('DOMContentLoaded', () => {
+    applyTheme();
+    loadAllQuotes();
+    // Vous devez ajouter le HTML de l'éditeur et des contrôles ici
+    // pour que le reste du script fonctionne.
+    // Par exemple :
+    document.getElementById('print-area').innerHTML = ``;
+    document.getElementById('controls-panel').innerHTML = ``;
+    
+    // Attacher les listeners
+    document.getElementById('new-quote-btn').addEventListener('click', openCompanyModal);
+    document.getElementById('back-to-dashboard-btn').addEventListener('click', showDashboard);
+    
+    // ... et tous les autres listeners dont vous avez besoin
+    
+    showDashboard();
+});
+
