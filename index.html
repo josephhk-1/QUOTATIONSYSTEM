@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quotation Generator - Advanced Pro</title>
+    <title>Quotation Manager Pro</title>
     
     <link rel="icon" type="image/svg+xml" href="logo.svg">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -16,82 +16,47 @@
 </head>
 <body class="p-2 sm:p-6 md:p-8">
 
-    <div id="landing-page" class="max-w-xl mx-auto text-center">
+    <div id="dashboard-page">
+        <div class="max-w-5xl mx-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-3xl font-bold text-slate-800">My Quotations</h1>
+                <button id="new-quote-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-transform hover:scale-105">
+                    + New Quotation
+                </button>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow-xl">
+                <div id="quote-list-container">
+                    </div>
+            </div>
         </div>
+    </div>
+
+    <div id="company-selection-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white p-8 rounded-2xl shadow-xl company-chooser max-w-sm w-full animate-in">
+            <h2 class="text-2xl font-bold text-center mb-6">Select a Company Profile</h2>
+            <div class="space-y-4">
+                <a href="#" onclick="createNewQuote('wooden_pieces')">Wooden Pieces EST.</a>
+                <a href="#" onclick="createNewQuote('rattan_palace')">Rattan Palace</a>
+            </div>
+            <button onclick="closeCompanyModal()" class="w-full mt-6 bg-slate-200 hover:bg-slate-300 text-slate-800 py-2 rounded-lg">Cancel</button>
+        </div>
+    </div>
 
     <div id="editor-page" class="hidden">
         <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="lg:col-span-2">
                 <main class="p-6 md:p-10 print-area bg-white shadow-xl rounded-2xl" id="print-area">
-                    <div class="grid grid-cols-2 gap-6 mb-8 pb-6 border-b border-slate-200">
-                        <div class="p-4 rounded-lg text-left bg-slate-50 border border-slate-200 relative">
-                            <div class="flex justify-between items-center mb-2">
-                                <h3 class="font-bold text-slate-700" data-lang="customer">Customer</h3>
-                                <button class="load-customer-btn text-blue-600 hover:text-blue-800 text-xs font-bold no-print">Load Client</button>
-                            </div>
-                            <p class="editable text-sm" contenteditable="true" data-field="customerName" data-en="Customer Name" data-ar="اسم العميل" spellcheck="false"></p>
-                            <p class="editable text-sm" contenteditable="true" data-field="customerAddress" data-en="Customer Address" data-ar="عنوان العميل" spellcheck="false"></p>
-                            <p class="editable text-sm" contenteditable="true" data-field="customerCountry" data-en="Saudi Arabia" data-ar="المملكة العربية السعودية" spellcheck="false"></p>
-                        </div>
-                        </div>
                     </main>
             </div>
+
             <aside class="lg:col-span-1 space-y-6 no-print">
-                <div class="control-panel-card">
-                    <div class="flex border-b">
-                        <button class="tab-btn active" data-tab="actions">Actions</button>
-                        <button class="tab-btn" data-tab="products">Products</button>
-                        <button class="tab-btn" data-tab="clients">Clients</button>
-                    </div>
-
-                    <div id="tab-actions" class="tab-content active">
-                         <div class="grid grid-cols-2 gap-3 mt-4">
-                            </div>
-                    </div>
-
-                    <div id="tab-products" class="tab-content hidden">
-                        <div id="product-list" class="mt-4 max-h-60 overflow-y-auto space-y-2"></div>
-                        <div class="mt-4 space-y-2">
-                            <input type="text" id="new-product-desc-en" placeholder="Product Name (EN)" class="w-full p-2 border rounded">
-                             <input type="text" id="new-product-desc-ar" placeholder="Product Name (AR)" class="w-full p-2 border rounded">
-                            <input type="number" id="new-product-price" placeholder="Unit Price" class="w-full p-2 border rounded">
-                            <button id="add-product-btn" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-3 rounded-lg">Add Product</button>
-                        </div>
-                    </div>
-
-                    <div id="tab-clients" class="tab-content hidden">
-                        <div id="client-list" class="mt-4 max-h-60 overflow-y-auto space-y-2"></div>
-                        <div class="mt-4 space-y-2">
-                             <input type="text" id="new-client-name-en" placeholder="Client Name (EN)" class="w-full p-2 border rounded">
-                             <input type="text" id="new-client-name-ar" placeholder="Client Name (AR)" class="w-full p-2 border rounded">
-                             <textarea id="new-client-address-en" placeholder="Address (EN)" class="w-full p-2 border rounded" rows="2"></textarea>
-                             <textarea id="new-client-address-ar" placeholder="Address (AR)" class="w-full p-2 border rounded" rows="2"></textarea>
-                            <button id="add-client-btn" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-3 rounded-lg">Add Client</button>
-                        </div>
-                    </div>
-                </div>
-            </aside>
+                <button id="back-to-dashboard-btn" class="w-full bg-slate-500 hover:bg-slate-600 text-white font-bold py-2 px-3 rounded-lg shadow transition-transform hover:scale-105">
+                    &larr; Back to Dashboard
+                </button>
+                </aside>
         </div>
     </div>
     
     <script src="script.js"></script>
-    
-    <div id="selection-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-40 hidden no-print">
-         <div class="bg-white rounded-lg shadow-2xl max-w-lg w-full max-h-[70vh] flex flex-col">
-             <header class="p-4 border-b flex justify-between items-center">
-                 <h2 id="modal-title" class="text-xl font-bold">Select an Item</h2>
-                 <button id="modal-close-btn" class="text-slate-500 hover:text-slate-800 text-3xl">&times;</button>
-             </header>
-             <div class="p-4">
-                 <input type="text" id="modal-search" placeholder="Search..." class="w-full p-2 border border-slate-300 rounded-lg">
-             </div>
-             <div id="modal-list" class="p-4 overflow-auto flex-grow bg-slate-50 space-y-2">
-                 </div>
-         </div>
-     </div>
-    <script src="script.js"></script>
-</body>
-</html>    
 </body>
 </html>
-
