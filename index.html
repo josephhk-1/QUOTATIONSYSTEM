@@ -47,11 +47,11 @@
         .pdf-render-mode .quotation-card { box-shadow: none !important; }
         .pdf-render-mode #company-logo { width: 250px !important; }
         /* Tighter spacing for PDF */
-        .pdf-render-mode .mb-8 { margin-bottom: 1.25rem !important; }
-        .pdf-render-mode .mt-8 { margin-top: 1.25rem !important; }
-        .pdf-render-mode .mt-12 { margin-top: 2rem !important; }
+        .pdf-render-mode .mb-8 { margin-bottom: 1rem !important; }
+        .pdf-render-mode .mt-8 { margin-top: 1rem !important; }
+        .pdf-render-mode .mt-12 { margin-top: 1.5rem !important; }
         .pdf-render-mode .pt-8 { padding-top: 1rem !important; }
-        .pdf-render-mode .gap-8 { gap: 1.25rem !important; }
+        .pdf-render-mode .gap-8 { gap: 1rem !important; }
     </style>
 </head>
 <body class="p-2 sm:p-6 md:p-8">
@@ -440,13 +440,13 @@
                 const canvas = await html2canvas(printableClone.querySelector('.print-area'), { scale: 3, useCORS: true, logging: false, backgroundColor: '#ffffff' });
                 
                 const finalCanvas = document.createElement('canvas');
-                finalCanvas.width = canvas.width + 80; 
-                finalCanvas.height = canvas.height + 80;
+                finalCanvas.width = canvas.width + 40; 
+                finalCanvas.height = canvas.height + 40;
                 const ctx = finalCanvas.getContext('2d');
                 
                 ctx.fillStyle = '#d4b886';
                 ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
-                ctx.drawImage(canvas, 40, 40);
+                ctx.drawImage(canvas, 20, 20);
 
                 pdfImageData = finalCanvas.toDataURL('image/png');
                 document.getElementById('pdf-preview-image').src = pdfImageData;
