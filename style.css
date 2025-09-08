@@ -45,3 +45,21 @@
     font-weight: bold;
     padding: 0.25rem 0.5rem;
 }
+
+/* ... (tous vos styles existants) ... */
+
+/* Styles pour la fenêtre modale de sélection */
+.modal-list-item {
+    padding: 0.75rem;
+    background-color: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.modal-list-item:hover {
+    background-color: #ebf8ff;
+    border-color: #4299e1;
+    transform: translateX(5px);
+}
