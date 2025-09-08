@@ -1,132 +1,179 @@
-// Mettez tout votre code JavaScript de index.html ici.
-// J'ajoute la logique pour la sauvegarde automatique.
+// ... (tout votre code JS existant jusqu'à DOMContentLoaded) ...
 
-// ... (votre code JS existant) ...
+// --- DEBUT : Logique de la Bibliothèque de Produits ---
+let products = [];
 
-// --- DEBUT : Logique de Sauvegarde Automatique ---
+function saveProducts() {
+    localStorage.setItem('products', JSON.stringify(products));
+}
 
-function autoSaveQuote() {
-    const quoteData = captureQuoteData(); // On utilise une fonction qui récupère les données
-    if (quoteData.items.length > 0 || Object.keys(quoteData.fields).length > 0) {
-        localStorage.setItem('autoSavedQuote', JSON.stringify(quoteData));
-        console.log('Quote auto-saved!');
+function loadProducts() {
+    const savedProducts = localStorage.getItem('products');
+    if (savedProducts) {
+        products = JSON.parse(savedProducts);
+    }
+    renderProducts();
+}
+
+function renderProducts() {
+    const productList = document.getElementById('product-list');
+    productList.innerHTML = '';
+    products.forEach((product, index) => {
+        const item = document.createElement('div');
+        item.className = 'list-item text-sm';
+        item.innerHTML = `
+            <span>${product.desc_en} / ${product.desc_ar} - <strong>${product.price}</strong></span>
+            <button class="delete-btn" data-index="${index}">&times;</button>
+        `;
+        productList.appendChild(item);
+    });
+    // Attacher les listeners pour la suppression
+    document.querySelectorAll('.delete-btn').forEach(btn => btn.addEventListener('click', deleteProduct));
+}
+
+function addProduct() {
+    const desc_en = document.getElementById('new-product-desc-en').value;
+    const desc_ar = document.getElementById('new-product-desc-ar').value;
+    const price = parseFloat(document.getElementById('new-product-price').value);
+    if ((desc_en || desc_ar) && !isNaN(price)) {
+        products.push({ desc_en, desc_ar, price });
+        saveProducts();
+        renderProducts();
+        // Vider les champs
+        document.getElementById('new-product-desc-en').value = '';
+        document.getElementById('new-product-desc-ar').value = '';
+        document.getElementById('new-product-price').value = '';
+    } else {
+        alert('Please fill in at least one description and a valid price.');
     }
 }
 
-function loadAutoSavedQuote() {
-    const savedData = localStorage.getItem('autoSavedQuote');
-    if (savedData) {
-        console.log('Found auto-saved quote. Loading...');
-        const data = JSON.parse(savedData);
-        // On passe à la page d'édition directement
-        document.getElementById('landing-page').classList.add('hidden');
-        document.getElementById('editor-page').classList.remove('hidden');
-        
-        // On charge les données
-        applyQuoteData(data); 
+function deleteProduct(event) {
+    const index = event.target.dataset.index;
+    products.splice(index, 1);
+    saveProducts();
+    renderProducts();
+}
+
+// --- FIN : Logique de la Bibliothèque de Produits ---
+
+
+// --- DEBUT : Logique du Gestionnaire de Clients ---
+let clients = [];
+
+function saveClients() {
+    localStorage.setItem('clients', JSON.stringify(clients));
+}
+
+function loadClients() {
+    const savedClients = localStorage.getItem('clients');
+    if (savedClients) {
+        clients = JSON.parse(savedClients);
+    }
+    renderClients();
+}
+
+function renderClients() {
+    const clientList = document.getElementById('client-list');
+    clientList.innerHTML = '';
+    clients.forEach((client, index) => {
+        const item = document.createElement('div');
+        item.className = 'list-item text-sm';
+        item.innerHTML = `
+            <span>${client.name_en} / ${client.name_ar}</span>
+            <button class="delete-client-btn" data-index="${index}">&times;</button>
+        `;
+        clientList.appendChild(item);
+    });
+    document.querySelectorAll('.delete-client-btn').forEach(btn => btn.addEventListener('click', deleteClient));
+}
+
+function addClient() {
+    const name_en = document.getElementById('new-client-name-en').value;
+    const name_ar = document.getElementById('new-client-name-ar').value;
+    const address_en = document.getElementById('new-client-address-en').value;
+    const address_ar = document.getElementById('new-client-address-ar').value;
+    if (name_en || name_ar) {
+        clients.push({ name_en, name_ar, address_en, address_ar });
+        saveClients();
+        renderClients();
+        // Vider les champs
+        document.getElementById('new-client-name-en').value = '';
+        document.getElementById('new-client-name-ar').value = '';
+        document.getElementById('new-client-address-en').value = '';
+        document.getElementById('new-client-address-ar').value = '';
+    } else {
+        alert('Please fill in at least one client name.');
     }
 }
 
-function clearAutoSave() {
-    if (confirm('Are you sure you want to clear the auto-saved quote? This cannot be undone.')) {
-        localStorage.removeItem('autoSavedQuote');
-        alert('Auto-saved quote cleared.');
-        // On pourrait recharger la page pour repartir de zéro
-        window.location.reload();
-    }
+function deleteClient(event) {
+    const index = event.target.dataset.index;
+    clients.splice(index, 1);
+    saveClients();
+    renderClients();
 }
 
-// Fonction pour capturer toutes les données du devis
-function captureQuoteData() {
-    syncUIData(); // Assure que les données sont à jour
-    const activeProfile = document.body.dataset.activeProfile;
-    const quoteData = { 
-        lang: currentLang, 
-        companyProfile: activeProfile,
-        fields: {}, 
-        items: [] 
-    };
-
-    document.querySelectorAll('.editable').forEach(el => {
-        const fieldName = el.dataset.field;
-        if(fieldName) quoteData.fields[fieldName] = { en: el.dataset.en || '', ar: el.dataset.ar || '' };
-    });
-
-    document.querySelectorAll('#table-body tr').forEach(row => {
-        const descEl = row.querySelector('.item-description');
-        const imgEl = row.querySelector('img');
-        quoteData.items.push({
-            photo: imgEl.dataset.photoBase64 || '',
-            desc_en: descEl.dataset.en || '', desc_ar: descEl.dataset.ar || '',
-            qty: row.querySelector('.quantity').value, price: row.querySelector('.unit-price').value
-        });
-    });
-    return quoteData;
-}
-
-// Fonction pour appliquer les données d'un devis à l'interface
-function applyQuoteData(data) {
-    document.body.dataset.activeProfile = data.companyProfile;
-    switchCompanyProfile(data.companyProfile);
-    Object.keys(data.fields).forEach(fieldName => {
-        const el = document.querySelector(`.editable[data-field="${fieldName}"]`);
-        if (el) {
-            el.dataset.en = data.fields[fieldName].en;
-            el.dataset.ar = data.fields[fieldName].ar;
-        }
-    });
-    document.getElementById('table-body').innerHTML = '';
-    data.items.forEach(item => addNewRow(item));
-    setLanguage(data.lang || 'en');
-    updateTotals();
-}
-
-// On attache la sauvegarde à chaque modification
-document.addEventListener('input', autoSaveQuote);
-
-
-// --- FIN : Logique de Sauvegarde Automatique ---
+// --- FIN : Logique du Gestionnaire de Clients ---
 
 
 // Événements
 document.addEventListener('DOMContentLoaded', function () {
     // ... (votre code DOMContentLoaded existant) ...
 
-    document.getElementById('save-quote-btn').addEventListener('click', saveQuote);
-    document.getElementById('load-quote-btn').addEventListener('click', () => document.getElementById('file-loader').click());
-    document.getElementById('file-loader').addEventListener('change', loadQuote);
-    document.getElementById('preview-pdf-btn').addEventListener('click', generatePDF);
-    document.getElementById('clear-storage-btn').addEventListener('click', clearAutoSave);
-    document.getElementById('company-selector').addEventListener('change', (e) => selectCompany(e.target.value, true));
+    // Chargement initial des données
+    loadProducts();
+    loadClients();
 
-    // On essaie de charger un devis sauvegardé au démarrage
-    loadAutoSavedQuote();
+    // Listeners pour les nouveaux boutons
+    document.getElementById('add-product-btn').addEventListener('click', addProduct);
+    document.getElementById('add-client-btn').addEventListener('click', addClient);
+    
+    // Logique des onglets
+    document.querySelectorAll('.tab-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            document.querySelectorAll('.tab-btn, .tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            
+            button.classList.add('active');
+            document.getElementById(`tab-${button.dataset.tab}`).classList.remove('hidden');
+            document.getElementById(`tab-${button.dataset.tab}`).classList.add('active');
+        });
+    });
 });
 
-// Il faudra modifier votre fonction saveQuote pour utiliser captureQuoteData
-function saveQuote() {
-    const quoteData = captureQuoteData();
-    const customerName = document.querySelector('[data-field="customerName"]').textContent.trim();
-    const sanitizedName = customerName.replace(/[^a-z0-9\u0600-\u06FF]/gi, '_');
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(quoteData, null, 2));
-    const a = document.createElement('a');
-    a.href = dataStr;
-    a.download = `Source_${sanitizedName || 'quotation'}.json`;
-    a.click();
-}
+// MODIFIER la fonction addNewRow pour inclure le chargement de produit
+function addNewRow(item = { photo: '', desc_en: '', desc_ar: '', qty: 1, price: 0 }) {
+    // ... (votre code existant dans addNewRow) ...
+    // REMPLACER la ligne `row.innerHTML = ...` par ceci :
+    row.innerHTML = `
+        <td class="p-2 photo-col">
+            </td>
+        <td class="p-2 relative">
+            <div class="w-full p-2 editable item-description" contenteditable="true" data-en="${item.desc_en}" data-ar="${item.desc_ar}" spellcheck="false"></div>
+            <button class="load-product-btn absolute top-1 right-1 text-blue-500 no-print">...</button>
+        </td>
+        <td class="p-2"><input type="number" value="${item.qty}" class="quantity w-full text-center p-2 border rounded"></td>
+        <td class="p-2"><input type="number" value="${item.price}" step="0.01" class="unit-price w-full text-right p-2 border rounded"></td>
+        <td class="p-2 text-right total">0.00</td>
+        <td class="p-2 text-center no-print"><button class="remove-row text-red-500 hover:text-red-700 text-2xl font-bold">&times;</button></td>
+    `;
+    
+    // ... (le reste de votre code dans addNewRow) ...
 
-// Il faudra modifier votre fonction loadQuote pour utiliser applyQuoteData
-function loadQuote(event) {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        try {
-            const data = JSON.parse(e.target.result);
-            applyQuoteData(data);
-            // Sauvegarder ce qu'on vient de charger
-            localStorage.setItem('autoSavedQuote', JSON.stringify(data));
-        } catch (error) { 
-            alert(translations[currentLang].fileLoadError); 
+    // Ajouter le listener pour le nouveau bouton "..."
+    row.querySelector('.load-product-btn').addEventListener('click', (e) => {
+        // Logique pour afficher une liste de produits et remplir la ligne
+        // (Pour l'instant, on peut mettre une simple prompt box)
+        const productIndex = prompt(`Enter product number (1 to ${products.length})`);
+        if (productIndex && products[productIndex - 1]) {
+            const product = products[productIndex - 1];
+            const descEl = row.querySelector('.item-description');
+            descEl.dataset.en = product.desc_en;
+            descEl.dataset.ar = product.desc_ar;
+            descEl.innerHTML = descEl.dataset[currentLang];
+            row.querySelector('.unit-price').value = product.price;
+            updateTotals();
         }
-    };
-    reader.readAsText(event.target.files[0]);
+    });
 }
