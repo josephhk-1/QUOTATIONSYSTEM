@@ -75,5 +75,23 @@
     </div>
     
     <script src="script.js"></script>
+    
+    <div id="selection-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-40 hidden no-print">
+         <div class="bg-white rounded-lg shadow-2xl max-w-lg w-full max-h-[70vh] flex flex-col">
+             <header class="p-4 border-b flex justify-between items-center">
+                 <h2 id="modal-title" class="text-xl font-bold">Select an Item</h2>
+                 <button id="modal-close-btn" class="text-slate-500 hover:text-slate-800 text-3xl">&times;</button>
+             </header>
+             <div class="p-4">
+                 <input type="text" id="modal-search" placeholder="Search..." class="w-full p-2 border border-slate-300 rounded-lg">
+             </div>
+             <div id="modal-list" class="p-4 overflow-auto flex-grow bg-slate-50 space-y-2">
+                 </div>
+         </div>
+     </div>
+    <script src="script.js"></script>
+</body>
+</html>    
 </body>
 </html>
+
