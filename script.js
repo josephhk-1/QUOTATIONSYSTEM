@@ -41,9 +41,10 @@ const companyProfiles = {
     }
 };
 const translations = {
-    en: { dashboardTitle: "My Quotations", newQuoteBtn: "+ New Quotation", selectProfileTitle: "Select a Company Profile", backToDashboardBtn: "← Back to Dashboard", appTitle: "Quotation Editor", loadSource: "Load", saveSource: "Save", previewPdf: "Preview PDF", downloadPdf: "Download PDF", customer: "Customer", quoteNum: "Quote #:", date: "Date:", validUntil: "Valid Until:", projectDescription: "Project Description", photo: "Photo", description: "Item", quantity: "Quantity", unitPrice: "Unit Price", total: "Total", action: "Action", addRow: "+ Add Row", subtotal: "Subtotal", vat: "VAT (15%)", grandTotal: "TOTAL", terms: "Terms & Conditions", bankDetails: "Bank Details", signature: "Signature", pdfPreviewTitle: "PDF Preview", cancel: "Cancel", fileLoadError: "Error: Could not load file.", quotationTitle: "QUOTATION", closingPhrase: "Thank you for your business. We look forward to working with you." },
-    ar: { dashboardTitle: "عروضي", newQuoteBtn: "+ عرض سعر جديد", selectProfileTitle: "اختر ملف الشركة", backToDashboardBtn: "→ العودة للرئيسية", appTitle: "محرر عروض الأسعار", loadSource: "تحميل", saveSource: "حفظ", previewPdf: "معاينة PDF", downloadPdf: "تحميل PDF", customer: "العميل", quoteNum: "رقم العرض:", date: "التاريخ:", validUntil: "صالح حتى:", projectDescription: "وصف المشروع", photo: "صورة", description: "البند", quantity: "الكمية", unitPrice: "سعر الوحدة", total: "المجموع", action: "إجراء", addRow: "+ أضف سطراً", subtotal: "المجموع الفرعي", vat: "الضريبة (15%)", grandTotal: "الإجمالي", terms: "الشروط والأحكام", bankDetails: "التفاصيل البنكية", signature: "التوقيع", pdfPreviewTitle: "معاينة PDF", cancel: "إلغاء", fileLoadError: "خطأ: لا يمكن تحميل الملف.", quotationTitle: "عرض سعر", closingPhrase: "شكراً لثقتكم. نتطلع للعمل معكم." }
+    en: { dashboardTitle: "My Quotations", newQuoteBtn: "+ New Quotation", selectProfileTitle: "Select a Company Profile", backToDashboardBtn: "← Back to Dashboard", appTitle: "Quotation Editor", loadSource: "Load", saveSource: "Save", previewPdf: "Preview PDF", downloadPdf: "Download PDF", customer: "Customer", quoteNum: "Quote #:", date: "Date:", validUntil: "Valid Until:", projectDescription: "Project Description", photo: "Photo", description: "Item", quantity: "Quantity", unitPrice: "Unit Price", total: "Total", action: "Action", addRow: "+ Add Row", subtotal: "Subtotal", vat: "VAT (15%)", grandTotal: "TOTAL", terms: "Terms & Conditions", bankDetails: "Bank Details", signature: "Signature", pdfPreviewTitle: "PDF Preview", cancel: "Cancel", fileLoadError: "Error: Could not load file.", quotationTitle: "QUOTATION", closingPhrase: "Thank you for your business. We look forward to working with you.", noQuotes: "No quotations found.", clickNew: `Click "+ New Quotation" to get started.` },
+    ar: { dashboardTitle: "عروضي", newQuoteBtn: "+ عرض سعر جديد", selectProfileTitle: "اختر ملف الشركة", backToDashboardBtn: "→ العودة للرئيسية", appTitle: "محرر عروض الأسعار", loadSource: "تحميل", saveSource: "حفظ", previewPdf: "معاينة PDF", downloadPdf: "تحميل PDF", customer: "العميل", quoteNum: "رقم العرض:", date: "التاريخ:", validUntil: "صالح حتى:", projectDescription: "وصف المشروع", photo: "صورة", description: "البند", quantity: "الكمية", unitPrice: "سعر الوحدة", total: "المجموع", action: "إجراء", addRow: "+ أضف سطراً", subtotal: "المجموع الفرعي", vat: "الضريبة (15%)", grandTotal: "الإجمالي", terms: "الشروط والأحكام", bankDetails: "التفاصيل البنكية", signature: "التوقيع", pdfPreviewTitle: "معاينة PDF", cancel: "إلغاء", fileLoadError: "خطأ: لا يمكن تحميل الملف.", quotationTitle: "عرض سعر", closingPhrase: "شكراً لثقتكم. نتطلع للعمل معكم.", noQuotes: "لم يتم العثور على عروض أسعار.", clickNew: `انقر فوق "+ عرض سعر جديد" للبدء.` }
 };
+
 
 // ===============================================
 // DASHBOARD & NAVIGATION
@@ -55,7 +56,7 @@ function loadAllQuotes() { savedQuotes = JSON.parse(localStorage.getItem('savedQ
 function renderDashboard() {
     const container = document.getElementById('quote-list-container');
     if (savedQuotes.length === 0) {
-        container.innerHTML = `<div class="empty-state"><p class="font-semibold text-slate-600 dark:text-slate-300">No quotations found.</p><p class="text-sm text-slate-500 dark:text-slate-400">Click "+ New Quotation" to get started.</p></div>`;
+        container.innerHTML = `<div class="empty-state"><p class="font-semibold text-slate-600 dark:text-slate-300" data-lang="noQuotes"></p><p class="text-sm text-slate-500 dark:text-slate-400" data-lang="clickNew"></p></div>`;
         return;
     }
     container.innerHTML = `<div class="quote-list-item quote-list-header text-sm"><span class="text-slate-600 dark:text-slate-300">CLIENT / QUOTE #</span><span class="text-slate-600 dark:text-slate-300">DATE</span><span class="text-slate-600 dark:text-slate-300">TOTAL</span><span class="text-slate-600 dark:text-slate-300">ACTIONS</span></div><div id="quote-list"></div>`;
@@ -180,6 +181,7 @@ function applyQuoteData(data) {
     }
     
     document.getElementById('company-selector').value = data.companyProfile;
+    switchCompanyProfile(data.companyProfile);
     const today = new Date();
     document.getElementById('quoteDate').textContent = today.toLocaleDateString('en-CA');
     const validUntil = new Date();
@@ -187,7 +189,7 @@ function applyQuoteData(data) {
     document.getElementById('validDate').textContent = validUntil.toLocaleDateString('en-CA');
     document.getElementById('save-quote-btn').textContent = "Save & Close";
 
-    setLanguage(data.lang || currentLang); // This will update all text fields
+    setLanguage(data.lang || currentLang);
     updateTotals();
 }
 
@@ -227,16 +229,18 @@ function switchCompanyProfile(profileKey) {
         if (el) {
             el.dataset.en = dataMap[field].en;
             el.dataset.ar = dataMap[field].ar;
-            el.innerHTML = dataMap[field][currentLang];
         }
     });
+    setLanguage(currentLang);
 }
 
 function syncUIData() {
     document.querySelectorAll('#editor-page .editable').forEach(el => {
-        if(document.activeElement === el) {
-            el.dataset[currentLang] = el.innerHTML;
-        }
+        try {
+             if(document.activeElement === el) {
+                el.dataset[currentLang] = el.innerHTML;
+            }
+        } catch(e){}
     });
 }
 
@@ -260,7 +264,9 @@ function setLanguage(lang) {
             btn.classList.remove('active-lang');
         }
     });
-    renderDashboard();
+    if(document.getElementById('dashboard-page').classList.contains('hidden') === false){
+        renderDashboard();
+    }
 }
 
 function updateTotals() {
@@ -327,6 +333,7 @@ function addNewRow(item = { photo: '', desc_en: '', desc_ar: '', qty: 1, price: 
             updateTotals();
         });
     });
+    updateTotals();
 }
 
 // ===============================================
@@ -432,10 +439,19 @@ async function generatePDF() {
     clone.classList.remove('dark');
     if (currentLang === 'ar') {
         clone.setAttribute('dir', 'rtl');
+        clone.style.fontFamily = 'Cairo, sans-serif';
+    } else {
+         clone.style.fontFamily = 'Inter, sans-serif';
     }
+
     clone.querySelectorAll('.placeholder-icon').forEach(icon => {
         const photoContainer = icon.closest('.photo-upload-container');
-        if (photoContainer) photoContainer.style.display = 'none';
+        if (photoContainer) {
+             const img = photoContainer.querySelector('img');
+             if (!img || !img.dataset.photoBase64) {
+                photoContainer.style.display = 'none';
+             }
+        }
     });
     clone.style.width = '1024px';
     clone.style.position = 'absolute';
@@ -528,7 +544,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('new-quote-btn').addEventListener('click', openCompanyModal);
     document.getElementById('close-company-modal-btn').addEventListener('click', closeCompanyModal);
-
+    
+    attachEditorEventListeners();
     showDashboard();
 });
 
