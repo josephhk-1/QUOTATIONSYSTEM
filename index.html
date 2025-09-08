@@ -42,9 +42,16 @@
         }
         .photo-upload-container img { width: 100%; height: 100%; object-fit: cover; }
         
+        /* PDF Export Specific Styles */
         .pdf-render-mode { background-color: #d4b886 !important; }
         .pdf-render-mode .quotation-card { box-shadow: none !important; }
-        .pdf-render-mode #company-logo { width: 250px !important; /* Even larger logo for PDF */ }
+        .pdf-render-mode #company-logo { width: 250px !important; }
+        /* Tighter spacing for PDF */
+        .pdf-render-mode .mb-8 { margin-bottom: 1.25rem !important; }
+        .pdf-render-mode .mt-8 { margin-top: 1.25rem !important; }
+        .pdf-render-mode .mt-12 { margin-top: 2rem !important; }
+        .pdf-render-mode .pt-8 { padding-top: 1rem !important; }
+        .pdf-render-mode .gap-8 { gap: 1.25rem !important; }
     </style>
 </head>
 <body class="p-2 sm:p-6 md:p-8">
@@ -95,14 +102,14 @@
                      <!-- Left Column: Customer Info -->
                      <div class="border p-4 rounded-lg text-left">
                         <h3 class="font-bold text-gray-700 mb-2" data-lang="customer">Customer</h3>
-                        <p class="editable text-sm" contenteditable="true" data-field="customerName" data-en="Customer Name" data-ar="اسم العميل"></p>
-                        <p class="editable text-sm" contenteditable="true" data-field="customerAddress" data-en="Customer Address" data-ar="عنوان العميل"></p>
-                        <p class="editable text-sm" contenteditable="true" data-field="customerCountry" data-en="Saudi Arabia" data-ar="المملكة العربية السعودية"></p>
+                        <p class="editable text-sm" contenteditable="true" data-field="customerName" data-en="Customer Name" data-ar="اسم العميل" spellcheck="false"></p>
+                        <p class="editable text-sm" contenteditable="true" data-field="customerAddress" data-en="Customer Address" data-ar="عنوان العميل" spellcheck="false"></p>
+                        <p class="editable text-sm" contenteditable="true" data-field="customerCountry" data-en="Saudi Arabia" data-ar="المملكة العربية السعودية" spellcheck="false"></p>
                     </div>
                     <!-- Right Column: Quote Info -->
                     <div class="text-right">
                          <div class="text-sm inline-block text-left">
-                            <p><span class="font-bold" data-lang="quoteNum">Quote #:</span> <span class="editable" contenteditable="true" data-field="quoteNum"></span></p>
+                            <p><span class="font-bold" data-lang="quoteNum">Quote #:</span> <span class="editable" contenteditable="true" data-field="quoteNum" spellcheck="false"></span></p>
                             <p><span class="font-bold" data-lang="date">Date:</span> <span id="quoteDate"></span></p>
                             <p><span class="font-bold" data-lang="validUntil">Valid Until:</span> <span id="validDate"></span></p>
                         </div>
@@ -111,7 +118,7 @@
                 
                 <div class="mb-8 border p-4 rounded-lg">
                     <h3 class="font-bold text-gray-800 mb-2" data-lang="projectDescription">Project Description</h3>
-                    <p class="editable text-sm" contenteditable="true" data-field="projectDescription" data-en="Enter project description..." data-ar="أدخل وصف المشروع..."></p>
+                    <p class="editable text-sm" contenteditable="true" data-field="projectDescription" data-en="Enter project description..." data-ar="أدخل وصف المشروع..." spellcheck="false"></p>
                 </div>
 
                 <table class="w-full text-sm" id="items-table">
@@ -306,7 +313,7 @@
                         <input type="file" class="hidden" accept="image/*">
                     </div>
                 </td>
-                <td class="p-2"><div class="w-full p-2 editable item-description" contenteditable="true" data-en="${item.desc_en}" data-ar="${item.desc_ar}"></div></td>
+                <td class="p-2"><div class="w-full p-2 editable item-description" contenteditable="true" data-en="${item.desc_en}" data-ar="${item.desc_ar}" spellcheck="false"></div></td>
                 <td class="p-2"><input type="number" value="${item.qty}" class="quantity w-full text-center p-2 border rounded"></td>
                 <td class="p-2"><input type="number" value="${item.price}" step="0.01" class="unit-price w-full text-right p-2 border rounded"></td>
                 <td class="p-2 text-right total">0.00</td>
@@ -428,18 +435,18 @@
             printableClone.querySelectorAll('.no-print').forEach(el => el.remove());
             
             try {
-                await new Promise(resolve => setTimeout(resolve, 500)); // Increased delay for external images
+                await new Promise(resolve => setTimeout(resolve, 500)); 
 
                 const canvas = await html2canvas(printableClone.querySelector('.print-area'), { scale: 3, useCORS: true, logging: false, backgroundColor: '#ffffff' });
                 
                 const finalCanvas = document.createElement('canvas');
-                finalCanvas.width = canvas.width + 120; 
-                finalCanvas.height = canvas.height + 120;
+                finalCanvas.width = canvas.width + 80; 
+                finalCanvas.height = canvas.height + 80;
                 const ctx = finalCanvas.getContext('2d');
                 
                 ctx.fillStyle = '#d4b886';
                 ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
-                ctx.drawImage(canvas, 60, 60);
+                ctx.drawImage(canvas, 40, 40);
 
                 pdfImageData = finalCanvas.toDataURL('image/png');
                 document.getElementById('pdf-preview-image').src = pdfImageData;
