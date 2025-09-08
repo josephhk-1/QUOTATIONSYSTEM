@@ -43,7 +43,6 @@
         .photo-upload-container img { width: 100%; height: 100%; object-fit: cover; }
         
         /* PDF Export Specific Styles */
-        .pdf-render-mode { background-color: #d4b886 !important; }
         .pdf-render-mode .quotation-card { box-shadow: none !important; }
         .pdf-render-mode #company-logo { width: 250px !important; }
         /* Tighter spacing for PDF */
@@ -98,9 +97,9 @@
                     <p class="text-sm text-gray-600 editable" contenteditable="true" data-field="companyAddress" spellcheck="false"></p>
                 </div>
 
-                <div class="grid grid-cols-2 gap-8 mb-8 pb-4 border-b">
+                <div class="grid grid-cols-2 gap-8 mb-8 pb-4 border-b border-gray-200">
                      <!-- Left Column: Customer Info -->
-                     <div class="border p-4 rounded-lg text-left">
+                     <div class="border border-gray-200 p-4 rounded-lg text-left">
                         <h3 class="font-bold text-gray-700 mb-2" data-lang="customer">Customer</h3>
                         <p class="editable text-sm" contenteditable="true" data-field="customerName" data-en="Customer Name" data-ar="اسم العميل" spellcheck="false"></p>
                         <p class="editable text-sm" contenteditable="true" data-field="customerAddress" data-en="Customer Address" data-ar="عنوان العميل" spellcheck="false"></p>
@@ -116,14 +115,14 @@
                     </div>
                 </div>
                 
-                <div class="mb-8 border p-4 rounded-lg">
+                <div class="mb-8 border border-gray-200 p-4 rounded-lg">
                     <h3 class="font-bold text-gray-800 mb-2" data-lang="projectDescription">Project Description</h3>
                     <p class="editable text-sm" contenteditable="true" data-field="projectDescription" data-en="Enter project description..." data-ar="أدخل وصف المشروع..." spellcheck="false"></p>
                 </div>
 
                 <table class="w-full text-sm" id="items-table">
                     <thead>
-                        <tr class="border-b-2 border-gray-800 text-gray-800">
+                        <tr class="border-b-2 border-gray-400 text-gray-800">
                             <th class="p-2 photo-col text-left font-semibold" data-lang="photo">Photo</th>
                             <th class="p-2 text-left font-semibold" data-lang="description">Item</th>
                             <th class="p-2 w-24 text-center font-semibold" data-lang="quantity">Quantity</th>
@@ -416,10 +415,9 @@
             if (document.activeElement) document.activeElement.blur();
             
             const { jsPDF } = window.jspdf;
-            const quoteElement = document.getElementById('editor-page'); 
+            const quoteElement = document.getElementById('print-area'); 
+            
             const printableClone = quoteElement.cloneNode(true);
-
-            printableClone.querySelector('header').classList.add('hidden');
             printableClone.classList.add('pdf-render-mode');
             printableClone.style.width = '1024px';
             printableClone.style.position = 'absolute';
@@ -435,20 +433,18 @@
             printableClone.querySelectorAll('.no-print').forEach(el => el.remove());
             
             try {
-                await new Promise(resolve => setTimeout(resolve, 500)); 
+                // Wait for images to load before capturing canvas
+                const images = printableClone.getElementsByTagName('img');
+                const promises = [...images].map(img => new Promise(resolve => {
+                    if (img.complete) return resolve();
+                    img.onload = img.onerror = resolve;
+                }));
+                await Promise.all(promises);
+                await new Promise(resolve => setTimeout(resolve, 100)); // Extra safety delay
 
-                const canvas = await html2canvas(printableClone.querySelector('.print-area'), { scale: 3, useCORS: true, logging: false, backgroundColor: '#ffffff' });
+                const canvas = await html2canvas(printableClone, { scale: 3, useCORS: true, logging: false, backgroundColor: '#ffffff' });
                 
-                const finalCanvas = document.createElement('canvas');
-                finalCanvas.width = canvas.width + 40; 
-                finalCanvas.height = canvas.height + 40;
-                const ctx = finalCanvas.getContext('2d');
-                
-                ctx.fillStyle = '#d4b886';
-                ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
-                ctx.drawImage(canvas, 20, 20);
-
-                pdfImageData = finalCanvas.toDataURL('image/png');
+                pdfImageData = canvas.toDataURL('image/png', 1.0);
                 document.getElementById('pdf-preview-image').src = pdfImageData;
                 document.getElementById('pdf-preview-modal').classList.remove('hidden');
 
@@ -457,18 +453,23 @@
                     const sanitizedName = customerName.replace(/[^a-z0-9\u0600-\u06FF]/gi, '_');
                     const pdf = new jsPDF('p', 'mm', 'a4');
                     const pdfWidth = pdf.internal.pageSize.getWidth();
-                    const pdfHeight = pdf.internal.pageSize.getHeight();
+                    
+                    const container = document.getElementById('quote-container');
+                    const tempBg = document.createElement('div');
+                    tempBg.style.backgroundColor = '#d4b886';
+                    tempBg.style.width = `${pdf.internal.pageSize.getWidth()}mm`;
+                    tempBg.style.height = `${pdf.internal.pageSize.getHeight()}mm`;
+                    document.body.appendChild(tempBg);
+
                     const imgProps = pdf.getImageProperties(pdfImageData);
-                    const imgRatio = imgProps.width / imgProps.height;
+                    const margin = 10; // 10mm margin
+                    const contentWidth = pdfWidth - (margin * 2);
+                    const contentHeight = (contentWidth * imgProps.height) / imgProps.width;
+
+                    pdf.setFillColor('#d4b886');
+                    pdf.rect(0, 0, pdf.internal.pageSize.getWidth(), pdf.internal.pageSize.getHeight(), 'F');
                     
-                    let imgWidth = pdfWidth;
-                    let imgHeight = imgWidth / imgRatio;
-                     if (imgHeight > pdfHeight) {
-                        imgHeight = pdfHeight;
-                        imgWidth = imgHeight * imgRatio;
-                    }
-                    
-                    pdf.addImage(pdfImageData, 'PNG', 0, 0, imgWidth, imgHeight);
+                    pdf.addImage(pdfImageData, 'PNG', margin, margin, contentWidth, contentHeight);
                     pdf.save(`Quotation_${sanitizedName || 'details'}.pdf`);
                     closePreviewModal();
                 };
