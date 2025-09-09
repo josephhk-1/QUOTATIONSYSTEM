@@ -186,7 +186,7 @@ function renderDashboard() {
     const container = document.getElementById('quote-list-container');
     if (savedQuotes.length === 0) {
         container.innerHTML = `<div class="empty-state"><p class="font-semibold text-slate-600 dark:text-slate-300" data-lang="noQuotes"></p><p class="text-sm text-slate-500 dark:text-slate-400" data-lang="clickNew"></p></div>`;
-        setLanguage(currentLang); // Ensure text is translated
+        setLanguage(currentLang); 
         return;
     }
     container.innerHTML = `<div class="quote-list-item quote-list-header text-sm"><span>CLIENT / QUOTE #</span><span>DATE</span><span>TOTAL</span><span>ACTIONS</span></div><div id="quote-list"></div>`;
