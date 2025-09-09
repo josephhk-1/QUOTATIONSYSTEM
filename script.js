@@ -21,6 +21,20 @@ const db = getFirestore(app);
 const appId = 'my-quotation-system';
 
 // ===============================================
+// OPTIMIZATION & UI HELPERS
+// ===============================================
+const showLoader = (show) => document.getElementById('global-loader').classList.toggle('hidden', !show);
+const showToast = (message, type = 'success') => {
+    const toastContainer = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    const bgColor = type === 'success' ? 'bg-green-500' : 'bg-red-500';
+    toast.className = `toast ${bgColor} text-white font-semibold py-2 px-4 rounded-lg shadow-lg`;
+    toast.textContent = message;
+    toastContainer.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+};
+
+// ===============================================
 // DARK MODE LOGIC
 // ===============================================
 const themeToggleBtn = document.getElementById('theme-toggle');
@@ -42,6 +56,7 @@ themeToggleBtn.addEventListener('click', () => {
 let currentLang = localStorage.getItem('language') || 'en';
 let savedQuotes = [], products = [], clients = [];
 let currentlyEditingQuoteId = null;
+let unsubscribeQuotes, unsubscribeProducts, unsubscribeClients;
 
 const companyProfiles = {
      'wooden_pieces': { 
@@ -64,8 +79,8 @@ const companyProfiles = {
     }
 };
 const translations = {
-    en: { dashboardTitle: "My Quotations", newQuoteBtn: "+ New Quotation", selectProfileTitle: "Select a Company Profile", backToDashboardBtn: "← Back to Dashboard", appTitle: "Quotation Editor", loadSource: "Load", saveSource: "Save", previewPdf: "Preview PDF", downloadPdf: "Download PDF", customer: "Customer", quoteNum: "Quote #:", date: "Date:", validUntil: "Valid Until:", projectDescription: "Project Description", photo: "Photo", description: "Item", quantity: "Quantity", unitPrice: "Unit Price", total: "Total", action: "Action", addRow: "+ Add Row", subtotal: "Subtotal", vat: "VAT (15%)", grandTotal: "TOTAL", terms: "Terms & Conditions", bankDetails: "Bank Details", signature: "Signature", pdfPreviewTitle: "PDF Preview", cancel: "Cancel", fileLoadError: "Error: Could not load file.", quotationTitle: "QUOTATION", closingPhrase: "Thank you for your business. We look forward to working with you.", noQuotes: "No quotations found.", clickNew: `Click "+ New Quotation" to get started.` },
-    ar: { dashboardTitle: "عروضي", newQuoteBtn: "+ عرض سعر جديد", selectProfileTitle: "اختر ملف الشركة", backToDashboardBtn: "→ العودة للرئيسية", appTitle: "محرر عروض الأسعار", loadSource: "تحميل", saveSource: "حفظ", previewPdf: "معاينة PDF", downloadPdf: "تحميل PDF", customer: "العميل", quoteNum: "رقم العرض:", date: "التاريخ:", validUntil: "صالح حتى:", projectDescription: "وصف المشروع", photo: "صورة", description: "البند", quantity: "الكمية", unitPrice: "سعر الوحدة", total: "المجموع", action: "إجراء", addRow: "+ أضف سطراً", subtotal: "المجموع الفرعي", vat: "الضريبة (15%)", grandTotal: "الإجمالي", terms: "الشروط والأحكام", bankDetails: "التفاصيل البنكية", signature: "التوقيع", pdfPreviewTitle: "معاينة PDF", cancel: "إلغاء", fileLoadError: "خطأ: لا يمكن تحميل الملف.", quotationTitle: "عرض سعر", closingPhrase: "شكراً لثقتكم. نتطلع للعمل معكم.", noQuotes: "لم يتم العثور على عروض أسعار.", clickNew: `انقر فوق "+ عرض سعر جديد" للبدء.` }
+    en: { dashboardTitle: "My Quotations", newQuoteBtn: "+ New Quotation", selectProfileTitle: "Select a Company Profile", backToDashboardBtn: "← Back to Dashboard", appTitle: "Quotation Editor", loadSource: "Load", saveSource: "Save", previewPdf: "Preview PDF", downloadPdf: "Download PDF", customer: "Customer", quoteNum: "Quote #:", date: "Date:", validUntil: "Valid Until:", projectDescription: "Project Description", photo: "Photo", description: "Item", quantity: "Quantity", unitPrice: "Unit Price", total: "Total", action: "Action", addRow: "+ Add Row", subtotal: "Subtotal", vat: "VAT (15%)", grandTotal: "TOTAL", terms: "Terms & Conditions", bankDetails: "Bank Details", signature: "Signature", pdfPreviewTitle: "PDF Preview", cancel: "Cancel", fileLoadError: "Error: Could not load file.", quotationTitle: "QUOTATION", closingPhrase: "Thank you for your business. We look forward to working with you.", noQuotes: "No quotations found.", clickNew: `Click "+ New Quotation" to get started.`, saving: "Saving...", saved: "Saved!", deleting: "Deleting...", deleted: "Deleted!", loading: "Loading...", generatingPdf: "Generating PDF...", emptyLibrary: "No items found. Add one below!" },
+    ar: { dashboardTitle: "عروضي", newQuoteBtn: "+ عرض سعر جديد", selectProfileTitle: "اختر ملف الشركة", backToDashboardBtn: "→ العودة للرئيسية", appTitle: "محرر عروض الأسعار", loadSource: "تحميل", saveSource: "حفظ", previewPdf: "معاينة PDF", downloadPdf: "تحميل PDF", customer: "العميل", quoteNum: "رقم العرض:", date: "التاريخ:", validUntil: "صالح حتى:", projectDescription: "وصف المشروع", photo: "صورة", description: "البند", quantity: "الكمية", unitPrice: "سعر الوحدة", total: "المجموع", action: "إجراء", addRow: "+ أضف سطراً", subtotal: "المجموع الفرعي", vat: "الضريبة (15%)", grandTotal: "الإجمالي", terms: "الشروط والأحكام", bankDetails: "التفاصيل البنكية", signature: "التوقيع", pdfPreviewTitle: "معاينة PDF", cancel: "إلغاء", fileLoadError: "خطأ: لا يمكن تحميل الملف.", quotationTitle: "عرض سعر", closingPhrase: "شكراً لثقتكم. نتطلع للعمل معكم.", noQuotes: "لم يتم العثور على عروض أسعار.", clickNew: `انقر فوق "+ عرض سعر جديد" للبدء.`, saving: "جاري الحفظ...", saved: "تم الحفظ!", deleting: "جاري الحذف...", deleted: "تم الحذف!", loading: "جاري التحميل...", generatingPdf: "جاري إنشاء PDF...", emptyLibrary: "لا توجد عناصر. أضف واحداً بالأسفل!" }
 };
 
 const editorHTML = `
@@ -238,6 +253,7 @@ const appFunctions = {
     },
 
     loadQuoteForEditing: async (quoteId) => {
+        showLoader(true);
         try {
             const docRef = doc(getCollectionRef('quotations'), quoteId);
             const docSnap = await getDoc(docRef);
@@ -246,16 +262,18 @@ const appFunctions = {
                 applyQuoteData(docSnap.data());
                 showEditor();
             }
-        } catch(e) { console.error("Error loading quote:", e); }
+        } catch(e) { console.error("Error loading quote:", e); showToast("Error loading quote.", "error"); }
+        finally { showLoader(false); }
     },
 
     saveCurrentQuote: async () => {
         const quoteData = captureQuoteData();
         const customerName = quoteData.fields.customerName?.en || quoteData.fields.customerName?.ar;
         if (!customerName || customerName.trim() === 'Customer Name' || customerName.trim() === '') {
-            alert("Please enter a customer name before saving.");
+            showToast("Please enter a customer name before saving.", "error");
             return;
         }
+        showLoader(true);
         try {
             if (currentlyEditingQuoteId) {
                 const docRef = doc(getCollectionRef('quotations'), currentlyEditingQuoteId);
@@ -263,16 +281,20 @@ const appFunctions = {
             } else {
                 await addDoc(getCollectionRef('quotations'), quoteData);
             }
-            alert('Quotation saved online!');
+            showToast(translations[currentLang].saved);
             showDashboard();
-        } catch(e) { console.error("Error saving quote:", e); }
+        } catch(e) { console.error("Error saving quote:", e); showToast("Error saving quote.", "error"); }
+        finally { showLoader(false); }
     },
 
     deleteQuote: async (quoteId) => {
         if (confirm('Are you sure you want to delete this quotation from the online database?')) {
+            showLoader(true);
             try {
                 await deleteDoc(doc(getCollectionRef('quotations'), quoteId));
-            } catch(e) { console.error("Error deleting quote:", e); }
+                showToast(translations[currentLang].deleted);
+            } catch(e) { console.error("Error deleting quote:", e); showToast("Error deleting quote.", "error");}
+            finally { showLoader(false); }
         }
     }
 };
@@ -492,6 +514,11 @@ function addNewRow(item = { photo: '', desc_en: '', desc_ar: '', qty: 1, price: 
 function renderProducts() {
     const list = document.getElementById('product-list');
     if(!list) return;
+    if(products.length === 0){
+        list.innerHTML = `<div class="text-center text-sm text-slate-500 py-4" data-lang="emptyLibrary"></div>`;
+        setLanguage(currentLang);
+        return;
+    }
     list.innerHTML = '';
     products.forEach((p) => {
         const item = document.createElement('div');
@@ -505,20 +532,31 @@ appFunctions.addProduct = async () => {
     const desc_en = document.getElementById('new-product-desc-en').value;
     const desc_ar = document.getElementById('new-product-desc-ar').value;
     const price = parseFloat(document.getElementById('new-product-price').value);
-    if ((desc_en || desc_ar) && !isNaN(price)) {
-        try {
-            await addDoc(getCollectionRef('products'), { en: desc_en, ar: desc_ar, price });
-            document.getElementById('new-product-desc-en').value = '';
-            document.getElementById('new-product-desc-ar').value = '';
-            document.getElementById('new-product-price').value = '';
-        } catch(e) { console.error("Error adding product:", e); }
+    if ((!desc_en && !desc_ar) || isNaN(price)) {
+        showToast("Please provide a name and a valid price.", "error");
+        return;
     }
+    const btn = document.getElementById('add-product-btn');
+    btn.disabled = true;
+    try {
+        await addDoc(getCollectionRef('products'), { en: desc_en, ar: desc_ar, price });
+        showToast("Product added!");
+        document.getElementById('new-product-desc-en').value = '';
+        document.getElementById('new-product-desc-ar').value = '';
+        document.getElementById('new-product-price').value = '';
+    } catch(e) { console.error("Error adding product:", e); showToast("Error adding product.", "error");}
+    finally { btn.disabled = false; }
 }
-appFunctions.deleteProduct = async (id) => { await deleteDoc(doc(getCollectionRef('products'), id)); }
+appFunctions.deleteProduct = async (id) => { await deleteDoc(doc(getCollectionRef('products'), id)); showToast("Product deleted."); }
 
 function renderClients() {
     const list = document.getElementById('client-list');
     if(!list) return;
+    if(clients.length === 0){
+        list.innerHTML = `<div class="text-center text-sm text-slate-500 py-4" data-lang="emptyLibrary"></div>`;
+        setLanguage(currentLang);
+        return;
+    }
     list.innerHTML = '';
     clients.forEach((c) => {
         const item = document.createElement('div');
@@ -533,17 +571,23 @@ appFunctions.addClient = async () => {
     const name_ar = document.getElementById('new-client-name-ar').value;
     const address_en = document.getElementById('new-client-address-en').value;
     const address_ar = document.getElementById('new-client-address-ar').value;
-    if (name_en || name_ar) {
-        try {
-            await addDoc(getCollectionRef('clients'), { en: name_en, ar: name_ar, address_en, address_ar });
-            document.getElementById('new-client-name-en').value = '';
-            document.getElementById('new-client-name-ar').value = '';
-            document.getElementById('new-client-address-en').value = '';
-            document.getElementById('new-client-address-ar').value = '';
-        } catch(e) { console.error("Error adding client:", e); }
+    if (!name_en && !name_ar) {
+        showToast("Please provide a client name.", "error");
+        return;
     }
+    const btn = document.getElementById('add-client-btn');
+    btn.disabled = true;
+    try {
+        await addDoc(getCollectionRef('clients'), { en: name_en, ar: name_ar, address_en, address_ar });
+        showToast("Client added!");
+        document.getElementById('new-client-name-en').value = '';
+        document.getElementById('new-client-name-ar').value = '';
+        document.getElementById('new-client-address-en').value = '';
+        document.getElementById('new-client-address-ar').value = '';
+    } catch(e) { console.error("Error adding client:", e); showToast("Error adding client.", "error"); }
+    finally { btn.disabled = false; }
 }
-appFunctions.deleteClient = async (id) => { await deleteDoc(doc(getCollectionRef('clients'), id)); }
+appFunctions.deleteClient = async (id) => { await deleteDoc(doc(getCollectionRef('clients'), id)); showToast("Client deleted.");}
 
 // ===============================================
 // MODALS
@@ -555,6 +599,11 @@ function openModal(title, items, renderItem, onSelect) {
     currentSelectionCallback = onSelect;
     const render = (filter = '') => {
         modalList.innerHTML = '';
+        if(items.length === 0){
+            modalList.innerHTML = `<div class="text-center text-sm text-slate-500 py-4" data-lang="emptyLibrary"></div>`;
+            setLanguage(currentLang);
+            return;
+        }
         items.forEach(item => {
             const itemText = renderItem(item).toLowerCase();
             if (itemText.includes(filter.toLowerCase())) {
@@ -577,6 +626,8 @@ modal.onclick = (e) => { if (e.target === modal) closeModal(); };
 function closePreviewModal() { document.getElementById('pdf-preview-modal').classList.add('hidden'); }
 
 async function generatePDF() {
+    showLoader(true);
+    showToast(translations[currentLang].generatingPdf);
     syncUIData();
     const { jsPDF } = window.jspdf;
     const quoteElement = document.getElementById('print-area');
@@ -612,28 +663,29 @@ async function generatePDF() {
         document.getElementById('pdf-preview-modal').classList.remove('hidden');
         document.getElementById('download-pdf-btn').onclick = () => {
             const customerName = document.querySelector('#editor-page .editable[data-field="customerName"]').textContent.trim().replace(/[^a-z0-9]/gi, '_');
+            const quoteNum = document.querySelector('#editor-page .editable[data-field="quoteNum"]').textContent.trim();
             const pdf = new jsPDF('p', 'mm', 'a4');
             const pdfWidth = pdf.internal.pageSize.getWidth();
             const margin = 10;
             const contentWidth = pdfWidth - (margin * 2);
             const contentHeight = (contentWidth * canvas.height) / canvas.width;
             pdf.addImage(imgData, 'PNG', margin, margin, contentWidth, contentHeight);
-            pdf.save(`Quotation_${customerName||'details'}.pdf`);
+            pdf.save(`${quoteNum}_${customerName||'Quotation'}.pdf`);
             closePreviewModal();
         };
-    } catch(e) { console.error("PDF generation failed:", e); alert("PDF generation failed."); } 
-    finally { document.body.removeChild(clone); }
+    } catch(e) { console.error("PDF generation failed:", e); showToast("PDF generation failed.", "error"); } 
+    finally { document.body.removeChild(clone); showLoader(false); }
 }
 
 // ===============================================
 // APP INITIALIZATION
 // ===============================================
 function attachEditorEventListeners() {
-    document.getElementById('save-quote-btn').addEventListener('click', window.app.saveCurrentQuote);
+    document.getElementById('save-quote-btn').addEventListener('click', appFunctions.saveCurrentQuote);
     document.getElementById('preview-pdf-btn').addEventListener('click', generatePDF);
     document.getElementById('add-row').addEventListener('click', () => addNewRow());
-    document.getElementById('add-product-btn').addEventListener('click', window.app.addProduct);
-    document.getElementById('add-client-btn').addEventListener('click', window.app.addClient);
+    document.getElementById('add-product-btn').addEventListener('click', appFunctions.addProduct);
+    document.getElementById('add-client-btn').addEventListener('click', appFunctions.addClient);
     document.querySelector('.load-customer-btn').addEventListener('click', () => {
          openModal('Select a Client', clients, (c) => `<strong>${c[currentLang] || c['en']}</strong>`, (client) => {
             const nameEl = document.querySelector('#editor-page .editable[data-field="customerName"]');
@@ -659,6 +711,7 @@ function attachEditorEventListeners() {
 
 async function main() {
     applyTheme();
+    setLanguage(currentLang);
     
     document.querySelectorAll('.language-btn').forEach(btn => {
         btn.addEventListener('click', () => setLanguage(btn.dataset.langSwitch));
@@ -669,23 +722,28 @@ async function main() {
     document.getElementById('back-to-dashboard-btn').addEventListener('click', showDashboard);
     document.getElementById('cancel-pdf-btn').addEventListener('click', closePreviewModal);
     document.getElementById('close-pdf-modal-btn').addEventListener('click', closePreviewModal);
+    document.querySelectorAll('#company-selection-modal a').forEach(a => a.addEventListener('click', (e) => {
+        e.preventDefault();
+        appFunctions.createNewQuote(e.currentTarget.dataset.company);
+    }));
     
     showDashboard();
 
     await signInAnonymously(auth);
 
-    onSnapshot(query(getCollectionRef('quotations'), orderBy("meta.savedAt", "desc")), (snapshot) => {
+    unsubscribeQuotes = onSnapshot(query(getCollectionRef('quotations'), orderBy("meta.savedAt", "desc")), (snapshot) => {
         savedQuotes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         renderDashboard();
     });
-    onSnapshot(getCollectionRef('products'), (snapshot) => {
+    unsubscribeProducts = onSnapshot(getCollectionRef('products'), (snapshot) => {
         products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         if(document.getElementById('product-list')) renderProducts();
     });
-    onSnapshot(getCollectionRef('clients'), (snapshot) => {
+    unsubscribeClients = onSnapshot(getCollectionRef('clients'), (snapshot) => {
         clients = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         if(document.getElementById('client-list')) renderClients();
     });
 }
 
 main();
+
