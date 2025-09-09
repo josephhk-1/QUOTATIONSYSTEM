@@ -731,17 +731,22 @@ async function main() {
 
     await signInAnonymously(auth);
 
+    if (unsubscribeQuotes) unsubscribeQuotes();
     unsubscribeQuotes = onSnapshot(query(getCollectionRef('quotations'), orderBy("meta.savedAt", "desc")), (snapshot) => {
         savedQuotes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         renderDashboard();
     });
+
+    if (unsubscribeProducts) unsubscribeProducts();
     unsubscribeProducts = onSnapshot(getCollectionRef('products'), (snapshot) => {
         products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        if(document.getElementById('product-list')) renderProducts();
+        renderProducts();
     });
+
+    if (unsubscribeClients) unsubscribeClients();
     unsubscribeClients = onSnapshot(getCollectionRef('clients'), (snapshot) => {
         clients = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        if(document.getElementById('client-list')) renderClients();
+        renderClients();
     });
 }
 
