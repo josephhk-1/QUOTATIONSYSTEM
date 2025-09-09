@@ -186,6 +186,7 @@ function renderDashboard() {
     const container = document.getElementById('quote-list-container');
     if (savedQuotes.length === 0) {
         container.innerHTML = `<div class="empty-state"><p class="font-semibold text-slate-600 dark:text-slate-300" data-lang="noQuotes"></p><p class="text-sm text-slate-500 dark:text-slate-400" data-lang="clickNew"></p></div>`;
+        setLanguage(currentLang); // Ensure text is translated
         return;
     }
     container.innerHTML = `<div class="quote-list-item quote-list-header text-sm"><span>CLIENT / QUOTE #</span><span>DATE</span><span>TOTAL</span><span>ACTIONS</span></div><div id="quote-list"></div>`;
@@ -201,9 +202,12 @@ function renderDashboard() {
         const quoteNum = quote.fields.quoteNum?.en || 'N/A';
         const date = quote.meta.savedAt.toDate().toLocaleDateString('en-CA');
         const total = parseFloat(quote.totals.grandTotal).toFixed(2);
-        item.innerHTML = `<div><p class="font-bold text-slate-800 dark:text-slate-100">${clientName}</p><p class="text-xs text-slate-500 dark:text-slate-400">${quoteNum}</p></div><span class="text-slate-600 dark:text-slate-300">${date}</span><span class="font-semibold text-slate-800 dark:text-slate-100">${total} SAR</span><div class="quote-actions"><button class="load-btn" onclick="window.app.loadQuoteForEditing('${quote.id}')">Edit</button><button class="delete-quote-btn" onclick="window.app.deleteQuote('${quote.id}')">Delete</button></div>`;
+        item.innerHTML = `<div><p class="font-bold text-slate-800 dark:text-slate-100">${clientName}</p><p class="text-xs text-slate-500 dark:text-slate-400">${quoteNum}</p></div><span class="text-slate-600 dark:text-slate-300">${date}</span><span class="font-semibold text-slate-800 dark:text-slate-100">${total} SAR</span><div class="quote-actions"><button class="load-btn" data-id="${quote.id}">Edit</button><button class="delete-quote-btn" data-id="${quote.id}">Delete</button></div>`;
         list.appendChild(item);
     });
+
+    list.querySelectorAll('.load-btn').forEach(btn => btn.addEventListener('click', (e) => appFunctions.loadQuoteForEditing(e.target.dataset.id)));
+    list.querySelectorAll('.delete-quote-btn').forEach(btn => btn.addEventListener('click', (e) => appFunctions.deleteQuote(e.target.dataset.id)));
 }
 
 function showDashboard() {
@@ -492,9 +496,10 @@ function renderProducts() {
     products.forEach((p) => {
         const item = document.createElement('div');
         item.className = 'list-item text-sm';
-        item.innerHTML = `<span>${p[currentLang] || p['en']} - <strong>${p.price}</strong></span><button class="delete-btn" onclick="window.app.deleteProduct('${p.id}')">&times;</button>`;
+        item.innerHTML = `<span>${p[currentLang] || p['en']} - <strong>${p.price}</strong></span><button class="delete-btn" data-id="${p.id}">&times;</button>`;
         list.appendChild(item);
     });
+    list.querySelectorAll('.delete-btn').forEach(btn => btn.addEventListener('click', (e) => appFunctions.deleteProduct(e.target.dataset.id)));
 }
 appFunctions.addProduct = async () => {
     const desc_en = document.getElementById('new-product-desc-en').value;
@@ -518,9 +523,10 @@ function renderClients() {
     clients.forEach((c) => {
         const item = document.createElement('div');
         item.className = 'list-item text-sm';
-        item.innerHTML = `<span>${c[currentLang] || c['en']}</span><button class="delete-btn" onclick="window.app.deleteClient('${c.id}')">&times;</button>`;
+        item.innerHTML = `<span>${c[currentLang] || c['en']}</span><button class="delete-btn" data-id="${c.id}">&times;</button>`;
         list.appendChild(item);
     });
+    list.querySelectorAll('.delete-btn').forEach(btn => btn.addEventListener('click', (e) => appFunctions.deleteClient(e.target.dataset.id)));
 }
 appFunctions.addClient = async () => {
     const name_en = document.getElementById('new-client-name-en').value;
