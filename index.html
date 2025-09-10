@@ -3,19 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quotation Generator - Final Version</title>
+    <title>Générateur de Devis - Version Finale</title>
     
-    <!-- SDK Firebase -->
+    <!-- ============================================= -->
+    <!--          SDK ET BIBLIOTHÈQUES EXTERNES        -->
+    <!-- ============================================= -->
+    
+    <!-- SDK Firebase pour la base de données -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
-    <!-- Dépendances externes -->
+    <!-- TailwindCSS pour le style rapide et moderne -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- jsPDF et html2canvas pour la génération de PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <!-- Polices de caractères depuis Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     
+    <!-- ============================================= -->
+    <!--                 STYLES CSS                    -->
+    <!-- ============================================= -->
     <style>
+        /* Variables globales pour les couleurs et la police, pour une personnalisation facile */
         :root {
             --font-family: 'Inter', sans-serif;
             --bg-main: #f1f5f9;
@@ -24,29 +36,95 @@
             --text-body: #334155;
             --border-color: #e2e8f0;
         }
-        body { font-family: var(--font-family); background-color: var(--bg-main); }
-        #print-area { background-color: var(--bg-card); font-size: 14px; color: var(--text-body); }
-        #print-area h2, #print-area h3 { font-size: 16px; color: var(--text-title); font-weight: bold; }
+
+        body { 
+            font-family: var(--font-family); 
+            background-color: var(--bg-main); 
+        }
+
+        /* Styles pour la zone d'aperçu qui sera convertie en PDF */
+        #print-area { 
+            background-color: var(--bg-card); 
+            font-size: 14px; 
+            color: var(--text-body); 
+        }
+        #print-area h2, #print-area h3 { 
+            font-size: 16px; 
+            color: var(--text-title); 
+            font-weight: bold; 
+        }
         
+        /* Style pour le logo de l'entreprise : grand et bien visible */
         #company-logo {
             max-width: 450px;
             margin-bottom: 1rem;
-            object-fit: contain;
+            object-fit: contain; /* Évite la déformation de l'image */
         }
 
-        .control-panel-card { background-color: white; border-radius: 0.75rem; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid var(--border-color); }
-        .photo-upload-container { position: relative; width: 60px; height: 60px; background-color: #f8fafc; border: 2px dashed #e2e8f0; border-radius: 0.5rem; cursor: pointer; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .photo-upload-container img { width: 100%; height: 100%; object-fit: cover; }
-        .pdf-render-mode .no-print { display: none; }
-        .saved-quote-item { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 0.5rem; transition: background-color 0.2s; border: 1px solid var(--border-color); }
-        .saved-quote-item:hover { background-color: #f8fafc; }
-        .saved-quote-item .details { cursor: pointer; flex-grow: 1; }
+        /* Styles pour les cartes du panneau de contrôle à droite */
+        .control-panel-card { 
+            background-color: white; 
+            border-radius: 0.75rem; 
+            padding: 1.5rem; 
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); 
+            border: 1px solid var(--border-color); 
+        }
+
+        /* Style pour la zone de téléversement des photos d'articles */
+        .photo-upload-container { 
+            position: relative; 
+            width: 60px; 
+            height: 60px; 
+            background-color: #f8fafc; 
+            border: 2px dashed #e2e8f0; 
+            border-radius: 0.5rem; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            overflow: hidden; 
+        }
+        .photo-upload-container img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+        }
+
+        /* Cache les éléments non imprimables lors de la génération du PDF */
+        .pdf-render-mode .no-print { 
+            display: none; 
+        }
+        
+        /* Style pour chaque devis dans la liste des devis sauvegardés */
+        .saved-quote-item { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 0.75rem; 
+            border-radius: 0.5rem; 
+            margin-bottom: 0.5rem; 
+            transition: background-color 0.2s; 
+            border: 1px solid var(--border-color); 
+        }
+        .saved-quote-item:hover { 
+            background-color: #f8fafc; 
+        }
+        .saved-quote-item .details { 
+            cursor: pointer; 
+            flex-grow: 1; 
+        }
     </style>
 </head>
 <body class="p-4 sm:p-8">
 
-    <!-- Notifications et Modale de Confirmation -->
+    <!-- ============================================= -->
+    <!--      ÉLÉMENTS D'INTERFACE UTILISATEUR         -->
+    <!-- ============================================= -->
+
+    <!-- Zone de notification pour les messages de succès/erreur -->
     <div id="notification" class="fixed top-5 right-5 text-white py-2 px-4 rounded-lg shadow-lg transform translate-x-[120%] transition-transform duration-300 z-50"></div>
+    
+    <!-- Fenêtre modale pour confirmer la suppression -->
     <div id="confirm-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
         <div class="bg-white rounded-lg shadow-2xl max-w-sm w-full p-6 text-center">
             <h3 id="confirm-title" class="text-lg font-bold text-slate-800 mb-4">Confirmation de suppression</h3>
@@ -58,12 +136,20 @@
         </div>
     </div>
 
+    <!-- Structure principale de la page -->
     <div id="editor-page">
         <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="lg:col-span-2">
-                <main class="p-6 md:p-10 bg-white shadow-xl rounded-2xl" id="print-area"></main>
+            
+            <!-- Colonne de gauche : Aperçu du devis -->
+            <div class="lg-col-span-2">
+                <main class="p-6 md:p-10 bg-white shadow-xl rounded-2xl" id="print-area">
+                    <!-- Le contenu du devis sera injecté ici par JavaScript -->
+                </main>
             </div>
-            <aside class="lg:col-span-1 space-y-6 no-print">
+            
+            <!-- Colonne de droite : Panneau de contrôle -->
+            <aside class="lg-col-span-1 space-y-6 no-print">
+                <!-- Carte pour choisir l'entreprise -->
                 <div class="control-panel-card">
                     <h2 class="font-bold text-lg text-slate-700 border-b pb-3 mb-4">Entreprise</h2>
                     <select id="company-selector" onchange="switchCompany(this.value)" class="w-full p-2 border border-slate-300 rounded-lg">
@@ -71,6 +157,8 @@
                         <option value="rattan_palace">Rattan Palace</option>
                     </select>
                 </div>
+                
+                <!-- Carte pour les actions principales -->
                 <div class="control-panel-card">
                     <h2 class="font-bold text-lg text-slate-700 border-b pb-3 mb-4">Actions</h2>
                     <div class="grid grid-cols-2 gap-3">
@@ -79,6 +167,8 @@
                         <button onclick="generatePDF()" class="col-span-2 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 rounded-lg">Générer PDF</button>
                     </div>
                 </div>
+                
+                <!-- Carte pour afficher les devis sauvegardés -->
                 <div class="control-panel-card">
                     <div class="flex justify-between items-center border-b pb-3 mb-4">
                          <h2 class="font-bold text-lg text-slate-700">Devis Sauvegardés</h2>
@@ -90,7 +180,13 @@
         </div>
     </div>
 
+    <!-- ============================================= -->
+    <!--           SCRIPT PRINCIPAL JAVASCRIPT         -->
+    <!-- ============================================= -->
     <script>
+        // -------------------------------------------
+        // SECTION 1 : CONFIGURATION FIREBASE
+        // -------------------------------------------
         const firebaseConfig = {
             apiKey: "AIzaSyAcMI9tp51br8JPJrkRoIhGpS8jWlUEgOE",
             authDomain: "my-quotation-system-e3135.firebaseapp.com",
@@ -100,10 +196,14 @@
             appId: "1:733892069861:web:c619b6218852050b4b870c",
             measurementId: "G-61TP42SNMV"
         };
+        // Initialisation de Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        let currentCompanyKey = 'wooden_pieces';
+        // -------------------------------------------
+        // SECTION 2 : PROFILS DES ENTREPRISES
+        // -------------------------------------------
+        let currentCompanyKey = 'wooden_pieces'; // Entreprise sélectionnée par défaut
 
         const companyProfiles = {
             'wooden_pieces': { 
@@ -122,32 +222,54 @@
             }
         };
 
+        // -------------------------------------------
+        // SECTION 3 : LOGIQUE DE L'APPLICATION
+        // -------------------------------------------
+
+        // Se déclenche quand la page est entièrement chargée
         document.addEventListener('DOMContentLoaded', initializePage);
 
+        /**
+         * Initialise la page en créant la structure HTML du devis
+         * et en configurant les événements principaux.
+         */
         function initializePage() {
             const printArea = document.getElementById('print-area');
             printArea.innerHTML = `<input type="hidden" id="current-quote-id" value=""><div class="text-center mb-8"><img id="company-logo" src="" alt="Company Logo" class="mx-auto"><div id="company-info"><h1 class="text-2xl font-bold" data-field="companyName"></h1><p class="text-xs text-slate-500" data-field="companyCR"></p><p class="text-xs text-slate-500" data-field="companyVat"></p><p class="text-xs text-slate-500" data-field="companyAddress"></p></div></div><div class="grid grid-cols-2 gap-6 mb-8 pb-4 border-b"><div><h3 class="mb-2">Customer</h3><div class="editable text-sm p-2 bg-slate-50 rounded-md" contenteditable="true" data-field="customerName" data-placeholder="Customer Name"></div><div class="editable text-sm p-2 mt-1 bg-slate-50 rounded-md" contenteditable="true" data-field="customerAddress" data-placeholder="Customer Address"></div><div class="editable text-sm p-2 mt-1 bg-slate-50 rounded-md" contenteditable="true" data-field="customerCountry" data-placeholder="Country"></div></div><div class="text-right"><table class="w-full text-sm"><tr><td class="font-bold p-1">Quote #:</td><td class="p-1 editable" contenteditable="true" data-field="quoteNum"></td></tr><tr><td class="font-bold p-1">Date:</td><td class="p-1" id="quoteDate"></td></tr><tr><td class="font-bold p-1">Valid Until:</td><td class="p-1" id="validDate"></td></tr></table></div></div><div class="mb-8"><h3>Project Description</h3><div class="editable text-sm p-3 rounded-lg bg-slate-50 border" contenteditable="true" data-field="projectDescription" data-placeholder="Enter project description..."></div></div><table class="w-full text-sm mb-8" id="items-table"><thead><tr class="border-b-2 text-left"><th class="p-2 w-20 font-bold">Photo</th><th class="p-2 font-bold">Item</th><th class="p-2 w-24 text-center font-bold">Quantity</th><th class="p-2 w-28 text-right font-bold">Unit Price</th><th class="p-2 w-28 text-right font-bold">Total</th><th class="p-2 w-16 text-center no-print"></th></tr></thead><tbody id="table-body"></tbody></table><button id="add-row" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-2 px-4 rounded-lg no-print">+ Add Row</button><div class="flex justify-end mt-8"><div class="w-full max-w-xs"><div class="flex justify-between py-2 border-b"><span class="font-bold">Subtotal</span><span id="subtotal">0.00</span></div><div class="flex justify-between py-2 border-b"><span class="font-bold">VAT (15%)</span><span id="vat">0.00</span></div><div class="flex justify-between py-3 text-lg font-bold bg-slate-100 px-3 rounded-lg mt-2"><span>TOTAL</span><span id="grand-total">0.00</span></div></div></div><div class="mt-12 pt-6 border-t grid grid-cols-1 md:grid-cols-2 gap-8 text-xs"><div><h3 class="mb-2">Terms & Conditions</h3><div class="editable space-y-1" contenteditable="true" data-field="terms"></div></div><div><h3 class="mb-2">Bank Details</h3><div class="editable space-y-1" contenteditable="true" data-field="bankDetails"></div></div></div><div class="mt-12 pt-8 text-right"><div class="w-56 h-12 border-b-2 inline-block"></div><p class="font-bold pr-16">Signature</p></div><div class="text-center mt-8 pt-4 border-t"><p class="font-bold editable text-sm" data-field="thankYouNote"></p></div>`;
+            
             document.getElementById('add-row').addEventListener('click', () => addNewRow());
+            
+            // Logique pour les placeholders (texte gris qui disparaît)
             document.querySelectorAll('.editable[data-placeholder]').forEach(el => {
                 el.addEventListener('focus', function() { if(this.querySelector('span.text-slate-400')) this.innerHTML = ''; });
                 el.addEventListener('blur', function() { if(!this.textContent.trim()) this.innerHTML = `<span class="text-slate-400">${this.dataset.placeholder}</span>`; });
             });
+            
             switchCompany(currentCompanyKey);
         }
         
+        /**
+         * Change les informations affichées en fonction de l'entreprise sélectionnée.
+         * @param {string} companyKey - La clé de l'entreprise ('wooden_pieces' ou 'rattan_palace').
+         */
         function switchCompany(companyKey) {
             currentCompanyKey = companyKey;
             const profile = companyProfiles[companyKey];
             if (!profile) return;
+
             Object.keys(profile).forEach(field => {
                 const el = document.querySelector(`[data-field="company${field.charAt(0).toUpperCase() + field.slice(1)}"], [data-field="${field}"]`);
                 if(el) el.innerHTML = profile[field];
             });
             document.getElementById('company-logo').src = profile.logo;
-            newQuote();
-            loadQuotesFromFirebase();
+            
+            newQuote(); // Crée un devis vide pour la nouvelle entreprise
+            loadQuotesFromFirebase(); // Charge les devis de cette entreprise
         }
 
+        /**
+         * Réinitialise le formulaire pour créer un nouveau devis.
+         */
         function newQuote() {
             document.querySelectorAll('.editable[data-placeholder]').forEach(el => {
                 if(el.dataset.placeholder) el.innerHTML = `<span class="text-slate-400">${el.dataset.placeholder}</span>`;
@@ -163,6 +285,9 @@
             document.getElementById('validDate').textContent = validUntil.toLocaleDateString('en-CA');
         }
 
+        /**
+         * Génère un numéro de devis unique basé sur la date et l'acronyme de l'entreprise.
+         */
         function generateQuoteNumber() {
             const profile = companyProfiles[currentCompanyKey];
             const now = new Date();
@@ -173,6 +298,9 @@
             document.querySelector('[data-field="quoteNum"]').innerHTML = quoteNumber;
         }
 
+        /**
+         * Met à jour tous les totaux (par ligne, sous-total, TVA, total général).
+         */
         function updateTotals() {
             let subtotal = 0;
             document.querySelectorAll('#table-body tr').forEach(row => {
@@ -187,6 +315,10 @@
             document.getElementById('grand-total').textContent = (subtotal + vat).toFixed(2);
         }
 
+        /**
+         * Ajoute une nouvelle ligne au tableau des articles.
+         * @param {object} item - Un objet optionnel avec les données d'un article à charger.
+         */
         function addNewRow(item = { photo: '', name: '', qty: 1, price: 0 }) {
             const row = document.getElementById('table-body').insertRow();
             row.className = 'border-b';
@@ -198,6 +330,9 @@
             updateTotals();
         }
 
+        /**
+         * Gère le téléversement d'une photo pour un article.
+         */
         function handlePhotoUpload(event, row) {
             const file = event.target.files[0]; if (!file) return;
             const reader = new FileReader();
@@ -211,6 +346,13 @@
             reader.readAsDataURL(file);
         }
 
+        // ----------------------------------------------------
+        // SECTION 4 : GÉNÉRATION PDF ET GESTION FIREBASE
+        // ----------------------------------------------------
+
+        /**
+         * Génère un PDF de haute qualité, gérant plusieurs pages si nécessaire.
+         */
         async function generatePDF() {
             if (document.activeElement) document.activeElement.blur();
             const { jsPDF } = window.jspdf;
@@ -259,6 +401,9 @@
             }
         }
 
+        /**
+         * Sauvegarde le devis actuel dans Firebase (création ou mise à jour).
+         */
         async function saveQuoteToFirebase() {
             const saveButton = document.querySelector('button[onclick="saveQuoteToFirebase()"]');
             const customerNameEl = document.querySelector('[data-field="customerName"]');
@@ -298,7 +443,7 @@
                     document.getElementById('current-quote-id').value = docRef.id;
                     showNotification("Quote saved successfully!");
                 }
-                await loadQuotesFromFirebase();
+                await loadQuotesFromFirebase(); // Mise à jour immédiate
             } catch (error) {
                 console.error("Error saving quote: ", error);
                 showNotification("Error saving quote.", true);
@@ -308,6 +453,9 @@
             }
         }
 
+        /**
+         * Charge les devis de l'entreprise actuelle depuis Firebase.
+         */
         async function loadQuotesFromFirebase() {
             const listEl = document.getElementById('saved-quotes-list');
             listEl.innerHTML = `<p class="text-slate-500">Loading...</p>`;
@@ -329,11 +477,14 @@
                     listEl.appendChild(item);
                 });
             } catch (error) {
-                console.error("Error loading quotes: ", error);
-                listEl.innerHTML = `<p class="text-red-500 text-xs">Error loading quotes. Please check the browser console (F12) for the solution.</p>`;
+                console.error("Firebase Error:", error);
+                listEl.innerHTML = `<p class="text-red-500 text-xs">Error loading quotes. Please open the console (F12) and click the link in the error message to create the database index.</p>`;
             }
         }
 
+        /**
+         * Charge les données d'un devis spécifique dans l'éditeur.
+         */
         function loadSpecificQuote(id, data) {
             document.getElementById('current-quote-id').value = id;
             Object.keys(data.fields).forEach(fieldName => {
@@ -348,6 +499,9 @@
             updateTotals();
         }
 
+        /**
+         * Supprime un devis de Firebase après confirmation.
+         */
         function deleteQuote(id, customerName) {
             showConfirmModal(`Are you sure you want to delete the quote for ${customerName}? This is irreversible.`, async () => {
                 try {
@@ -362,6 +516,9 @@
             });
         }
 
+        /**
+         * Affiche une notification en haut à droite.
+         */
         function showNotification(message, isError = false) {
             const el = document.getElementById('notification');
             el.textContent = message;
@@ -369,6 +526,9 @@
             setTimeout(() => el.classList.add('translate-x-[120%]'), 3000);
         }
 
+        /**
+         * Affiche une modale de confirmation.
+         */
         function showConfirmModal(message, onConfirm) {
             const modal = document.getElementById('confirm-modal');
             document.getElementById('confirm-message').textContent = message;
