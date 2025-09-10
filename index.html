@@ -1,91 +1,91 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quotation Manager Pro</title>
-    <link rel="icon" type="image/svg+xml" href="logo.svg">
-    <script>
-        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-    </script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = { darkMode: 'class' }
-    </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Cairo:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-i18n="app.title">Quotation Manager</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="script.js" type="module" defer></script>
 </head>
-<body class="p-2 sm:p-6 md:p-8 bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200 transition-colors duration-300">
+<body>
 
-    <div class="fixed top-4 right-4 z-50 flex items-center gap-2">
-        <div id="language-switcher" class="flex text-sm font-semibold bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm shadow-lg rounded-full">
-            <button data-lang-switch="en" class="language-btn p-2 rounded-full">EN</button>
-            <button data-lang-switch="ar" class="language-btn p-2 rounded-full">AR</button>
+  <div id="toast-host"></div>
+
+  <div class="container">
+    <header>
+      <h1 data-i18n="quote.title">Quotation</h1>
+      <div class="controls">
+        <select id="language-switcher">
+          <option value="en">English</option>
+          <option value="ar">العربية</option>
+        </select>
+        <button id="dark-mode-toggle" class="icon-button" aria-label="Toggle dark mode">🌙</button>
+      </div>
+    </header>
+
+    <main id="quote-editor">
+      <section class="quote-meta">
+        <div class="form-group">
+          <label for="quote-number" data-i18n="quote.number_label">Quote N°</label>
+          <input type="text" id="quote-number" value="2025-001">
         </div>
-        <button id="theme-toggle" class="p-2 rounded-full bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm text-slate-600 dark:text-slate-300 shadow-lg"></button>
-    </div>
-    
-    <div id="toast-container" class="fixed top-5 right-5 z-[100] flex flex-col items-end gap-3"></div>
-    <div id="global-loader" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-[101] hidden"><div class="loader"></div></div>
-
-    <div id="dashboard-page">
-        <div class="max-w-5xl mx-auto">
-            <div class="flex justify-between items-center mb-6">
-                <h1 class="text-3xl font-bold text-slate-800 dark:text-slate-100" data-lang="dashboardTitle"></h1>
-                <button id="new-quote-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md" data-lang="newQuoteBtn"></button>
-            </div>
-            <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-xl min-h-[150px]">
-                <div id="quote-list-container"><div class="flex justify-center items-center p-8"><div class="loader"></div></div></div>
-            </div>
+        <div class="form-group">
+          <label for="quote-date" data-i18n="quote.date_label">Date</label>
+          <input type="date" id="quote-date">
         </div>
-    </div>
-
-    <div id="company-selection-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 hidden">
-        <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-xl company-chooser max-w-sm w-full animate-in">
-            <h2 class="text-2xl font-bold text-center mb-6 text-slate-800 dark:text-slate-100" data-lang="selectProfileTitle"></h2>
-            <div class="space-y-4">
-                <a href="#" data-company="wooden_pieces">Wooden Pieces EST.</a>
-                <a href="#" data-company="rattan_palace">Rattan Palace</a>
-            </div>
-            <button id="close-company-modal-btn" class="w-full mt-6 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 py-2 rounded-lg" data-lang="cancel"></button>
+        <div class="form-group">
+          <label for="client-name" data-i18n="client.name_label">Client Name</label>
+          <input type="text" id="client-name" placeholder="Enter client name...">
         </div>
-    </div>
+      </section>
 
-    <div id="editor-page" class="hidden">
-        <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="lg:col-span-2"><main class="p-6 md:p-10 print-area bg-white dark:bg-slate-800 shadow-xl rounded-2xl" id="print-area"></main></div>
-            <aside class="lg:col-span-1 space-y-6 no-print">
-                 <button id="back-to-dashboard-btn" class="w-full bg-slate-500 hover:bg-slate-600 text-white font-bold py-2 px-3 rounded-lg shadow" data-lang="backToDashboardBtn"></button>
-                <div id="controls-panel-container"></div>
-            </aside>
+      <section class="quote-items">
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th data-i18n="table.item">Item / Description</th>
+                <th data-i18n="table.qty">Qty</th>
+                <th data-i18n="table.unit_price">Unit Price</th>
+                <th data-i18n="table.total">Total</th>
+                <th class="no-print" data-i18n="table.actions">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="quote-items-body">
+              </tbody>
+          </table>
         </div>
-    </div>
-    
-    <div id="selection-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-40 hidden no-print">
-         <div class="bg-white dark:bg-slate-800 rounded-lg shadow-2xl max-w-lg w-full max-h-[70vh] flex flex-col animate-in">
-             <header class="p-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center"><h2 id="modal-title" class="text-xl font-bold"></h2><button id="modal-close-btn" class="text-3xl">&times;</button></header>
-             <div class="p-4"><input type="text" id="modal-search" placeholder="Search..." class="w-full p-2 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-lg"></div>
-             <div id="modal-list" class="p-4 overflow-auto flex-grow bg-slate-50 dark:bg-slate-900/50 space-y-2"></div>
-         </div>
-     </div>
+        <button id="add-item-btn" class="no-print" data-i18n="actions.add_item">+ Add Item</button>
+      </section>
+      
+      <section class="quote-summary">
+        <div class="totals">
+          <div class="total-row">
+            <span data-i18n="totals.subtotal">Subtotal:</span>
+            <span id="subtotal">0.00</span>
+          </div>
+          <div class="total-row">
+            <label for="discount" data-i18n="totals.discount">Discount:</label>
+            <input type="number" id="discount" value="0" min="0">
+          </div>
+          <div class="total-row">
+            <span data-i18n="totals.vat">VAT (15%):</span>
+            <span id="vat">0.00</span>
+          </div>
+          <hr>
+          <div class="total-row grand-total">
+            <span data-i18n="totals.grand_total">Grand Total:</span>
+            <span id="grand-total">0.00</span>
+          </div>
+        </div>
+      </section>
 
-    <div id="pdf-preview-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden no-print">
-         <div class="bg-white rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col animate-in">
-             <header class="p-4 border-b flex justify-between items-center"><h2 class="text-xl font-bold" data-lang="pdfPreviewTitle"></h2><button id="close-pdf-modal-btn" class="text-3xl">&times;</button></header>
-             <div class="p-4 overflow-auto flex-grow bg-slate-100"><img id="pdf-preview-image" src="" alt="PDF Preview" class="w-full h-auto border shadow-lg"></div>
-             <footer class="p-4 bg-slate-50 border-t flex justify-end gap-3"><button id="cancel-pdf-btn" class="bg-slate-500 hover:bg-slate-600 text-white font-bold py-2 px-4 rounded-lg" data-lang="cancel"></button><button id="download-pdf-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg" data-lang="downloadPdf"></button></footer>
-         </div>
-     </div>
+      <footer class="quote-actions no-print">
+        <button id="save-btn" data-i18n="actions.save">Save Changes</button>
+        <button id="pdf-btn" data-i18n="actions.download_pdf">Download PDF</button>
+      </footer>
+    </main>
+  </div>
 
-    <script type="module" src="script.js"></script>
 </body>
 </html>
-
