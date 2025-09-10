@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quotation Generator - Pro Version</title>
+    <title>Quotation Generator - Final Version</title>
     
     <!-- SDK Firebase -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -330,7 +330,7 @@
                 });
             } catch (error) {
                 console.error("Error loading quotes: ", error);
-                listEl.innerHTML = `<p class="text-red-500">Error loading quotes.</p>`;
+                listEl.innerHTML = `<p class="text-red-500 text-xs">Error loading quotes. Please check the browser console (F12) for the solution.</p>`;
             }
         }
 
