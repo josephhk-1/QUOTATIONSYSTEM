@@ -197,6 +197,21 @@ body { font-family: 'Inter', sans-serif; }
     border-color: #4b5563;
 }
 
+/* Loading Overlay for slow operations */
+#loading-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    color: white;
+    font-size: 1.25rem;
+    font-weight: 600;
+    backdrop-filter: blur(4px);
+}
+
 @media print {
     .no-print {
         display: none !important;
@@ -205,3 +220,4 @@ body { font-family: 'Inter', sans-serif; }
         box-shadow: none !important;
     }
 }
+
