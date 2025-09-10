@@ -28,11 +28,12 @@
         #print-area { background-color: var(--bg-card); font-size: 14px; color: var(--text-body); }
         #print-area h2, #print-area h3 { font-size: 16px; color: var(--text-title); font-weight: bold; }
         
-        /* Logo "Big Big" */
+        /* LOGO GRANDE TAILLE ET CLAIR */
         #company-logo {
-            max-width: 350px; /* Largeur augmentée */
-            height: 150px;   /* Hauteur augmentée */
-            object-fit: contain;
+            max-width: 450px; /* Largeur considérablement augmentée */
+            /* On supprime la hauteur fixe pour garder les proportions */
+            margin-bottom: 1rem; /* Ajoute de l'espace en dessous */
+            object-fit: contain; /* Garde les proportions de l'image */
         }
 
         .control-panel-card { background-color: white; border-radius: 0.75rem; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid var(--border-color); }
@@ -130,7 +131,7 @@
             const printArea = document.getElementById('print-area');
             printArea.innerHTML = `
                 <input type="hidden" id="current-quote-id" value="">
-                <div class="text-center mb-8"><img id="company-logo" src="" alt="Company Logo" class="mx-auto mb-4">
+                <div class="text-center mb-8"><img id="company-logo" src="" alt="Company Logo" class="mx-auto">
                     <div id="company-info">
                         <h1 class="text-2xl font-bold" data-field="companyName"></h1><p class="text-xs text-slate-500" data-field="companyCR"></p>
                         <p class="text-xs text-slate-500" data-field="companyVat"></p><p class="text-xs text-slate-500" data-field="companyAddress"></p>
@@ -275,8 +276,51 @@
             reader.readAsDataURL(file);
         }
 
-        async function generatePDF() { /* ... (Identique à la version précédente) ... */ }
+        async function generatePDF() {
+            if (document.activeElement) document.activeElement.blur();
+            const { jsPDF } = window.jspdf;
+            const quoteElement = document.getElementById('print-area');
+            
+            const printableClone = quoteElement.cloneNode(true);
+            printableClone.classList.add('pdf-render-mode');
+            printableClone.style.width = '800px'; 
+            printableClone.style.position = 'absolute';
+            printableClone.style.left = '-9999px';
+            document.body.appendChild(printableClone);
+            
+            printableClone.querySelectorAll('input.quantity, input.unit-price').forEach(input => {
+                const span = document.createElement('span');
+                span.textContent = input.value;
+                input.parentNode.replaceChild(span, input);
+            });
+            printableClone.querySelectorAll('.editable[contenteditable="true"]').forEach(div => {
+                div.removeAttribute('contenteditable');
+            });
 
+            try {
+                const canvas = await html2canvas(printableClone, { scale: 2, useCORS: true });
+                const imgData = canvas.toDataURL('image/png');
+                
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = pdf.internal.pageSize.getHeight();
+                const imgProps = pdf.getImageProperties(imgData);
+                const ratio = imgProps.height / imgProps.width;
+                const imgHeight = pdfWidth * ratio;
+                let finalHeight = imgHeight < pdfHeight ? imgHeight : pdfHeight;
+                
+                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, finalHeight);
+                const customerNameEl = document.querySelector('[data-field="customerName"]');
+                const customerName = (customerNameEl.textContent || 'details').replace(/<[^>]*>?/gm, '').trim();
+                pdf.save(`Quotation_${customerName}.pdf`);
+
+            } catch(e) {
+                console.error("La génération du PDF a échoué:", e);
+                alert("Une erreur est survenue lors de la génération du PDF.");
+            } finally {
+                document.body.removeChild(printableClone);
+            }
+        }
 
         // ===================================================================================
         // SECTION 4 : FONCTIONS FIREBASE
@@ -362,7 +406,7 @@
             Object.keys(data.fields).forEach(fieldName => {
                 const el = document.querySelector(`.editable[data-field="${fieldName}"]`);
                 if (el) {
-                   if (data.fields[fieldName]) {
+                   if (data.fields[fieldName] && data.fields[fieldName].trim() !== '') {
                        el.innerHTML = data.fields[fieldName];
                    } else if(el.dataset.placeholder) {
                        el.innerHTML = `<span class="text-slate-400">${el.dataset.placeholder}</span>`;
