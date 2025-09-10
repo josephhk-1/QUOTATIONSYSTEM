@@ -3,110 +3,446 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quotation Manager Pro</title>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%233b82f6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'%3E%3C/path%3E%3Cpolyline points='14 2 14 8 20 8'%3E%3C/polyline%3E%3Cline x1='16' y1='13' x2='8' y2='13'%3E%3C/line%3E%3Cline x1='16' y1='17' x2='8' y2='17'%3E%3C/line%3E%3C/svg%3E">
+    <title>Quotation Generator</title>
     
-    <!-- Dark Mode Quick Load -->
-    <script>
-        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-    </script>
-    
-    <!-- External Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = { darkMode: 'class' }
-    </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-storage-compat.js"></script>
-
-    <!-- Fonts & Custom Styles -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Cairo:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Définition des variables pour les couleurs et la mise en page pour une personnalisation facile */
+        :root {
+            --font-family: 'Inter', sans-serif;
+            --bg-main: #f1f5f9;
+            --bg-card: #ffffff;
+            --text-title: #1e293b;
+            --text-body: #334155;
+            --border-color: #e2e8f0;
+        }
+        body { 
+            font-family: var(--font-family); 
+            background-color: var(--bg-main); 
+        }
+        /* Style spécifique pour la langue arabe */
+        html[lang="ar"] body { 
+            font-family: 'Cairo', sans-serif; 
+        }
+        
+        /* Styles pour la zone d'impression qui deviendra le PDF */
+        #print-area {
+            background-color: var(--bg-card);
+            font-size: 14px;
+            color: var(--text-body);
+        }
+        #print-area h2, #print-area h3 {
+            font-size: 16px;
+            color: var(--text-title);
+            font-weight: bold;
+        }
+        
+        /* Styles pour les cartes du panneau de contrôle */
+        .control-panel-card {
+            background-color: white;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        /* Style pour le conteneur de la photo de l'article */
+        .photo-upload-container {
+            position: relative;
+            width: 60px;
+            height: 60px;
+            background-color: #f8fafc;
+            border: 2px dashed #e2e8f0;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .photo-upload-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Cache les éléments non nécessaires lors de l'impression */
+        .no-print {
+            display: revert;
+        }
+        .pdf-render-mode .no-print {
+            display: none;
+        }
+    </style>
 </head>
-<body class="p-2 sm:p-6 md:p-8 bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200 transition-colors duration-300">
+<body class="p-4 sm:p-8">
 
-    <div class="fixed top-4 right-4 z-50 flex items-center gap-2">
-        <div id="language-switcher" class="flex text-sm font-semibold bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm shadow-lg rounded-full">
-            <button data-lang-switch="en" class="language-btn p-2 rounded-full">EN</button>
-            <button data-lang-switch="ar" class="language-btn p-2 rounded-full">AR</button>
-        </div>
-        <button id="theme-toggle" class="p-2 rounded-full bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm text-slate-600 dark:text-slate-300 shadow-lg"></button>
-    </div>
-
-    <!-- PAGE TABLEAU DE BORD -->
-    <div id="dashboard-page">
-        <div class="max-w-5xl mx-auto">
-            <div class="flex justify-between items-center mb-6">
-                <h1 class="text-3xl font-bold text-slate-800 dark:text-slate-100" data-lang="dashboardTitle">My Quotations</h1>
-                <button id="new-quote-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-transform hover:scale-105" data-lang="newQuoteBtn">+ New Quotation</button>
-            </div>
-            <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-xl">
-                <div id="quote-list-container">
-                    <!-- Loading Spinner -->
-                    <div class="text-center p-8 text-slate-500">Loading data...</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODALE DE SÉLECTION DE L'ENTREPRISE -->
-    <div id="company-selection-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 hidden">
-        <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-xl company-chooser max-w-sm w-full animate-in">
-            <h2 class="text-2xl font-bold text-center mb-6 text-slate-800 dark:text-slate-100" data-lang="selectProfileTitle">Select a Company Profile</h2>
-            <div class="space-y-4">
-                <a href="#" onclick="createNewQuote('wooden_pieces')">Wooden Pieces EST.</a>
-                <a href="#" onclick="createNewQuote('rattan_palace')">Rattan Palace</a>
-            </div>
-            <button id="close-company-modal-btn" class="w-full mt-6 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 py-2 rounded-lg" data-lang="cancel">Cancel</button>
-        </div>
-    </div>
-
-    <!-- PAGE ÉDITEUR DE DEVIS -->
-    <div id="editor-page" class="hidden">
+    <div id="editor-page">
         <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
             <div class="lg:col-span-2">
-                <main class="p-6 md:p-10 print-area bg-white dark:bg-slate-800 shadow-xl rounded-2xl" id="print-area">
-                    <!-- Le contenu sera injecté par JS -->
+                <main class="p-6 md:p-10 bg-white shadow-xl rounded-2xl" id="print-area">
+                    
+                    <div class="text-center mb-8">
+                        <img id="company-logo" src="" alt="Company Logo" class="h-24 mx-auto mb-4">
+                        <div id="company-info">
+                            <h1 class="text-2xl font-bold editable" data-field="companyName"></h1>
+                            <p class="text-xs text-slate-500 editable" data-field="companyCR"></p>
+                            <p class="text-xs text-slate-500 editable" data-field="companyVat"></p>
+                            <p class="text-xs text-slate-500 editable" data-field="companyAddress"></p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-6 mb-8 pb-4 border-b">
+                        <div>
+                            <h3 class="mb-2" data-lang="customer">Customer</h3>
+                            <div class="editable text-sm p-2 bg-slate-50 rounded-md" contenteditable="true" data-field="customerName" data-placeholder="Customer Name"></div>
+                            <div class="editable text-sm p-2 mt-1 bg-slate-50 rounded-md" contenteditable="true" data-field="customerAddress" data-placeholder="Customer Address"></div>
+                             <div class="editable text-sm p-2 mt-1 bg-slate-50 rounded-md" contenteditable="true" data-field="customerCountry" data-placeholder="Country"></div>
+                        </div>
+                        <div class="text-right">
+                            <table class="w-full text-sm">
+                                <tr>
+                                    <td class="font-bold p-1" data-lang="quoteNum">Quote #:</td>
+                                    <td class="p-1 editable" contenteditable="true" data-field="quoteNum"></td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold p-1" data-lang="date">Date:</td>
+                                    <td class="p-1" id="quoteDate"></td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold p-1" data-lang="validUntil">Valid Until:</td>
+                                    <td class="p-1" id="validDate"></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-8">
+                        <h3 class="mb-2" data-lang="projectDescription">Project Description</h3>
+                        <div class="editable text-sm p-3 rounded-lg bg-slate-50 border" contenteditable="true" data-field="projectDescription" data-placeholder="Enter project description..."></div>
+                    </div>
+
+                    <table class="w-full text-sm mb-8" id="items-table">
+                        <thead>
+                            <tr class="border-b-2 text-left">
+                                <th class="p-2 w-20 font-bold" data-lang="photo">Photo</th>
+                                <th class="p-2 font-bold" data-lang="item">Item</th>
+                                <th class="p-2 w-24 text-center font-bold" data-lang="quantity">Quantity</th>
+                                <th class="p-2 w-28 text-right font-bold" data-lang="unitPrice">Unit Price</th>
+                                <th class="p-2 w-28 text-right font-bold" data-lang="total">Total</th>
+                                <th class="p-2 w-16 text-center no-print"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body"></tbody>
+                    </table>
+                    <button id="add-row" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-2 px-4 rounded-lg no-print" data-lang="addRow">+ Add Row</button>
+
+                    <div class="flex justify-end mt-8">
+                        <div class="w-full max-w-xs">
+                            <div class="flex justify-between py-2 border-b">
+                                <span class="font-bold" data-lang="subtotal">Subtotal</span>
+                                <span id="subtotal">0.00</span>
+                            </div>
+                            <div class="flex justify-between py-2 border-b">
+                                <span class="font-bold" data-lang="vat">VAT (15%)</span>
+                                <span id="vat">0.00</span>
+                            </div>
+                            <div class="flex justify-between py-3 text-lg font-bold bg-slate-100 px-3 rounded-lg mt-2">
+                                <span data-lang="grandTotal">TOTAL</span>
+                                <span id="grand-total">0.00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-12 pt-6 border-t grid grid-cols-1 md:grid-cols-2 gap-8 text-xs">
+                        <div>
+                            <h3 class="mb-2" data-lang="terms">Terms & Conditions</h3>
+                            <div class="editable space-y-1" contenteditable="true" data-field="terms"></div>
+                        </div>
+                        <div>
+                            <h3 class="mb-2" data-lang="bankDetails">Bank Details</h3>
+                            <div class="editable space-y-1" contenteditable="true" data-field="bankDetails"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-12 pt-8 text-right">
+                        <div class="w-56 h-12 border-b-2 inline-block"></div>
+                        <p class="font-bold pr-16" data-lang="signature">Signature</p>
+                    </div>
+                    <div class="text-center mt-8 pt-4 border-t">
+                        <p class="font-bold editable text-sm" data-field="thankYouNote"></p>
+                    </div>
                 </main>
             </div>
+            
             <aside class="lg:col-span-1 space-y-6 no-print">
-                <button id="back-to-dashboard-btn" class="w-full bg-slate-500 hover:bg-slate-600 text-white font-bold py-2 px-3 rounded-lg shadow transition-transform hover:scale-105" data-lang="backToDashboardBtn">← Back to Dashboard</button>
-                <div id="controls-panel-container">
-                    <!-- Le contenu des contrôles sera injecté par JS -->
+                <div class="control-panel-card">
+                    <h2 class="font-bold text-lg text-slate-700 border-b pb-3 mb-4">Contrôles</h2>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="document.getElementById('file-loader').click()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded-lg">Charger</button>
+                        <input type="file" id="file-loader" class="hidden" accept=".json" onchange="loadQuote(event)">
+                        <button onclick="saveQuote()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-3 rounded-lg">Sauvegarder</button>
+                        <button onclick="generatePDF()" class="col-span-2 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 rounded-lg">Générer PDF</button>
+                    </div>
                 </div>
             </aside>
         </div>
     </div>
-    
-    <!-- MODALES -->
-    <div id="selection-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-40 hidden no-print">
-        <div class="bg-white dark:bg-slate-800 rounded-lg shadow-2xl max-w-lg w-full max-h-[70vh] flex flex-col animate-in">
-            <header class="p-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center"><h2 id="modal-title" class="text-xl font-bold text-slate-800 dark:text-slate-100">Select an Item</h2><button id="modal-close-btn" class="text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100 text-3xl">×</button></header>
-            <div class="p-4"><input type="text" id="modal-search" placeholder="Search..." class="w-full p-2 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"></div>
-            <div id="modal-list" class="p-4 overflow-auto flex-grow bg-slate-50 dark:bg-slate-900/50 space-y-2"></div>
-        </div>
-    </div>
-    <div id="pdf-preview-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden no-print">
-        <div class="bg-white rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col animate-in">
-            <header class="p-4 border-b flex justify-between items-center"><h2 class="text-xl font-bold" data-lang="pdfPreviewTitle">PDF Preview</h2><button onclick="closePreviewModal()" class="text-slate-500 hover:text-slate-800 text-3xl">×</button></header>
-            <div class="p-4 overflow-auto flex-grow bg-slate-100"><img id="pdf-preview-image" src="" alt="PDF Preview" class="w-full h-auto border shadow-lg"></div>
-            <footer class="p-4 bg-slate-50 border-t flex justify-end gap-3"><button onclick="closePreviewModal()" class="bg-slate-500 hover:bg-slate-600 text-white font-bold py-2 px-4 rounded-lg" data-lang="cancel">Cancel</button><button id="download-pdf-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg" data-lang="downloadPdf">Download PDF</button></footer>
-        </div>
-    </div>
 
-    <script src="script.js"></script>
+    <script>
+        // ===================================================================================
+        // SECTION 1 : CONFIGURATION ET DONNÉES
+        // ===================================================================================
+        
+        let currentLang = 'en'; // Langue par défaut
+        
+        // Données pour l'entreprise. Facile à modifier ou à dupliquer pour une autre entreprise.
+        const companyProfile = {
+            acronym: 'WPE',
+            logo: 'logowooden.png', // Assure-toi d'avoir un fichier 'logowooden.png' dans le même dossier
+            name: { en: 'Wooden Pieces EST.' },
+            cr: { en: 'CR: 1010798529' }, // [cite: 5]
+            vat: { en: 'Vat No.: 310618978500003' }, // [cite: 6]
+            address: { en: 'RFKB2501. ALQods st, Alkhaleej, P.O.Box: 2401, RIYADH 13223, Kingdom of Saudi Arabia' },
+            bankDetails: { en: `<p><b>Bank:</b> ALINMAA BANK</p><p><b>IBAN:</b> SA0705000068203914512000</p>` }, // [cite: 17, 18]
+            terms: { en: `<ul><li>50% Down payment</li><li>50% After delivery</li><li>Delivery within 20 to 30 days from down payment</li><li>3 years warranty on manufacturing defects</li></ul>` }, // [cite: 14, 15, 16]
+            thankYouNote: { en: 'We appreciate your business and look forward to working with you.' } // [cite: 20]
+        };
+        
+        // Traductions pour l'interface (peut être étendu à d'autres langues)
+        const translations = {
+            en: { customer: "Customer", quoteNum: "Quote #:", date: "Date:", validUntil: "Valid Until:", projectDescription: "Project Description", photo: "Photo", item: "Item", quantity: "Quantity", unitPrice: "Unit Price", total: "Total", addRow: "+ Add Row", subtotal: "Subtotal", vat: "VAT (15%)", grandTotal: "TOTAL", terms: "Terms & Conditions", bankDetails: "Bank Details", signature: "Signature" },
+        };
+
+        // ===================================================================================
+        // SECTION 2 : LOGIQUE PRINCIPALE
+        // ===================================================================================
+        
+        // Se déclenche lorsque la page est entièrement chargée
+        document.addEventListener('DOMContentLoaded', function () {
+            initializePage();
+            document.getElementById('add-row').addEventListener('click', () => addNewRow());
+        });
+
+        // Fonction d'initialisation pour remplir les données au démarrage
+        function initializePage() {
+            // Appliquer les données de l'entreprise
+            document.getElementById('company-logo').src = companyProfile.logo;
+            const fields = ['name', 'cr', 'vat', 'address', 'bankDetails', 'terms', 'thankYouNote'];
+            fields.forEach(field => {
+                const el = document.querySelector(`[data-field="company${field.charAt(0).toUpperCase() + field.slice(1)}"], [data-field="${field}"]`);
+                if(el && companyProfile[field]) {
+                    el.dataset.en = companyProfile[field].en;
+                    el.innerHTML = companyProfile[field].en;
+                }
+            });
+
+            // Gérer les champs éditables avec des placeholders
+            document.querySelectorAll('.editable[data-placeholder]').forEach(el => {
+                if(!el.textContent.trim()) el.innerHTML = `<span class="text-slate-400">${el.dataset.placeholder}</span>`;
+                el.addEventListener('focus', function() {
+                    if(this.querySelector('span.text-slate-400')) this.innerHTML = '';
+                });
+                el.addEventListener('blur', function() {
+                    if(!this.textContent.trim()) this.innerHTML = `<span class="text-slate-400">${this.dataset.placeholder}</span>`;
+                });
+            });
+
+            // Mettre à jour les dates
+            const today = new Date();
+            document.getElementById('quoteDate').textContent = today.toLocaleDateString('en-CA');
+            const validUntil = new Date();
+            validUntil.setDate(today.getDate() + 7); // Devis valide 7 jours
+            document.getElementById('validDate').textContent = validUntil.toLocaleDateString('en-CA');
+            
+            // Générer un numéro de devis unique
+            generateQuoteNumber();
+            
+            // Ajouter une première ligne vide
+            addNewRow();
+        }
+
+        // Met à jour tous les calculs (total par ligne, sous-total, TVA, total général)
+        function updateTotals() {
+            let subtotal = 0;
+            document.querySelectorAll('#table-body tr').forEach(row => {
+                const quantity = parseFloat(row.querySelector('.quantity').value) || 0;
+                const unitPrice = parseFloat(row.querySelector('.unit-price').value) || 0;
+                const total = quantity * unitPrice;
+                row.querySelector('.total').textContent = total.toFixed(2);
+                subtotal += total;
+            });
+            const vat = subtotal * 0.15;
+            const grandTotal = subtotal + vat;
+            document.getElementById('subtotal').textContent = subtotal.toFixed(2);
+            document.getElementById('vat').textContent = vat.toFixed(2);
+            document.getElementById('grand-total').textContent = grandTotal.toFixed(2);
+        }
+
+        // Ajoute une nouvelle ligne au tableau des articles
+        function addNewRow(item = { photo: '', name: '', qty: 1, price: 0 }) {
+            const tableBody = document.getElementById('table-body');
+            const row = document.createElement('tr');
+            row.className = 'border-b';
+            row.innerHTML = `
+                <td class="p-2">
+                    <div class="photo-upload-container">
+                        <img src="${item.photo || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" class="${item.photo ? '' : 'hidden'}" data-photo-base64="${item.photo || ''}">
+                        <div class="placeholder-icon ${item.photo ? 'hidden' : ''}">
+                            <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        </div>
+                        <input type="file" class="hidden" accept="image/*">
+                    </div>
+                </td>
+                <td class="p-2"><div class="item-name w-full p-2 border rounded" contenteditable="true">${item.name}</div></td>
+                <td class="p-2"><input type="number" value="${item.qty}" class="quantity w-full text-center p-2 border rounded"></td>
+                <td class="p-2"><input type="number" value="${item.price}" step="0.01" class="unit-price w-full text-right p-2 border rounded"></td>
+                <td class="p-2 text-right total font-bold">0.00</td>
+                <td class="p-2 text-center no-print"><button class="remove-row text-red-500 hover:text-red-700 text-2xl font-bold">&times;</button></td>
+            `;
+            tableBody.appendChild(row);
+
+            // Ajout des écouteurs d'événements pour la nouvelle ligne
+            row.querySelectorAll('input.quantity, input.unit-price').forEach(input => input.addEventListener('input', updateTotals));
+            row.querySelector('.remove-row').addEventListener('click', () => { row.remove(); updateTotals(); });
+            
+            const photoContainer = row.querySelector('.photo-upload-container');
+            const fileInput = row.querySelector('input[type="file"]');
+            photoContainer.addEventListener('click', () => fileInput.click());
+            fileInput.addEventListener('change', (event) => handlePhotoUpload(event, row));
+
+            updateTotals();
+        }
+
+        // Gère le téléversement d'une photo pour un article
+        function handlePhotoUpload(event, row) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const imgEl = row.querySelector('img');
+                const placeholder = row.querySelector('.placeholder-icon');
+                imgEl.src = e.target.result;
+                imgEl.dataset.photoBase64 = e.target.result;
+                imgEl.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Génère un numéro de devis unique basé sur la date
+        function generateQuoteNumber() {
+            const now = new Date();
+            const day = String(now.getDate()).padStart(2, '0');
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const year = String(now.getFullYear()).slice(-2);
+            const quoteNumber = `Q-${companyProfile.acronym}-${day}${month}${year}`;
+            document.querySelector('[data-field="quoteNum"]').innerHTML = quoteNumber;
+        }
+
+        // ===================================================================================
+        // SECTION 3 : SAUVEGARDE, CHARGEMENT ET GÉNÉRATION PDF
+        // ===================================================================================
+
+        // Sauvegarde les données du devis dans un fichier JSON
+        function saveQuote() {
+            const quoteData = { fields: {}, items: [] };
+            
+            document.querySelectorAll('.editable').forEach(el => {
+                const fieldName = el.dataset.field;
+                if(fieldName) {
+                    const hasPlaceholder = el.querySelector('span.text-slate-400');
+                    quoteData.fields[fieldName] = hasPlaceholder ? '' : el.innerHTML;
+                }
+            });
+
+            document.querySelectorAll('#table-body tr').forEach(row => {
+                quoteData.items.push({
+                    photo: row.querySelector('img').dataset.photoBase64 || '',
+                    name: row.querySelector('.item-name').textContent,
+                    qty: row.querySelector('.quantity').value,
+                    price: row.querySelector('.unit-price').value
+                });
+            });
+            
+            const customerName = (quoteData.fields.customerName || 'quotation').replace(/<[^>]*>?/gm, '');
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(quoteData, null, 2));
+            const a = document.createElement('a');
+            a.href = dataStr;
+            a.download = `Quotation_${customerName}.json`;
+            a.click();
+        }
+
+        // Charge les données d'un devis depuis un fichier JSON
+        function loadQuote(event) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    Object.keys(data.fields).forEach(fieldName => {
+                        const el = document.querySelector(`.editable[data-field="${fieldName}"]`);
+                        if (el) el.innerHTML = data.fields[fieldName];
+                    });
+                    document.getElementById('table-body').innerHTML = '';
+                    data.items.forEach(item => addNewRow(item));
+                    updateTotals();
+                } catch (error) { alert("Erreur: Impossible de charger le fichier."); }
+            };
+            reader.readAsText(event.target.files[0]);
+        }
+
+        // Génère le PDF à partir de la zone d'impression
+        async function generatePDF() {
+            if (document.activeElement) document.activeElement.blur();
+            const { jsPDF } = window.jspdf;
+            const quoteElement = document.getElementById('print-area');
+            
+            const printableClone = quoteElement.cloneNode(true);
+            printableClone.classList.add('pdf-render-mode');
+            printableClone.style.width = '800px'; 
+            printableClone.style.position = 'absolute';
+            printableClone.style.left = '-9999px';
+            document.body.appendChild(printableClone);
+            
+            // Remplacer les champs de saisie par du texte simple pour le PDF
+            printableClone.querySelectorAll('input.quantity, input.unit-price').forEach(input => {
+                const span = document.createElement('span');
+                span.textContent = input.value;
+                input.parentNode.replaceChild(span, input);
+            });
+            printableClone.querySelectorAll('.editable[contenteditable="true"]').forEach(div => {
+                div.removeAttribute('contenteditable');
+            });
+
+            try {
+                const canvas = await html2canvas(printableClone, { scale: 2, useCORS: true });
+                const imgData = canvas.toDataURL('image/png');
+                
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = pdf.internal.pageSize.getHeight();
+                const imgProps = pdf.getImageProperties(imgData);
+                const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                
+                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, imgHeight);
+                const customerNameEl = document.querySelector('[data-field="customerName"]');
+                const customerName = customerNameEl.textContent.trim() || 'details';
+                pdf.save(`Quotation_${customerName}.pdf`);
+
+            } catch(e) {
+                console.error("La génération du PDF a échoué:", e);
+                alert("Une erreur est survenue lors de la génération du PDF.");
+            } finally {
+                document.body.removeChild(printableClone);
+            }
+        }
+    </script>
 </body>
 </html>
-
