@@ -44,11 +44,6 @@ const moonIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="
 function applyTheme() {
     themeToggleBtn.innerHTML = document.documentElement.classList.contains('dark') ? sunIcon : moonIcon;
 }
-themeToggleBtn.addEventListener('click', () => {
-    document.documentElement.classList.toggle('dark');
-    localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
-    applyTheme();
-});
 
 // ===============================================
 // GLOBAL STATE & DATA
@@ -80,7 +75,7 @@ const companyProfiles = {
 };
 const translations = {
     en: { dashboardTitle: "My Quotations", newQuoteBtn: "+ New Quotation", selectProfileTitle: "Select a Company Profile", backToDashboardBtn: "← Back to Dashboard", appTitle: "Quotation Editor", loadSource: "Load", saveSource: "Save", previewPdf: "Preview PDF", downloadPdf: "Download PDF", customer: "Customer", quoteNum: "Quote #:", date: "Date:", validUntil: "Valid Until:", projectDescription: "Project Description", photo: "Photo", description: "Item", quantity: "Quantity", unitPrice: "Unit Price", total: "Total", action: "Action", addRow: "+ Add Row", subtotal: "Subtotal", vat: "VAT (15%)", grandTotal: "TOTAL", terms: "Terms & Conditions", bankDetails: "Bank Details", signature: "Signature", pdfPreviewTitle: "PDF Preview", cancel: "Cancel", fileLoadError: "Error: Could not load file.", quotationTitle: "QUOTATION", closingPhrase: "Thank you for your business. We look forward to working with you.", noQuotes: "No quotations found.", clickNew: `Click "+ New Quotation" to get started.`, saving: "Saving...", saved: "Saved!", deleting: "Deleting...", deleted: "Deleted!", loading: "Loading...", generatingPdf: "Generating PDF...", emptyLibrary: "No items found. Add one below!" },
-    ar: { dashboardTitle: "عروضي", newQuoteBtn: "+ عرض سعر جديد", selectProfileTitle: "اختر ملف الشركة", backToDashboardBtn: "→ العودة للرئيسية", appTitle: "محرر عروض الأسعار", loadSource: "تحميل", saveSource: "حفظ", previewPdf: "معاينة PDF", downloadPdf: "تحميل PDF", customer: "العميل", quoteNum: "رقم العرض:", date: "التاريخ:", validUntil: "صالح حتى:", projectDescription: "وصف المشروع", photo: "صورة", description: "البند", quantity: "الكمية", unitPrice: "سعر الوحدة", total: "المجموع", action: "إجراء", addRow: "+ أضف سطراً", subtotal: "المجموع الفرعي", vat: "الضريبة (15%)", grandTotal: "الإجمالي", terms: "الشروط والأحكام", bankDetails: "التفاصيل البنكية", signature: "التوقيع", pdfPreviewTitle: "معاينة PDF", cancel: "إلغاء", fileLoadError: "خطأ: لا يمكن تحميل الملف.", quotationTitle: "عرض سعر", closingPhrase: "شكراً لثقتكم. نتطلع للعمل معكم.", noQuotes: "لم يتم العثور على عروض أسعار.", clickNew: `انقر فوق "+ عرض سعر جديد" للبدء.`, saving: "جاري الحفظ...", saved: "تم الحفظ!", deleting: "جاري الحذف...", deleted: "تم الحذف!", loading: "جاري التحميل...", generatingPdf: "جاري إنشاء PDF...", emptyLibrary: "لا توجد عناصر. أضف واحداً بالأسفل!" }
+    ar: { dashboardTitle: "عروضي", newQuoteBtn: "+ عرض سعر جديد", selectProfileTitle: "اختر ملف الشركة", backToDashboardBtn: "→ العودة للئيسية", appTitle: "محرر عروض الأسعار", loadSource: "تحميل", saveSource: "حفظ", previewPdf: "معاينة PDF", downloadPdf: "تحميل PDF", customer: "العميل", quoteNum: "رقم العرض:", date: "التاريخ:", validUntil: "صالح حتى:", projectDescription: "وصف المشروع", photo: "صورة", description: "البند", quantity: "الكمية", unitPrice: "سعر الوحدة", total: "المجموع", action: "إجراء", addRow: "+ أضف سطراً", subtotal: "المجموع الفرعي", vat: "الضريبة (15%)", grandTotal: "الإجمالي", terms: "الشروط والأحكام", bankDetails: "التفاصيل البنكية", signature: "التوقيع", pdfPreviewTitle: "معاينة PDF", cancel: "إلغاء", fileLoadError: "خطأ: لا يمكن تحميل الملف.", quotationTitle: "عرض سعر", closingPhrase: "شكراً لثقتكم. نتطلع للعمل معكم.", noQuotes: "لم يتم العثور على عروض أسعار.", clickNew: `انقر فوق "+ عرض سعر جديد" للبدء.`, saving: "جاري الحفظ...", saved: "تم الحفظ!", deleting: "جاري الحذف...", deleted: "تم الحذف!", loading: "جاري التحميل...", generatingPdf: "جاري إنشاء PDF...", emptyLibrary: "لا توجد عناصر. أضف واحداً بالأسفل!" }
 };
 
 const editorHTML = `
@@ -298,6 +293,7 @@ const appFunctions = {
         }
     }
 };
+// Make functions globally accessible for HTML onclick attributes
 window.app = appFunctions;
 
 
@@ -751,4 +747,7 @@ async function main() {
 }
 
 main();
+
+
+}
 
