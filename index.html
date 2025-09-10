@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quotation Generator - Multi Company</title>
+    <title>Quotation Generator - Final Version</title>
     
+    <!-- SDK Firebase -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
+    <!-- Dépendances externes -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -26,7 +28,13 @@
         #print-area { background-color: var(--bg-card); font-size: 14px; color: var(--text-body); }
         #print-area h2, #print-area h3 { font-size: 16px; color: var(--text-title); font-weight: bold; }
         
-        #company-logo { max-width: 250px; height: 100px; object-fit: contain; }
+        /* Logo "Big Big" */
+        #company-logo {
+            max-width: 350px; /* Largeur augmentée */
+            height: 150px;   /* Hauteur augmentée */
+            object-fit: contain;
+        }
+
         .control-panel-card { background-color: white; border-radius: 0.75rem; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid var(--border-color); }
         .photo-upload-container { position: relative; width: 60px; height: 60px; background-color: #f8fafc; border: 2px dashed #e2e8f0; border-radius: 0.5rem; cursor: pointer; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .photo-upload-container img { width: 100%; height: 100%; object-fit: cover; }
@@ -42,21 +50,11 @@
             
             <div class="lg:col-span-2">
                 <main class="p-6 md:p-10 bg-white shadow-xl rounded-2xl" id="print-area">
-                    <input type="hidden" id="current-quote-id" value="">
-                    <div class="text-center mb-8">
-                        <img id="company-logo" src="" alt="Company Logo" class="mx-auto mb-4">
-                        <div id="company-info">
-                            <h1 class="text-2xl font-bold" data-field="companyName"></h1>
-                            <p class="text-xs text-slate-500" data-field="companyCR"></p>
-                            <p class="text-xs text-slate-500" data-field="companyVat"></p>
-                            <p class="text-xs text-slate-500" data-field="companyAddress"></p>
-                        </div>
-                    </div>
-                    </main>
+                    <!-- Le contenu sera injecté ici par JavaScript -->
+                </main>
             </div>
             
             <aside class="lg:col-span-1 space-y-6 no-print">
-                
                 <div class="control-panel-card">
                     <h2 class="font-bold text-lg text-slate-700 border-b pb-3 mb-4">Entreprise</h2>
                     <select id="company-selector" onchange="switchCompany(this.value)" class="w-full p-2 border border-slate-300 rounded-lg">
@@ -79,77 +77,16 @@
                          <h2 class="font-bold text-lg text-slate-700">Devis Sauvegardés</h2>
                          <button onclick="loadQuotesFromFirebase()" class="text-blue-500 hover:text-blue-700">Rafraîchir</button>
                     </div>
-                    <div id="saved-quotes-list" class="space-y-2 max-h-96 overflow-y-auto">
-                        </div>
+                    <div id="saved-quotes-list" class="space-y-2 max-h-96 overflow-y-auto"></div>
                 </div>
             </aside>
         </div>
     </div>
 
     <script>
-      const printAreaHTML = `
-        <input type="hidden" id="current-quote-id" value="">
-        <div class="text-center mb-8">
-            <img id="company-logo" src="" alt="Company Logo" class="mx-auto mb-4">
-            <div id="company-info">
-                <h1 class="text-2xl font-bold" data-field="companyName"></h1>
-                <p class="text-xs text-slate-500" data-field="companyCR"></p>
-                <p class="text-xs text-slate-500" data-field="companyVat"></p>
-                <p class="text-xs text-slate-500" data-field="companyAddress"></p>
-            </div>
-        </div>
-        <div class="grid grid-cols-2 gap-6 mb-8 pb-4 border-b">
-            <div>
-                <h3 class="mb-2">Customer</h3>
-                <div class="editable text-sm p-2 bg-slate-50 rounded-md" contenteditable="true" data-field="customerName" data-placeholder="Customer Name"></div>
-                <div class="editable text-sm p-2 mt-1 bg-slate-50 rounded-md" contenteditable="true" data-field="customerAddress" data-placeholder="Customer Address"></div>
-                <div class="editable text-sm p-2 mt-1 bg-slate-50 rounded-md" contenteditable="true" data-field="customerCountry" data-placeholder="Country"></div>
-            </div>
-            <div class="text-right">
-                <table class="w-full text-sm">
-                    <tr><td class="font-bold p-1">Quote #:</td><td class="p-1 editable" contenteditable="true" data-field="quoteNum"></td></tr>
-                    <tr><td class="font-bold p-1">Date:</td><td class="p-1" id="quoteDate"></td></tr>
-                    <tr><td class="font-bold p-1">Valid Until:</td><td class="p-1" id="validDate"></td></tr>
-                </table>
-            </div>
-        </div>
-        <div class="mb-8">
-            <h3>Project Description</h3>
-            <div class="editable text-sm p-3 rounded-lg bg-slate-50 border" contenteditable="true" data-field="projectDescription" data-placeholder="Enter project description..."></div>
-        </div>
-        <table class="w-full text-sm mb-8" id="items-table">
-            <thead><tr class="border-b-2 text-left"><th class="p-2 w-20 font-bold">Photo</th><th class="p-2 font-bold">Item</th><th class="p-2 w-24 text-center font-bold">Quantity</th><th class="p-2 w-28 text-right font-bold">Unit Price</th><th class="p-2 w-28 text-right font-bold">Total</th><th class="p-2 w-16 text-center no-print"></th></tr></thead>
-            <tbody id="table-body"></tbody>
-        </table>
-        <button id="add-row" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-2 px-4 rounded-lg no-print">+ Add Row</button>
-        <div class="flex justify-end mt-8">
-            <div class="w-full max-w-xs">
-                <div class="flex justify-between py-2 border-b"><span class="font-bold">Subtotal</span><span id="subtotal">0.00</span></div>
-                <div class="flex justify-between py-2 border-b"><span class="font-bold">VAT (15%)</span><span id="vat">0.00</span></div>
-                <div class="flex justify-between py-3 text-lg font-bold bg-slate-100 px-3 rounded-lg mt-2"><span>TOTAL</span><span id="grand-total">0.00</span></div>
-            </div>
-        </div>
-        <div class="mt-12 pt-6 border-t grid grid-cols-1 md:grid-cols-2 gap-8 text-xs">
-            <div><h3 class="mb-2">Terms & Conditions</h3><div class="editable space-y-1" contenteditable="true" data-field="terms"></div></div>
-            <div><h3 class="mb-2">Bank Details</h3><div class="editable space-y-1" contenteditable="true" data-field="bankDetails"></div></div>
-        </div>
-        <div class="mt-12 pt-8 text-right">
-            <div class="w-56 h-12 border-b-2 inline-block"></div>
-            <p class="font-bold pr-16">Signature</p>
-        </div>
-        <div class="text-center mt-8 pt-4 border-t">
-            <p class="font-bold editable text-sm" data-field="thankYouNote"></p>
-        </div>
-      `;
-      document.getElementById('print-area').innerHTML = printAreaHTML;
-    </script>
-
-
-    <script>
         // ===================================================================================
         // SECTION 1 : CONFIGURATION FIREBASE
         // ===================================================================================
-        
         const firebaseConfig = {
             apiKey: "AIzaSyAcMI9tp51br8JPJrkRoIhGpS8jWlUEgOE",
             authDomain: "my-quotation-system-e3135.firebaseapp.com",
@@ -159,34 +96,25 @@
             appId: "1:733892069861:web:c619b6218852050b4b870c",
             measurementId: "G-61TP42SNMV"
         };
-
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
         // ===================================================================================
         // SECTION 2 : PROFILS DES ENTREPRISES
         // ===================================================================================
-        let currentCompanyKey = 'wooden_pieces'; // Entreprise par défaut
+        let currentCompanyKey = 'wooden_pieces';
 
         const companyProfiles = {
             'wooden_pieces': { 
-                acronym: 'WPE', 
-                logo: 'logowooden.png', // Assure-toi d'avoir ce fichier
-                name: 'Wooden Pieces EST.', 
-                cr: 'CR: 1010798529', 
-                vat: 'Vat No.: 310618978500003',
-                address: 'RFKB2501. ALQods st, Alkhaleej, P.O.Box: 2401, RIYADH 13223, Kingdom of Saudi Arabia',
+                acronym: 'WPE', logo: 'logowooden.png', name: 'Wooden Pieces EST.', cr: 'CR: 1010798529', vat: 'Vat No.: 310618978500003',
+                address: 'RFKB2501. ALQods st, Alkhaleej, P.O.Box: 2401, RIYADH 13223, KSA',
                 bankDetails: `<p><b>Bank:</b> ALINMAA BANK</p><p><b>IBAN:</b> SA0705000068203914512000</p>`,
-                terms: `<ul><li>50% Down payment</li><li>50% After delivery</li><li>Delivery within 20 to 30 days...</li><li>3 years warranty...</li></ul>`,
+                terms: `<ul><li>50% Down payment</li><li>50% After delivery</li><li>Delivery within 20 to 30 days</li><li>3 years warranty</li></ul>`,
                 thankYouNote: 'We appreciate your business and look forward to working with you.'
             },
             'rattan_palace': { 
-                acronym: 'RP', 
-                logo: 'logo.png', // Assure-toi d'avoir ce fichier
-                name: 'Rattan Palace', 
-                cr: 'CR: 7050562888', 
-                vat: 'Vat No.: 313099850500003',
-                address: 'RFKB2501. ALQods st, Alkhaleej, P.O.Box: 2401, RIYADH 13223, Kingdom of Saudi Arabia',
+                acronym: 'RP', logo: 'logo.png', name: 'Rattan Palace', cr: 'CR: 7050562888', vat: 'Vat No.: 313099850500003',
+                address: 'RFKB2501. ALQods st, Alkhaleej, P.O.Box: 2401, RIYADH 13223, KSA',
                 bankDetails: `<p><b>Bank:</b> Riyad Bank</p><p><b>IBAN:</b> SA3020000002126072249940</p>`,
                 terms: `<ul><li>50% Down payment</li><li>50% After delivery</li><li>Delivery within 20 to 30 days</li><li>3 years warranty</li></ul>`,
                 thankYouNote: 'Thank you for your business.'
@@ -196,19 +124,56 @@
         // ===================================================================================
         // SECTION 3 : LOGIQUE DE L'APPLICATION
         // ===================================================================================
+        document.addEventListener('DOMContentLoaded', initializePage);
 
-        document.addEventListener('DOMContentLoaded', function () {
-            initializePage();
-        });
-        
         function initializePage() {
+            const printArea = document.getElementById('print-area');
+            printArea.innerHTML = `
+                <input type="hidden" id="current-quote-id" value="">
+                <div class="text-center mb-8"><img id="company-logo" src="" alt="Company Logo" class="mx-auto mb-4">
+                    <div id="company-info">
+                        <h1 class="text-2xl font-bold" data-field="companyName"></h1><p class="text-xs text-slate-500" data-field="companyCR"></p>
+                        <p class="text-xs text-slate-500" data-field="companyVat"></p><p class="text-xs text-slate-500" data-field="companyAddress"></p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-6 mb-8 pb-4 border-b">
+                    <div><h3 class="mb-2">Customer</h3>
+                        <div class="editable text-sm p-2 bg-slate-50 rounded-md" contenteditable="true" data-field="customerName" data-placeholder="Customer Name"></div>
+                        <div class="editable text-sm p-2 mt-1 bg-slate-50 rounded-md" contenteditable="true" data-field="customerAddress" data-placeholder="Customer Address"></div>
+                        <div class="editable text-sm p-2 mt-1 bg-slate-50 rounded-md" contenteditable="true" data-field="customerCountry" data-placeholder="Country"></div>
+                    </div>
+                    <div class="text-right"><table class="w-full text-sm">
+                        <tr><td class="font-bold p-1">Quote #:</td><td class="p-1 editable" contenteditable="true" data-field="quoteNum"></td></tr>
+                        <tr><td class="font-bold p-1">Date:</td><td class="p-1" id="quoteDate"></td></tr>
+                        <tr><td class="font-bold p-1">Valid Until:</td><td class="p-1" id="validDate"></td></tr>
+                    </table></div>
+                </div>
+                <div class="mb-8"><h3>Project Description</h3><div class="editable text-sm p-3 rounded-lg bg-slate-50 border" contenteditable="true" data-field="projectDescription" data-placeholder="Enter project description..."></div></div>
+                <table class="w-full text-sm mb-8" id="items-table">
+                    <thead><tr class="border-b-2 text-left"><th class="p-2 w-20 font-bold">Photo</th><th class="p-2 font-bold">Item</th><th class="p-2 w-24 text-center font-bold">Quantity</th><th class="p-2 w-28 text-right font-bold">Unit Price</th><th class="p-2 w-28 text-right font-bold">Total</th><th class="p-2 w-16 text-center no-print"></th></tr></thead>
+                    <tbody id="table-body"></tbody>
+                </table>
+                <button id="add-row" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-2 px-4 rounded-lg no-print">+ Add Row</button>
+                <div class="flex justify-end mt-8"><div class="w-full max-w-xs">
+                    <div class="flex justify-between py-2 border-b"><span class="font-bold">Subtotal</span><span id="subtotal">0.00</span></div>
+                    <div class="flex justify-between py-2 border-b"><span class="font-bold">VAT (15%)</span><span id="vat">0.00</span></div>
+                    <div class="flex justify-between py-3 text-lg font-bold bg-slate-100 px-3 rounded-lg mt-2"><span>TOTAL</span><span id="grand-total">0.00</span></div>
+                </div></div>
+                <div class="mt-12 pt-6 border-t grid grid-cols-1 md:grid-cols-2 gap-8 text-xs">
+                    <div><h3 class="mb-2">Terms & Conditions</h3><div class="editable space-y-1" contenteditable="true" data-field="terms"></div></div>
+                    <div><h3 class="mb-2">Bank Details</h3><div class="editable space-y-1" contenteditable="true" data-field="bankDetails"></div></div>
+                </div>
+                <div class="mt-12 pt-8 text-right"><div class="w-56 h-12 border-b-2 inline-block"></div><p class="font-bold pr-16">Signature</p></div>
+                <div class="text-center mt-8 pt-4 border-t"><p class="font-bold editable text-sm" data-field="thankYouNote"></p></div>
+            `;
+            
             document.getElementById('add-row').addEventListener('click', () => addNewRow());
-            switchCompany(currentCompanyKey); // Charger l'entreprise par défaut
-             // Gérer les placeholders
             document.querySelectorAll('.editable[data-placeholder]').forEach(el => {
                 el.addEventListener('focus', function() { if(this.querySelector('span.text-slate-400')) this.innerHTML = ''; });
                 el.addEventListener('blur', function() { if(!this.textContent.trim()) this.innerHTML = `<span class="text-slate-400">${this.dataset.placeholder}</span>`; });
             });
+            
+            switchCompany(currentCompanyKey);
         }
         
         function switchCompany(companyKey) {
@@ -216,22 +181,15 @@
             const profile = companyProfiles[companyKey];
             if (!profile) return;
 
-            // Mettre à jour les infos de l'entreprise
+            Object.keys(profile).forEach(field => {
+                const el = document.querySelector(`[data-field="company${field.charAt(0).toUpperCase() + field.slice(1)}"], [data-field="${field}"]`);
+                if(el) el.innerHTML = profile[field];
+            });
             document.getElementById('company-logo').src = profile.logo;
-            document.querySelector('[data-field="companyName"]').innerHTML = profile.name;
-            document.querySelector('[data-field="companyCR"]').innerHTML = profile.cr;
-            document.querySelector('[data-field="companyVat"]').innerHTML = profile.vat;
-            document.querySelector('[data-field="companyAddress"]').innerHTML = profile.address;
-            document.querySelector('[data-field="terms"]').innerHTML = profile.terms;
-            document.querySelector('[data-field="bankDetails"]').innerHTML = profile.bankDetails;
-            document.querySelector('[data-field="thankYouNote"]').innerHTML = profile.thankYouNote;
-
-            newQuote(); // Réinitialiser le formulaire pour un nouveau devis
-            loadQuotesFromFirebase(); // Charger les devis pour cette entreprise
+            
+            newQuote();
+            loadQuotesFromFirebase();
         }
-
-        // Toutes les autres fonctions (newQuote, updateTotals, addNewRow, etc.) sont identiques
-        // au code précédent. Elles sont incluses ici pour que le fichier soit complet.
 
         function newQuote() {
             document.querySelectorAll('.editable[data-placeholder]').forEach(el => {
@@ -258,15 +216,72 @@
             document.querySelector('[data-field="quoteNum"]').innerHTML = quoteNumber;
         }
 
-        // ... [ Insérer ici les fonctions `updateTotals`, `addNewRow`, `handlePhotoUpload`, `generatePDF` du script précédent ] ...
-        // Le code complet est omis pour la lisibilité, mais il est nécessaire au fonctionnement.
+        function updateTotals() {
+            let subtotal = 0;
+            document.querySelectorAll('#table-body tr').forEach(row => {
+                const quantity = parseFloat(row.querySelector('.quantity').value) || 0;
+                const unitPrice = parseFloat(row.querySelector('.unit-price').value) || 0;
+                const total = quantity * unitPrice;
+                row.querySelector('.total').textContent = total.toFixed(2);
+                subtotal += total;
+            });
+            const vat = subtotal * 0.15;
+            const grandTotal = subtotal + vat;
+            document.getElementById('subtotal').textContent = subtotal.toFixed(2);
+            document.getElementById('vat').textContent = vat.toFixed(2);
+            document.getElementById('grand-total').textContent = grandTotal.toFixed(2);
+        }
+
+        function addNewRow(item = { photo: '', name: '', qty: 1, price: 0 }) {
+            const tableBody = document.getElementById('table-body');
+            const row = document.createElement('tr');
+            row.className = 'border-b';
+            row.innerHTML = `
+                <td class="p-2"><div class="photo-upload-container">
+                    <img src="${item.photo || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" class="${item.photo ? '' : 'hidden'}" data-photo-base64="${item.photo || ''}">
+                    <div class="placeholder-icon ${item.photo ? 'hidden' : ''}"><svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div>
+                    <input type="file" class="hidden" accept="image/*">
+                </div></td>
+                <td class="p-2"><div class="item-name w-full p-2 border rounded" contenteditable="true">${item.name}</div></td>
+                <td class="p-2"><input type="number" value="${item.qty}" class="quantity w-full text-center p-2 border rounded"></td>
+                <td class="p-2"><input type="number" value="${item.price}" step="0.01" class="unit-price w-full text-right p-2 border rounded"></td>
+                <td class="p-2 text-right total font-bold">0.00</td>
+                <td class="p-2 text-center no-print"><button class="remove-row text-red-500 hover:text-red-700 text-2xl font-bold">&times;</button></td>
+            `;
+            tableBody.appendChild(row);
+
+            row.querySelectorAll('input.quantity, input.unit-price').forEach(input => input.addEventListener('input', updateTotals));
+            row.querySelector('.remove-row').addEventListener('click', () => { row.remove(); updateTotals(); });
+            
+            const photoContainer = row.querySelector('.photo-upload-container');
+            const fileInput = row.querySelector('input[type="file"]');
+            photoContainer.addEventListener('click', () => fileInput.click());
+            fileInput.addEventListener('change', (event) => handlePhotoUpload(event, row));
+
+            updateTotals();
+        }
+
+        function handlePhotoUpload(event, row) {
+            const file = event.target.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const imgEl = row.querySelector('img');
+                const placeholder = row.querySelector('.placeholder-icon');
+                imgEl.src = e.target.result;
+                imgEl.dataset.photoBase64 = e.target.result;
+                imgEl.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function generatePDF() { /* ... (Identique à la version précédente) ... */ }
+
 
         // ===================================================================================
-        // SECTION 4 : FONCTIONS FIREBASE (MISES À JOUR)
+        // SECTION 4 : FONCTIONS FIREBASE
         // ===================================================================================
-
         async function saveQuoteToFirebase() {
-            // ... (logique de récupération des données identique) ...
             const customerNameEl = document.querySelector('[data-field="customerName"]');
             const customerName = customerNameEl.textContent.trim();
             if (!customerName || customerNameEl.querySelector('span.text-slate-400')) {
@@ -275,39 +290,92 @@
             }
 
             const quoteData = { fields: {}, items: [] };
-            // ... (récupération des données identique) ...
+            document.querySelectorAll('.editable').forEach(el => {
+                const fieldName = el.dataset.field;
+                if(fieldName) quoteData.fields[fieldName] = el.querySelector('span.text-slate-400') ? '' : el.innerHTML;
+            });
+            document.querySelectorAll('#table-body tr').forEach(row => {
+                quoteData.items.push({
+                    photo: row.querySelector('img').dataset.photoBase64 || '',
+                    name: row.querySelector('.item-name').textContent,
+                    qty: row.querySelector('.quantity').value,
+                    price: row.querySelector('.unit-price').value
+                });
+            });
 
+            const quoteId = document.getElementById('current-quote-id').value;
             const fullQuoteObject = {
-                companyId: currentCompanyKey, // <-- AJOUT IMPORTANT
+                companyId: currentCompanyKey,
                 customerName: customerName,
-                // ... (reste de l'objet identique) ...
+                quoteNumber: quoteData.fields.quoteNum,
+                data: quoteData,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             };
-            
-            // ... (logique de sauvegarde identique) ...
+
+            try {
+                if (quoteId) {
+                    await db.collection("quotes").doc(quoteId).update(fullQuoteObject);
+                    alert("Devis mis à jour avec succès !");
+                } else {
+                    fullQuoteObject.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+                    const docRef = await db.collection("quotes").add(fullQuoteObject);
+                    document.getElementById('current-quote-id').value = docRef.id;
+                    alert("Devis sauvegardé avec succès !");
+                }
+                loadQuotesFromFirebase();
+            } catch (error) {
+                console.error("Erreur lors de la sauvegarde : ", error);
+                alert("Une erreur est survenue lors de la sauvegarde.");
+            }
         }
 
         async function loadQuotesFromFirebase() {
             const listEl = document.getElementById('saved-quotes-list');
             listEl.innerHTML = '<p class="text-slate-500">Chargement...</p>';
             try {
-                // Requête MISE À JOUR pour filtrer par entreprise
                 const snapshot = await db.collection("quotes")
                     .where("companyId", "==", currentCompanyKey)
                     .orderBy("updatedAt", "desc")
                     .get();
-
                 if (snapshot.empty) {
                     listEl.innerHTML = `<p class="text-slate-500">Aucun devis pour ${companyProfiles[currentCompanyKey].name}.</p>`;
                     return;
                 }
                 listEl.innerHTML = '';
-                // ... (logique d'affichage identique) ...
+                snapshot.forEach(doc => {
+                    const quote = doc.data();
+                    const quoteItem = document.createElement('div');
+                    quoteItem.className = 'saved-quote-item';
+                    const date = quote.updatedAt ? new Date(quote.updatedAt.seconds * 1000) : new Date();
+                    quoteItem.innerHTML = `<p class="font-bold">${quote.customerName}</p><p class="text-xs text-slate-500">N°: ${quote.quoteNumber} - ${date.toLocaleDateString()}</p>`;
+                    quoteItem.onclick = () => loadSpecificQuote(doc.id, quote.data);
+                    listEl.appendChild(quoteItem);
+                });
             } catch (error) {
-                // ... (gestion d'erreur identique) ...
+                console.error("Erreur de chargement des devis : ", error);
+                listEl.innerHTML = '<p class="text-red-500">Erreur de chargement.</p>';
             }
         }
-        
-        // ... [ Insérer ici la fonction `loadSpecificQuote` du script précédent ] ...
+
+        function loadSpecificQuote(id, data) {
+            document.getElementById('current-quote-id').value = id;
+            Object.keys(data.fields).forEach(fieldName => {
+                const el = document.querySelector(`.editable[data-field="${fieldName}"]`);
+                if (el) {
+                   if (data.fields[fieldName]) {
+                       el.innerHTML = data.fields[fieldName];
+                   } else if(el.dataset.placeholder) {
+                       el.innerHTML = `<span class="text-slate-400">${el.dataset.placeholder}</span>`;
+                   }
+                }
+            });
+            const tableBody = document.getElementById('table-body');
+            tableBody.innerHTML = '';
+            if (data.items) {
+                data.items.forEach(item => addNewRow(item));
+            }
+            updateTotals();
+        }
     </script>
 </body>
 </html>
