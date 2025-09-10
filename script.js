@@ -21,7 +21,7 @@ const db = getFirestore(app);
 const appId = 'my-quotation-system';
 
 // ===============================================
-// OPTIMIZATION & UI HELPERS
+// UI HELPERS & OPTIMIZATION
 // ===============================================
 const showLoader = (show) => document.getElementById('global-loader').classList.toggle('hidden', !show);
 const showToast = (message, type = 'success') => {
@@ -33,17 +33,6 @@ const showToast = (message, type = 'success') => {
     toastContainer.appendChild(toast);
     setTimeout(() => toast.remove(), 3000);
 };
-
-// ===============================================
-// DARK MODE LOGIC
-// ===============================================
-const themeToggleBtn = document.getElementById('theme-toggle');
-const sunIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>`;
-const moonIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>`;
-
-function applyTheme() {
-    themeToggleBtn.innerHTML = document.documentElement.classList.contains('dark') ? sunIcon : moonIcon;
-}
 
 // ===============================================
 // GLOBAL STATE & DATA
@@ -74,119 +63,29 @@ const companyProfiles = {
     }
 };
 const translations = {
-    en: { dashboardTitle: "My Quotations", newQuoteBtn: "+ New Quotation", selectProfileTitle: "Select a Company Profile", backToDashboardBtn: "← Back to Dashboard", appTitle: "Quotation Editor", loadSource: "Load", saveSource: "Save", previewPdf: "Preview PDF", downloadPdf: "Download PDF", customer: "Customer", quoteNum: "Quote #:", date: "Date:", validUntil: "Valid Until:", projectDescription: "Project Description", photo: "Photo", description: "Item", quantity: "Quantity", unitPrice: "Unit Price", total: "Total", action: "Action", addRow: "+ Add Row", subtotal: "Subtotal", vat: "VAT (15%)", grandTotal: "TOTAL", terms: "Terms & Conditions", bankDetails: "Bank Details", signature: "Signature", pdfPreviewTitle: "PDF Preview", cancel: "Cancel", fileLoadError: "Error: Could not load file.", quotationTitle: "QUOTATION", closingPhrase: "Thank you for your business. We look forward to working with you.", noQuotes: "No quotations found.", clickNew: `Click "+ New Quotation" to get started.`, saving: "Saving...", saved: "Saved!", deleting: "Deleting...", deleted: "Deleted!", loading: "Loading...", generatingPdf: "Generating PDF...", emptyLibrary: "No items found. Add one below!" },
-    ar: { dashboardTitle: "عروضي", newQuoteBtn: "+ عرض سعر جديد", selectProfileTitle: "اختر ملف الشركة", backToDashboardBtn: "→ العودة للئيسية", appTitle: "محرر عروض الأسعار", loadSource: "تحميل", saveSource: "حفظ", previewPdf: "معاينة PDF", downloadPdf: "تحميل PDF", customer: "العميل", quoteNum: "رقم العرض:", date: "التاريخ:", validUntil: "صالح حتى:", projectDescription: "وصف المشروع", photo: "صورة", description: "البند", quantity: "الكمية", unitPrice: "سعر الوحدة", total: "المجموع", action: "إجراء", addRow: "+ أضف سطراً", subtotal: "المجموع الفرعي", vat: "الضريبة (15%)", grandTotal: "الإجمالي", terms: "الشروط والأحكام", bankDetails: "التفاصيل البنكية", signature: "التوقيع", pdfPreviewTitle: "معاينة PDF", cancel: "إلغاء", fileLoadError: "خطأ: لا يمكن تحميل الملف.", quotationTitle: "عرض سعر", closingPhrase: "شكراً لثقتكم. نتطلع للعمل معكم.", noQuotes: "لم يتم العثور على عروض أسعار.", clickNew: `انقر فوق "+ عرض سعر جديد" للبدء.`, saving: "جاري الحفظ...", saved: "تم الحفظ!", deleting: "جاري الحذف...", deleted: "تم الحذف!", loading: "جاري التحميل...", generatingPdf: "جاري إنشاء PDF...", emptyLibrary: "لا توجد عناصر. أضف واحداً بالأسفل!" }
+    en: { dashboardTitle: "My Quotations", newQuoteBtn: "+ New Quotation", selectProfileTitle: "Select a Company Profile", backToDashboardBtn: "← Back to Dashboard", cancel: "Cancel", quotationTitle: "QUOTATION", customer: "Customer", quoteNum: "Quote #:", date: "Date:", validUntil: "Valid Until:", projectDescription: "Project Description", photo: "Photo", description: "Item", quantity: "Quantity", unitPrice: "Unit Price", total: "Total", action: "Action", addRow: "+ Add Row", subtotal: "Subtotal", vat: "VAT (15%)", grandTotal: "TOTAL", terms: "Terms & Conditions", bankDetails: "Bank Details", signature: "Signature", closingPhrase: "Thank you for your business. We look forward to working with you.", previewPdf: "Preview PDF", pdfPreviewTitle: "PDF Preview", downloadPdf: "Download PDF", saved: "Saved!", deleting: "Deleting...", deleted: "Deleted!", generatingPdf: "Generating PDF...", emptyLibrary: "No items found. Add one below!", noQuotes: "No quotations found.", clickNew: `Click "+ New Quotation" to get started.` },
+    ar: { dashboardTitle: "عروضي", newQuoteBtn: "+ عرض سعر جديد", selectProfileTitle: "اختر ملف الشركة", backToDashboardBtn: "→ العودة للرئيسية", cancel: "إلغاء", quotationTitle: "عرض سعر", customer: "العميل", quoteNum: "رقم العرض:", date: "التاريخ:", validUntil: "صالح حتى:", projectDescription: "وصف المشروع", photo: "صورة", description: "البند", quantity: "الكمية", unitPrice: "سعر الوحدة", total: "المجموع", action: "إجراء", addRow: "+ أضف سطراً", subtotal: "المجموع الفرعي", vat: "الضريبة (15%)", grandTotal: "الإجمالي", terms: "الشروط والأحكام", bankDetails: "التفاصيل البنكية", signature: "التوقيع", closingPhrase: "شكراً لثقتكم. نتطلع للعمل معكم.", previewPdf: "معاينة PDF", pdfPreviewTitle: "معاينة PDF", downloadPdf: "تحميل PDF", saved: "تم الحفظ!", deleting: "جاري الحذف...", deleted: "تم الحذف!", generatingPdf: "جاري إنشاء PDF...", emptyLibrary: "لا توجد عناصر. أضف واحداً بالأسفل!", noQuotes: "لم يتم العثور على عروض أسعار.", clickNew: `انقر فوق "+ عرض سعر جديد" للبدء.` }
 };
 
 const editorHTML = `
-    <h1 class="text-4xl font-bold text-center mb-10 tracking-wider" data-lang="quotationTitle">QUOTATION</h1>
-    <div class="text-center mb-10">
-        <img id="company-logo" src="" alt="Company Logo" class="w-64 h-auto mx-auto mb-2">
-        <div class="company-info">
-            <h2 class="text-3xl font-bold text-slate-800 dark:text-slate-100 editable" contenteditable="true" data-field="companyName" spellcheck="false"></h2>
-            <p class="text-sm text-slate-500 dark:text-slate-400 editable" contenteditable="true" data-field="companyCR" spellcheck="false"></p>
-            <p class="text-sm text-slate-500 dark:text-slate-400 editable" contenteditable="true" data-field="companyVat" spellcheck="false"></p>
-            <p class="text-sm text-slate-500 dark:text-slate-400 editable" contenteditable="true" data-field="companyAddress" spellcheck="false"></p>
-        </div>
-    </div>
-    <div class="grid grid-cols-2 gap-6 mb-8 pb-6 border-b border-slate-200 dark:border-slate-700">
-        <div class="p-4 rounded-lg text-left bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-700 relative">
-            <div class="flex justify-between items-center mb-2">
-                <h3 class="font-bold text-slate-700 dark:text-slate-200" data-lang="customer">Customer</h3>
-                <button class="load-customer-btn text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 text-xs font-bold no-print">Load Client</button>
-            </div>
-            <p class="editable text-sm" contenteditable="true" data-field="customerName" data-en="Customer Name" data-ar="اسم العميل" spellcheck="false"></p>
-            <p class="editable text-sm" contenteditable="true" data-field="customerAddress" data-en="Customer Address" data-ar="عنوان العميل" spellcheck="false"></p>
-            <p class="editable text-sm" contenteditable="true" data-field="customerCountry" data-en="Saudi Arabia" data-ar="المملكة العربية السعودية" spellcheck="false"></p>
-        </div>
-        <div class="p-4 rounded-lg text-right bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-700">
-            <div class="text-sm inline-block text-left">
-                <p><span class="font-bold" data-lang="quoteNum">Quote #:</span> <span class="editable" contenteditable="true" data-field="quoteNum" spellcheck="false"></span></p>
-                <p><span class="font-bold" data-lang="date">Date:</span> <span id="quoteDate"></span></p>
-                <p><span class="font-bold" data-lang="validUntil">Valid Until:</span> <span id="validDate"></span></p>
-            </div>
-        </div>
-    </div>
-    <div class="mb-8">
-        <h3 class="font-bold text-lg text-slate-800 dark:text-slate-100 mb-4 pb-2 border-b border-slate-200 dark:border-slate-700" data-lang="projectDescription">Project Description</h3>
-        <div class="editable text-sm p-4 rounded-lg bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-700" contenteditable="true" data-field="projectDescription" data-en="Enter project description..." data-ar="أدخل وصف المشروع..." spellcheck="false"></div>
-    </div>
-    <table class="w-full text-sm" id="items-table">
-        <thead class="text-slate-700 dark:text-slate-300">
-            <tr class="border-b-2 border-slate-300 dark:border-slate-600">
-                <th class="p-2 w-24 text-left font-semibold" data-lang="photo">Photo</th>
-                <th class="p-2 text-left font-semibold" data-lang="description">Item</th>
-                <th class="p-2 w-24 text-center font-semibold" data-lang="quantity">Quantity</th>
-                <th class="p-2 w-32 text-right font-semibold" data-lang="unitPrice">Unit Price</th>
-                <th class="p-2 w-32 text-right font-semibold" data-lang="total">Total</th>
-                <th class="p-2 w-16 text-center no-print font-semibold" data-lang="action">Action</th>
-            </tr>
-        </thead>
-        <tbody id="table-body"></tbody>
-    </table>
-    <button id="add-row" class="mt-4 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 font-bold py-2 px-4 rounded-lg no-print"><span data-lang="addRow">+ Add Row</span></button>
-    <div class="flex justify-end mt-8">
-        <div class="w-full max-w-sm text-slate-800 dark:text-slate-200">
-            <div class="flex justify-between py-2 border-b border-slate-200 dark:border-slate-700"><span class="font-semibold" data-lang="subtotal">Subtotal</span><span id="subtotal">0.00</span></div>
-            <div class="flex justify-between py-2 border-b border-slate-200 dark:border-slate-700"><span class="font-semibold" data-lang="vat">VAT (15%)</span><span id="vat">0.00</span></div>
-            <div class="flex justify-between py-3 text-xl font-bold bg-blue-50 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200 px-4 rounded-lg mt-2"><span data-lang="grandTotal">TOTAL</span><span id="grand-total">0.00</span></div>
-        </div>
-    </div>
-    <div class="mt-12 pt-6 border-t border-slate-200 dark:border-slate-700 grid grid-cols-1 md:grid-cols-2 gap-8 text-xs">
-        <div><h3 class="font-bold text-base text-slate-800 dark:text-slate-100 mb-3 text-center" data-lang="terms">Terms & Conditions</h3><div class="editable text-justify p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg" contenteditable="true" data-field="terms" spellcheck="false"></div></div>
-        <div><h3 class="font-bold text-base text-slate-800 dark:text-slate-100 mb-3 text-center" data-lang="bankDetails">Bank Details</h3><div class="editable text-justify p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg" contenteditable="true" data-field="bankDetails" spellcheck="false"></div></div>
-    </div>
-    <div class="mt-16 pt-10 border-t border-slate-200 dark:border-slate-700 text-center">
-        <div class="w-64 h-16 border-b-2 border-slate-300 dark:border-slate-600 inline-block"></div>
-        <p class="font-semibold mt-2" data-lang="signature">Signature</p>
-    </div>
-    <div class="text-center mt-6">
-        <p class="font-semibold text-slate-700 dark:text-slate-300 editable" data-field="closingPhrase" spellcheck="false"></p>
-    </div>
-`;
+    <h1 class="text-4xl font-bold text-center mb-10 tracking-wider" data-lang="quotationTitle"></h1>
+    <div class="text-center mb-10"><img id="company-logo" src="" alt="Company Logo" class="w-64 h-auto mx-auto mb-2"><div class="company-info"><h2 class="text-3xl font-bold text-slate-800 dark:text-slate-100 editable" contenteditable="true" data-field="companyName" spellcheck="false"></h2><p class="text-sm text-slate-500 dark:text-slate-400 editable" contenteditable="true" data-field="companyCR" spellcheck="false"></p><p class="text-sm text-slate-500 dark:text-slate-400 editable" contenteditable="true" data-field="companyVat" spellcheck="false"></p><p class="text-sm text-slate-500 dark:text-slate-400 editable" contenteditable="true" data-field="companyAddress" spellcheck="false"></p></div></div>
+    <div class="grid grid-cols-2 gap-6 mb-8 pb-6 border-b border-slate-200 dark:border-slate-700"><div class="p-4 rounded-lg text-left bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-700 relative"><div class="flex justify-between items-center mb-2"><h3 class="font-bold text-slate-700 dark:text-slate-200" data-lang="customer"></h3><button class="load-customer-btn text-blue-500 hover:text-blue-600 dark:text-blue-400 text-xs font-bold no-print">Load Client</button></div><p class="editable text-sm" contenteditable="true" data-field="customerName" data-en="Customer Name" data-ar="اسم العميل"></p><p class="editable text-sm" contenteditable="true" data-field="customerAddress" data-en="Customer Address" data-ar="عنوان العميل"></p><p class="editable text-sm" contenteditable="true" data-field="customerCountry" data-en="Saudi Arabia" data-ar="المملكة العربية السعودية"></p></div><div class="p-4 rounded-lg text-right bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-700"><div class="text-sm inline-block text-left"><p><span class="font-bold" data-lang="quoteNum"></span> <span class="editable" contenteditable="true" data-field="quoteNum"></span></p><p><span class="font-bold" data-lang="date"></span> <span id="quoteDate"></span></p><p><span class="font-bold" data-lang="validUntil"></span> <span id="validDate"></span></p></div></div></div>
+    <div class="mb-8"><h3 class="font-bold text-lg text-slate-800 dark:text-slate-100 mb-4 pb-2 border-b" data-lang="projectDescription"></h3><div class="editable text-sm p-4 rounded-lg bg-slate-50 dark:bg-slate-700/50 border" contenteditable="true" data-field="projectDescription" data-en="Enter project description..." data-ar="أدخل وصف المشروع..."></div></div>
+    <table class="w-full text-sm" id="items-table"><thead class="text-slate-700 dark:text-slate-300"><tr class="border-b-2 border-slate-300 dark:border-slate-600"><th class="p-2 w-24 text-left font-semibold" data-lang="photo"></th><th class="p-2 text-left font-semibold" data-lang="description"></th><th class="p-2 w-24 text-center font-semibold" data-lang="quantity"></th><th class="p-2 w-32 text-right font-semibold" data-lang="unitPrice"></th><th class="p-2 w-32 text-right font-semibold" data-lang="total"></th><th class="p-2 w-16 text-center no-print font-semibold" data-lang="action"></th></tr></thead><tbody id="table-body"></tbody></table>
+    <button id="add-row" class="mt-4 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 font-bold py-2 px-4 rounded-lg no-print"><span data-lang="addRow"></span></button>
+    <div class="flex justify-end mt-8"><div class="w-full max-w-sm"><div class="flex justify-between py-2 border-b"><span class="font-semibold" data-lang="subtotal"></span><span id="subtotal">0.00</span></div><div class="flex justify-between py-2 border-b"><span class="font-semibold" data-lang="vat"></span><span id="vat">0.00</span></div><div class="flex justify-between py-3 text-xl font-bold bg-blue-50 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200 px-4 rounded-lg mt-2"><span data-lang="grandTotal"></span><span id="grand-total">0.00</span></div></div></div>
+    <div class="mt-12 pt-6 border-t grid md:grid-cols-2 gap-8 text-xs"><div><h3 class="font-bold text-base mb-3 text-center" data-lang="terms"></h3><div class="editable text-justify p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg" contenteditable="true" data-field="terms"></div></div><div><h3 class="font-bold text-base mb-3 text-center" data-lang="bankDetails"></h3><div class="editable text-justify p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg" contenteditable="true" data-field="bankDetails"></div></div></div>
+    <div class="mt-16 pt-10 border-t text-center"><div class="w-64 h-16 border-b-2 inline-block"></div><p class="font-semibold mt-2" data-lang="signature"></p></div>
+    <div class="text-center mt-6"><p class="font-semibold text-slate-700 dark:text-slate-300 editable" data-field="closingPhrase"></p></div>`;
 
 const controlsHTML = `
-    <div class="control-panel-card bg-white dark:bg-slate-800">
-        <h2 class="font-bold text-lg text-slate-700 dark:text-slate-200 border-b border-slate-200 dark:border-slate-700 pb-3 mb-4">Company Profile</h2>
-        <select id="company-selector" class="w-full p-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200">
-            <option value="wooden_pieces">Wooden Pieces EST.</option>
-            <option value="rattan_palace">Rattan Palace</option>
-        </select>
-    </div>
-    <div class="control-panel-card bg-white dark:bg-slate-800">
-        <div class="flex border-b border-slate-200 dark:border-slate-700">
-            <button class="tab-btn active" data-tab="actions">Actions</button>
-            <button class="tab-btn" data-tab="products">Products</button>
-            <button class="tab-btn" data-tab="clients">Clients</button>
-        </div>
-        <div id="tab-actions" class="tab-content active pt-4">
-            <div class="grid grid-cols-2 gap-3">
-                <button id="save-quote-btn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-3 rounded-lg"></button>
-                <button id="preview-pdf-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 rounded-lg"><span data-lang="previewPdf">Preview PDF</span></button>
-            </div>
-        </div>
-        <div id="tab-products" class="tab-content hidden pt-4">
-            <div id="product-list" class="max-h-60 overflow-y-auto space-y-2"></div>
-            <div class="mt-4 space-y-2">
-                <input type="text" id="new-product-desc-en" placeholder="Product Name (EN)" class="w-full p-2 border rounded bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600">
-                <input type="text" id="new-product-desc-ar" placeholder="اسم المنتج (AR)" class="w-full p-2 border rounded bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600">
-                <input type="number" id="new-product-price" placeholder="Unit Price" class="w-full p-2 border rounded bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600">
-                <button id="add-product-btn" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-3 rounded-lg">Add Product</button>
-            </div>
-        </div>
-        <div id="tab-clients" class="tab-content hidden pt-4">
-            <div id="client-list" class="max-h-60 overflow-y-auto space-y-2"></div>
-            <div class="mt-4 space-y-2">
-                 <input type="text" id="new-client-name-en" placeholder="Client Name (EN)" class="w-full p-2 border rounded bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600">
-                 <input type="text" id="new-client-name-ar" placeholder="اسم العميل (AR)" class="w-full p-2 border rounded bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600">
-                 <textarea id="new-client-address-en" placeholder="Address (EN)" class="w-full p-2 border rounded bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600" rows="2"></textarea>
-                 <textarea id="new-client-address-ar" placeholder="العنوان (AR)" class="w-full p-2 border rounded bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600" rows="2"></textarea>
-                <button id="add-client-btn" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-3 rounded-lg">Add Client</button>
-            </div>
-        </div>
-    </div>
-`;
-
+    <div class="control-panel-card bg-white dark:bg-slate-800"><h2 class="font-bold text-lg border-b pb-3 mb-4">Company Profile</h2><select id="company-selector" class="w-full p-2 border rounded bg-white dark:bg-slate-700"><option value="wooden_pieces">Wooden Pieces EST.</option><option value="rattan_palace">Rattan Palace</option></select></div>
+    <div class="control-panel-card bg-white dark:bg-slate-800"><div class="flex border-b"><button class="tab-btn active" data-tab="actions">Actions</button><button class="tab-btn" data-tab="products">Products</button><button class="tab-btn" data-tab="clients">Clients</button></div>
+        <div id="tab-actions" class="tab-content active pt-4"><div class="grid grid-cols-2 gap-3"><button id="save-quote-btn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-3 rounded-lg"></button><button id="preview-pdf-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 rounded-lg" data-lang="previewPdf"></button></div></div>
+        <div id="tab-products" class="tab-content hidden pt-4"><div id="product-list" class="max-h-60 overflow-y-auto space-y-2"></div><div class="mt-4 space-y-2"><input type="text" id="new-product-desc-en" placeholder="Product Name (EN)" class="w-full p-2 border rounded bg-white dark:bg-slate-700"><input type="text" id="new-product-desc-ar" placeholder="اسم المنتج (AR)" class="w-full p-2 border rounded bg-white dark:bg-slate-700"><input type="number" id="new-product-price" placeholder="Unit Price" class="w-full p-2 border rounded bg-white dark:bg-slate-700"><button id="add-product-btn" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-3 rounded-lg">Add Product</button></div></div>
+        <div id="tab-clients" class="tab-content hidden pt-4"><div id="client-list" class="max-h-60 overflow-y-auto space-y-2"></div><div class="mt-4 space-y-2"><input type="text" id="new-client-name-en" placeholder="Client Name (EN)" class="w-full p-2 border rounded bg-white dark:bg-slate-700"><input type="text" id="new-client-name-ar" placeholder="اسم العميل (AR)" class="w-full p-2 border rounded bg-white dark:bg-slate-700"><textarea id="new-client-address-en" placeholder="Address (EN)" class="w-full p-2 border rounded bg-white dark:bg-slate-700" rows="2"></textarea><textarea id="new-client-address-ar" placeholder="العنوان (AR)" class="w-full p-2 border rounded bg-white dark:bg-slate-700" rows="2"></textarea><button id="add-client-btn" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-3 rounded-lg">Add Client</button></div></div>
+    </div>`;
 
 // ===============================================
 // DASHBOARD & NAVIGATION
@@ -203,14 +102,14 @@ function renderDashboard() {
     const list = document.getElementById('quote-list');
     list.innerHTML = '';
     
-    const sortedQuotes = [...savedQuotes].sort((a, b) => b.meta.savedAt.toMillis() - a.meta.savedAt.toMillis());
+    const sortedQuotes = [...savedQuotes].sort((a, b) => (b.meta.savedAt?.toMillis() || 0) - (a.meta.savedAt?.toMillis() || 0));
 
     sortedQuotes.forEach(quote => {
         const item = document.createElement('div');
         item.className = 'quote-list-item text-sm';
         const clientName = quote.fields.customerName[currentLang] || quote.fields.customerName['en'] || 'N/A';
         const quoteNum = quote.fields.quoteNum?.en || 'N/A';
-        const date = quote.meta.savedAt.toDate().toLocaleDateString('en-CA');
+        const date = quote.meta.savedAt ? quote.meta.savedAt.toDate().toLocaleDateString('en-CA') : 'N/A';
         const total = parseFloat(quote.totals.grandTotal).toFixed(2);
         item.innerHTML = `<div><p class="font-bold text-slate-800 dark:text-slate-100">${clientName}</p><p class="text-xs text-slate-500 dark:text-slate-400">${quoteNum}</p></div><span class="text-slate-600 dark:text-slate-300">${date}</span><span class="font-semibold text-slate-800 dark:text-slate-100">${total} SAR</span><div class="quote-actions"><button class="load-btn" data-id="${quote.id}">Edit</button><button class="delete-quote-btn" data-id="${quote.id}">Delete</button></div>`;
         list.appendChild(item);
@@ -293,9 +192,6 @@ const appFunctions = {
         }
     }
 };
-// Make functions globally accessible for HTML onclick attributes
-window.app = appFunctions;
-
 
 // ===============================================
 // DATA CAPTURE & APPLY
@@ -707,7 +603,6 @@ function attachEditorEventListeners() {
 
 async function main() {
     applyTheme();
-    setLanguage(currentLang);
     
     document.querySelectorAll('.language-btn').forEach(btn => {
         btn.addEventListener('click', () => setLanguage(btn.dataset.langSwitch));
@@ -723,14 +618,17 @@ async function main() {
         appFunctions.createNewQuote(e.currentTarget.dataset.company);
     }));
     
+    setLanguage(currentLang);
     showDashboard();
 
+    showLoader(true);
     await signInAnonymously(auth);
 
     if (unsubscribeQuotes) unsubscribeQuotes();
     unsubscribeQuotes = onSnapshot(query(getCollectionRef('quotations'), orderBy("meta.savedAt", "desc")), (snapshot) => {
         savedQuotes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         renderDashboard();
+        showLoader(false);
     });
 
     if (unsubscribeProducts) unsubscribeProducts();
@@ -747,7 +645,4 @@ async function main() {
 }
 
 main();
-
-
-}
 
