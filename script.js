@@ -39,6 +39,12 @@ let currentLang = localStorage.getItem('language') || 'en';
 let savedQuotes = [], products = [], clients = [], currentlyEditingQuoteId = null;
 let unsubscribeQuotes, unsubscribeProducts, unsubscribeClients;
 
+// This object will hold direct references to DOM nodes for fast translation
+let translationNodes = {
+    lang: [],
+    editable: []
+};
+
 const companyProfiles = {
     'wooden_pieces': { 
         acronym: 'WPE', logo: 'https://placehold.co/256x100/a855f7/FFFFFF?text=Wooden+Pieces', 
@@ -286,7 +292,7 @@ function renderDashboard() {
     const container = document.getElementById('quote-list-container');
     if (savedQuotes.length === 0) {
         container.innerHTML = `<div class="empty-state"><p class="font-semibold text-slate-600 dark:text-slate-300" data-lang="noQuotes"></p><p class="text-sm text-slate-500 dark:text-slate-400" data-lang="clickNew"></p></div>`;
-        setLanguage(currentLang);
+        setLanguage(currentLang, document.querySelector('#dashboard-page'));
         return;
     }
     container.innerHTML = `<div class="quote-list-item quote-list-header text-sm"><span class="text-slate-600 dark:text-slate-300">CLIENT / QUOTE #</span><span class="text-slate-600 dark:text-slate-300">DATE</span><span class="text-slate-600 dark:text-slate-300">TOTAL</span><span class="text-slate-600 dark:text-slate-300">ACTIONS</span></div><div id="quote-list"></div>`;
@@ -299,7 +305,9 @@ function renderDashboard() {
         const quoteNum = quote.fields.quoteNum?.en || 'N/A';
         const date = quote.meta.savedAt ? new Date(quote.meta.savedAt.seconds * 1000).toLocaleDateString('en-CA') : 'N/A';
         const total = parseFloat(quote.totals.grandTotal).toFixed(2);
-        item.innerHTML = `<div><p class="font-bold text-slate-800 dark:text-slate-100">${clientName}</p><p class="text-xs text-slate-500 dark:text-slate-400">${quoteNum}</p></div><span class="text-slate-600 dark:text-slate-300">${date}</span><span class="font-semibold text-slate-800 dark:text-slate-100">${total} SAR</span><div class="quote-actions"><button class="load-btn" onclick="loadQuoteForEditing('${quote.meta.id}')">Edit</button><button class="delete-quote-btn" onclick="deleteQuote('${quote.meta.id}')">Delete</button></div>`;
+        item.innerHTML = `<div><p class="font-bold text-slate-800 dark:text-slate-100">${clientName}</p><p class="text-xs text-slate-500 dark:text-slate-400">${quoteNum}</p></div><span class="text-slate-600 dark:text-slate-300">${date}</span><span class="font-semibold text-slate-800 dark:text-slate-100">${total} SAR</span><div class="quote-actions"><button class="load-btn">Edit</button><button class="delete-quote-btn">Delete</button></div>`;
+        item.querySelector('.load-btn').onclick = () => loadQuoteForEditing(quote.meta.id);
+        item.querySelector('.delete-quote-btn').onclick = () => deleteQuote(quote.meta.id);
         list.appendChild(item);
     });
 }
@@ -308,7 +316,7 @@ function showDashboard() {
     document.getElementById('dashboard-page').classList.remove('hidden');
     document.getElementById('editor-page').classList.add('hidden');
     renderDashboard();
-    setLanguage(currentLang);
+    setLanguage(currentLang, document.body); // Full translate on page change
 }
 
 function showEditor() {
@@ -404,7 +412,7 @@ function applyQuoteData(data) {
     document.getElementById('validDate').textContent = validUntil.toLocaleDateString('en-CA');
     document.getElementById('save-quote-btn').textContent = "Save & Close";
 
-    setLanguage(data.lang || currentLang);
+    setLanguage(data.lang || currentLang, document.getElementById('editor-page'));
     updateTotals();
     attachEditorEventListeners();
 }
@@ -426,7 +434,7 @@ function getEmptyQuoteData(profileKey) {
 }
 
 // ===============================================
-// EDITOR FUNCTIONS
+// EDITOR FUNCTIONS & PERFORMANCE OPTIMIZATIONS
 // ===============================================
 function switchCompanyProfile(profileKey) {
     document.body.dataset.activeProfile = profileKey;
@@ -444,31 +452,40 @@ function switchCompanyProfile(profileKey) {
             el.dataset.ar = dataMap[field].ar;
         }
     });
-    setLanguage(currentLang);
+    setLanguage(currentLang, document.getElementById('editor-page'));
 }
 
 function syncUIData() {
     document.querySelectorAll('#editor-page .editable').forEach(el => {
-        try {
-            if(document.activeElement === el) { el.dataset[currentLang] = el.innerHTML; }
-        } catch(e){}
+        if(document.activeElement === el) { el.dataset[currentLang] = el.innerHTML; }
     });
 }
 
-function setLanguage(lang) {
+function setLanguage(lang, container = document) {
     currentLang = lang;
     localStorage.setItem('language', lang);
     document.documentElement.lang = lang;
     document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
-    document.querySelectorAll('[data-lang]').forEach(el => {
-        const key = el.getAttribute('data-lang');
-        if (translations[lang] && translations[lang][key]) el.textContent = translations[lang][key];
+    
+    // Use pre-queried nodes for faster updates
+    translationNodes.lang.forEach(node => {
+        const key = node.getAttribute('data-lang');
+        if (translations[lang] && translations[lang][key]) {
+            node.textContent = translations[lang][key];
+        }
     });
-    document.querySelectorAll('.editable').forEach(el => { el.innerHTML = el.dataset[lang] || ''; });
+    translationNodes.editable.forEach(node => {
+        node.innerHTML = node.dataset[lang] || '';
+    });
+    
     document.querySelectorAll('.language-btn').forEach(btn => {
         btn.classList.toggle('active-lang', btn.dataset.langSwitch === lang);
     });
-    if(document.getElementById('dashboard-page').offsetParent !== null) renderDashboard();
+
+    // Re-render dashboard if visible, as its content is dynamic
+    if(document.getElementById('dashboard-page').offsetParent !== null) {
+        renderDashboard();
+    }
 }
 
 function updateTotals() {
@@ -489,8 +506,9 @@ function updateTotals() {
 
 function addNewRow(item = { photo: '', desc_en: '', desc_ar: '', qty: 1, price: 0 }) {
     const tableBody = document.getElementById('table-body');
-    const row = document.createElement('tr');
+    const row = tableBody.insertRow(); // More efficient than innerHTML
     row.className = 'border-b border-slate-200 dark:border-slate-700';
+    
     row.innerHTML = `
         <td class="p-2 align-top"><div class="photo-upload-container"><img src="${item.photo||'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" class="${item.photo?'':'hidden'}" data-photo-base64="${item.photo||''}"><div class="placeholder-icon ${!item.photo?'':'hidden'}"><svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div><input type="file" class="hidden" accept="image/*"></div></td>
         <td class="p-2 align-top relative"><div class="w-full p-2 editable item-description" contenteditable="true" data-en="${item.desc_en}" data-ar="${item.desc_ar}" spellcheck="false"></div><button class="load-product-btn absolute top-1 right-1 text-blue-500 no-print p-1 leading-none">...</button></td>
@@ -499,12 +517,10 @@ function addNewRow(item = { photo: '', desc_en: '', desc_ar: '', qty: 1, price: 
         <td class="p-2 align-top text-right total">0.00</td>
         <td class="p-2 align-top text-center no-print"><button class="remove-row text-red-500 hover:text-red-700 text-2xl font-bold">×</button></td>
     `;
-    tableBody.appendChild(row);
+    
     const descEl = row.querySelector('.item-description');
     descEl.innerHTML = descEl.dataset[currentLang] || '';
     
-    descEl.addEventListener('blur', syncUIData);
-    row.querySelectorAll('input').forEach(input => input.addEventListener('input', updateTotals));
     row.querySelector('.remove-row').addEventListener('click', () => { row.remove(); updateTotals(); });
 
     const photoContainer = row.querySelector('.photo-upload-container');
@@ -514,12 +530,11 @@ function addNewRow(item = { photo: '', desc_en: '', desc_ar: '', qty: 1, price: 
         const file = event.target.files[0];
         if (!file) return;
         const img = photoContainer.querySelector('img');
-        img.src = URL.createObjectURL(file); // Temporary preview
+        img.src = URL.createObjectURL(file);
         img.classList.remove('hidden');
         photoContainer.querySelector('.placeholder-icon').classList.add('hidden');
-
         const downloadURL = await uploadImage(file);
-        if (downloadURL) img.src = downloadURL; // Final URL
+        if (downloadURL) img.src = downloadURL;
     });
     
     row.querySelector('.load-product-btn').addEventListener('click', () => {
@@ -594,7 +609,30 @@ modalCloseBtn.onclick = closeModal;
 modal.onclick = (e) => { if (e.target === modal) closeModal(); };
 function closePreviewModal() { document.getElementById('pdf-preview-modal').classList.add('hidden'); }
 
+// Loading overlay utility
+function showLoading(message) {
+    let overlay = document.getElementById('loading-overlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'loading-overlay';
+        document.body.appendChild(overlay);
+    }
+    overlay.textContent = message;
+    overlay.classList.remove('hidden');
+}
+
+function hideLoading() {
+    const overlay = document.getElementById('loading-overlay');
+    if (overlay) {
+        overlay.classList.add('hidden');
+    }
+}
+
+
 async function generatePDF() {
+    showLoading('Generating PDF...');
+    await new Promise(resolve => setTimeout(resolve, 50)); // Allow UI to update
+
     syncUIData();
     const { jsPDF } = window.jspdf;
     const quoteElement = document.getElementById('print-area');
@@ -637,7 +675,10 @@ async function generatePDF() {
             closePreviewModal();
         };
     } catch(e) { console.error("PDF failed:", e); alert("PDF generation failed.");
-    } finally { document.body.removeChild(clone); }
+    } finally { 
+        document.body.removeChild(clone); 
+        hideLoading();
+    }
 }
 
 // ===============================================
@@ -655,7 +696,7 @@ function attachEditorEventListeners() {
             const addressEl = document.querySelector('#editor-page .editable[data-field="customerAddress"]');
             nameEl.dataset.en = client.name_en; nameEl.dataset.ar = client.name_ar;
             addressEl.dataset.en = client.address_en; addressEl.dataset.ar = client.address_ar;
-            setLanguage(currentLang);
+            setLanguage(currentLang, document.getElementById('editor-page'));
         });
     });
     document.querySelectorAll('.tab-btn').forEach(button => {
@@ -666,7 +707,19 @@ function attachEditorEventListeners() {
             document.getElementById(`tab-${button.dataset.tab}`).classList.remove('hidden');
         });
     });
-    document.querySelectorAll('#editor-page .editable').forEach(el => el.addEventListener('blur', syncUIData));
+    
+    const tableBody = document.getElementById('table-body');
+    tableBody.addEventListener('blur', (e) => {
+        if (e.target.classList.contains('editable')) {
+            syncUIData();
+        }
+    }, true);
+    tableBody.addEventListener('input', (e) => {
+        if (e.target.classList.contains('quantity') || e.target.classList.contains('unit-price')) {
+            updateTotals();
+        }
+    });
+
     document.getElementById('company-selector').addEventListener('change', (e) => switchCompanyProfile(e.target.value));
     renderProducts();
     renderClients();
@@ -674,7 +727,12 @@ function attachEditorEventListeners() {
 
 function initializeApp() {
     applyTheme();
-    document.querySelectorAll('.language-btn').forEach(btn => btn.addEventListener('click', () => setLanguage(btn.dataset.langSwitch)));
+    
+    // Cache all translatable nodes once on startup
+    translationNodes.lang = document.querySelectorAll('[data-lang]');
+    translationNodes.editable = document.querySelectorAll('.editable');
+
+    document.querySelectorAll('.language-btn').forEach(btn => btn.addEventListener('click', () => setLanguage(btn.dataset.langSwitch, document.body)));
     document.getElementById('new-quote-btn').addEventListener('click', openCompanyModal);
     document.getElementById('close-company-modal-btn').addEventListener('click', closeCompanyModal);
     document.getElementById('back-to-dashboard-btn').addEventListener('click', showDashboard);
@@ -703,3 +761,4 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+
