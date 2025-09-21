@@ -625,14 +625,14 @@
     </div>
 
     <!-- Modal PDF Preview -->
-    <div id="pdfPreviewModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
-        <div class="bg-white rounded-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+    <div id="pdfPreviewModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50" onclick="closePDFModalOnBackdrop(event)">
+        <div class="bg-white rounded-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
             <div class="p-6 border-b border-gray-200">
                 <div class="flex justify-between items-center">
                     <h3 class="text-xl font-semibold">
                         <span data-translate="preview">Preview</span> - <span id="previewQuoteNumber"></span>
                     </h3>
-                    <button onclick="closeModal('pdfPreviewModal')" class="text-gray-500 hover:text-gray-700 text-2xl transition-colors">&times;</button>
+                    <button onclick="closePDFModal()" class="text-gray-500 hover:text-gray-700 text-2xl transition-colors hover:bg-gray-100 rounded-full w-8 h-8 flex items-center justify-center">&times;</button>
                 </div>
             </div>
             <div class="p-6">
@@ -1542,6 +1542,16 @@
             updateDashboard();
         });
 
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const pdfModal = document.getElementById('pdfPreviewModal');
+                if (!pdfModal.classList.contains('hidden')) {
+                    closePDFModal();
+                }
+            }
+        });
+
         // Tab navigation
         function showTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(tab => {
@@ -1600,6 +1610,20 @@
                     updateQuoteTotals();
                 }
             }, 300);
+        }
+
+        function closePDFModal() {
+            const modal = document.getElementById('pdfPreviewModal');
+            modal.classList.add('hidden');
+            currentQuoteForPDF = null;
+            document.getElementById('pdfPreviewContent').innerHTML = '';
+            document.getElementById('pdfStatus').innerHTML = '📄 Ready to generate';
+        }
+
+        function closePDFModalOnBackdrop(event) {
+            if (event.target === event.currentTarget) {
+                closePDFModal();
+            }
         }
 
         // Client management
@@ -2055,5 +2079,5 @@
             }
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9828ead0e38908b5',t:'MTc1ODQ1MDk0Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9828f476d37d2cfc',t:'MTc1ODQ1MTMzNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
