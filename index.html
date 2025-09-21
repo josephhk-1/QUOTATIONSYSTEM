@@ -636,24 +636,115 @@
                 </div>
             </div>
             <div class="p-6">
-                <div class="mb-6 flex justify-between items-center">
-                    <div class="flex space-x-4">
-                        <label class="flex items-center space-x-2">
-                            <input type="radio" name="pdfLanguage" value="en" checked class="text-purple-600">
-                            <span>English</span>
-                        </label>
-                        <label class="flex items-center space-x-2">
-                            <input type="radio" name="pdfLanguage" value="ar" class="text-purple-600">
-                            <span>العربية</span>
-                        </label>
+                <!-- PDF Controls -->
+                <div class="mb-6 bg-gray-50 rounded-lg p-4 border">
+                    <h4 class="font-semibold text-gray-800 mb-4">
+                        <span data-translate="pdfSettings">PDF Settings</span> ⚙️
+                    </h4>
+                    
+                    <!-- Language Selection -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <span data-translate="language">Language</span>
+                            </label>
+                            <div class="flex space-x-3">
+                                <label class="flex items-center space-x-2">
+                                    <input type="radio" name="pdfLanguage" value="en" checked class="text-purple-600" onchange="updatePDFPreview()">
+                                    <span>English</span>
+                                </label>
+                                <label class="flex items-center space-x-2">
+                                    <input type="radio" name="pdfLanguage" value="ar" class="text-purple-600" onchange="updatePDFPreview()">
+                                    <span>العربية</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Page Format -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <span data-translate="pageFormat">Page Format</span>
+                            </label>
+                            <select id="pdfFormat" onchange="updatePDFPreview()" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                                <option value="a4">A4 (210×297mm)</option>
+                                <option value="letter">Letter (216×279mm)</option>
+                                <option value="legal">Legal (216×356mm)</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Layout Mode -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <span data-translate="layoutMode">Layout Mode</span>
+                            </label>
+                            <select id="pdfLayout" onchange="updatePDFPreview()" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                                <option value="auto">Auto Fit</option>
+                                <option value="compact">Compact</option>
+                                <option value="extended">Extended</option>
+                                <option value="fill">Fill Page</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="flex space-x-4">
-                        <button onclick="updatePDFPreview()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-all">
-                            <span data-translate="preview">Preview</span>
-                        </button>
-                        <button onclick="downloadPDF()" class="btn-primary text-white px-4 py-2 rounded-lg transition-all">
-                            <span data-translate="download">Download</span>
-                        </button>
+                    
+                    <!-- Advanced Options -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <span data-translate="margins">Margins (mm)</span>
+                            </label>
+                            <input type="number" id="pdfMargins" value="8" min="5" max="25" onchange="updatePDFPreview()" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <span data-translate="fontSize">Font Size</span>
+                            </label>
+                            <select id="pdfFontSize" onchange="updatePDFPreview()" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                                <option value="small">Small (8px)</option>
+                                <option value="normal" selected>Normal (10px)</option>
+                                <option value="large">Large (12px)</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <span data-translate="logoSize">Logo Size</span>
+                            </label>
+                            <select id="pdfLogoSize" onchange="updatePDFPreview()" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                                <option value="small">Small (150px)</option>
+                                <option value="normal" selected>Normal (200px)</option>
+                                <option value="large">Large (250px)</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <span data-translate="quality">Quality</span>
+                            </label>
+                            <select id="pdfQuality" onchange="updatePDFPreview()" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                                <option value="1">Standard</option>
+                                <option value="2" selected>High</option>
+                                <option value="3">Ultra</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center space-x-2 text-sm text-gray-600">
+                            <span id="pdfStatus">📄 Ready to generate</span>
+                        </div>
+                        <div class="flex space-x-3">
+                            <button onclick="resetPDFSettings()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm transition-all">
+                                🔄 <span data-translate="reset">Reset</span>
+                            </button>
+                            <button onclick="updatePDFPreview()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-all">
+                                👁️ <span data-translate="preview">Preview</span>
+                            </button>
+                            <button onclick="downloadPDF()" class="btn-primary text-white px-4 py-2 rounded-lg transition-all">
+                                📥 <span data-translate="download">Download</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <div id="pdfPreviewContent" class="border border-gray-300 rounded-lg bg-white min-h-[600px] flex justify-center">
@@ -754,7 +845,16 @@
                 quoteItems: 'Quote Items',
                 addItem: 'Add Item',
                 createQuote: 'Create Quote',
-                all: 'All'
+                all: 'All',
+                pdfSettings: 'PDF Settings',
+                language: 'Language',
+                pageFormat: 'Page Format',
+                layoutMode: 'Layout Mode',
+                margins: 'Margins',
+                fontSize: 'Font Size',
+                logoSize: 'Logo Size',
+                quality: 'Quality',
+                reset: 'Reset'
             },
             ar: {
                 dashboard: 'لوحة التحكم',
@@ -804,7 +904,16 @@
                 quoteItems: 'عناصر العرض',
                 addItem: 'إضافة عنصر',
                 createQuote: 'إنشاء عرض سعر',
-                all: 'الكل'
+                all: 'الكل',
+                pdfSettings: 'إعدادات PDF',
+                language: 'اللغة',
+                pageFormat: 'تنسيق الصفحة',
+                layoutMode: 'نمط التخطيط',
+                margins: 'الهوامش',
+                fontSize: 'حجم الخط',
+                logoSize: 'حجم الشعار',
+                quality: 'الجودة',
+                reset: 'إعادة تعيين'
             }
         };
 
@@ -983,17 +1092,48 @@
         function updatePDFPreview() {
             if (!currentQuoteForPDF) return;
             
-            const pdfLang = document.querySelector('input[name="pdfLanguage"]:checked').value;
-            const quote = quotes.find(q => q.id === currentQuoteForPDF);
-            const client = clients.find(c => c.id === quote.clientId);
-            const lines = quoteLines.filter(ql => ql.quoteId === currentQuoteForPDF);
-            const company = companies[currentCompany];
+            document.getElementById('pdfStatus').innerHTML = '⏳ Generating preview...';
             
-            const previewContent = generatePDFContent(quote, client, lines, company, pdfLang);
-            document.getElementById('pdfPreviewContent').innerHTML = previewContent;
+            setTimeout(() => {
+                const pdfLang = document.querySelector('input[name="pdfLanguage"]:checked').value;
+                const quote = quotes.find(q => q.id === currentQuoteForPDF);
+                const client = clients.find(c => c.id === quote.clientId);
+                const lines = quoteLines.filter(ql => ql.quoteId === currentQuoteForPDF);
+                const company = companies[currentCompany];
+                
+                // Get PDF settings
+                const settings = getPDFSettings();
+                
+                const previewContent = generatePDFContent(quote, client, lines, company, pdfLang, settings);
+                document.getElementById('pdfPreviewContent').innerHTML = previewContent;
+                
+                document.getElementById('pdfStatus').innerHTML = '✅ Preview ready';
+            }, 100);
         }
 
-        function generatePDFContent(quote, client, lines, company, lang) {
+        function getPDFSettings() {
+            return {
+                format: document.getElementById('pdfFormat').value,
+                layout: document.getElementById('pdfLayout').value,
+                margins: parseInt(document.getElementById('pdfMargins').value),
+                fontSize: document.getElementById('pdfFontSize').value,
+                logoSize: document.getElementById('pdfLogoSize').value,
+                quality: parseInt(document.getElementById('pdfQuality').value)
+            };
+        }
+
+        function resetPDFSettings() {
+            document.getElementById('pdfFormat').value = 'a4';
+            document.getElementById('pdfLayout').value = 'auto';
+            document.getElementById('pdfMargins').value = '8';
+            document.getElementById('pdfFontSize').value = 'normal';
+            document.getElementById('pdfLogoSize').value = 'normal';
+            document.getElementById('pdfQuality').value = '2';
+            document.querySelector('input[name="pdfLanguage"][value="en"]').checked = true;
+            updatePDFPreview();
+        }
+
+        function generatePDFContent(quote, client, lines, company, lang, settings = {}) {
             const isArabic = lang === 'ar';
             
             let subtotal = 0;
@@ -1003,20 +1143,62 @@
             const tax = subtotal * 0.15;
             const total = subtotal + tax;
 
-            // Smart layout detection
+            // Apply settings with defaults
+            const format = settings.format || 'a4';
+            const layout = settings.layout || 'auto';
+            const margins = settings.margins || 8;
+            const fontSize = settings.fontSize || 'normal';
+            const logoSize = settings.logoSize || 'normal';
+            
+            // Calculate dimensions based on format
+            const formatDimensions = {
+                a4: { width: '210mm', height: '297mm' },
+                letter: { width: '216mm', height: '279mm' },
+                legal: { width: '216mm', height: '356mm' }
+            };
+            
+            const pageDimensions = formatDimensions[format];
+            
+            // Smart layout detection or forced layout
             const itemCount = lines.length;
-            const isCompact = itemCount > 8 || (itemCount > 5 && lines.some(line => {
-                const product = products.find(p => p.id === line.productId);
-                return product && (product.description.length > 50 || product.descriptionEn.length > 50);
-            }));
+            let isCompact = false;
+            
+            if (layout === 'auto') {
+                isCompact = itemCount > 8 || (itemCount > 5 && lines.some(line => {
+                    const product = products.find(p => p.id === line.productId);
+                    return product && (product.description.length > 50 || product.descriptionEn.length > 50);
+                }));
+            } else if (layout === 'compact') {
+                isCompact = true;
+            } else if (layout === 'extended') {
+                isCompact = false;
+            } else if (layout === 'fill') {
+                isCompact = itemCount > 6;
+            }
 
+            // Font size mapping
+            const fontSizes = {
+                small: { base: '8px', header: '12px', title: '14px' },
+                normal: { base: '10px', header: '14px', title: '16px' },
+                large: { base: '12px', header: '16px', title: '18px' }
+            };
+            
+            const fonts = fontSizes[fontSize];
+            
+            // Logo size mapping
+            const logoSizes = {
+                small: '150px',
+                normal: '200px',
+                large: '250px'
+            };
+            
+            const logoSizePx = logoSizes[logoSize];
+            
             const containerClass = isCompact ? 'pdf-container compact' : 'pdf-container extended';
-            const logoSize = isCompact ? '30px' : '40px';
-            const headerFontSize = isCompact ? '14px' : '18px';
-            const sectionPadding = isCompact ? '6px' : '10px';
+            const sectionPadding = isCompact ? '6px' : `${margins}px`;
 
             return `
-                <div class="${containerClass}" ${isArabic ? 'dir="rtl"' : ''}>
+                <div class="${containerClass}" ${isArabic ? 'dir="rtl"' : ''} style="width: ${pageDimensions.width}; min-height: ${pageDimensions.height}; padding: ${margins}mm; font-size: ${fonts.base};">
                     <div class="pdf-content">
                         <!-- Header Section -->
                         <div class="pdf-header pdf-section">
@@ -1024,11 +1206,11 @@
                                 <div style="flex: 1; ${isArabic ? 'text-align: right;' : 'text-align: left;'}">
                                     <div style="display: flex; align-items: flex-start; margin-bottom: ${isCompact ? '6px' : '8px'};">
                                         <div style="display: flex; flex-direction: column; align-items: center; margin-right: 15px;">
-                                            <img src="${company.logo}" alt="Logo" class="pdf-logo" style="width: 200px; height: 200px; object-fit: contain; background: transparent; border: none; margin-bottom: 8px;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                                            <div style="width: 200px; height: 200px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; display: none; align-items: center; justify-content: center; margin-bottom: 8px;">
-                                                <span style="color: white; font-size: 36px; font-weight: bold;">${company.name.charAt(0)}</span>
+                                            <img src="${company.logo}" alt="Logo" class="pdf-logo" style="width: ${logoSizePx}; height: ${logoSizePx}; object-fit: contain; background: transparent; border: none; margin-bottom: 8px;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                            <div style="width: ${logoSizePx}; height: ${logoSizePx}; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; display: none; align-items: center; justify-content: center; margin-bottom: 8px;">
+                                                <span style="color: white; font-size: ${parseInt(logoSizePx) / 6}px; font-weight: bold;">${company.name.charAt(0)}</span>
                                             </div>
-                                            <h1 style="font-size: ${isCompact ? '14px' : '16px'}; font-weight: bold; color: #667eea; margin: 0; line-height: 1.1; text-align: center; max-width: 200px;">
+                                            <h1 style="font-size: ${fonts.title}; font-weight: bold; color: #667eea; margin: 0; line-height: 1.1; text-align: center; max-width: ${logoSizePx};">
                                                 ${isArabic ? company.nameAr : company.name}
                                             </h1>
                                         </div>
@@ -1238,9 +1420,12 @@
         async function downloadPDF() {
             if (!currentQuoteForPDF) return;
             
+            document.getElementById('pdfStatus').innerHTML = '⏳ Generating PDF...';
+            
             const pdfLang = document.querySelector('input[name="pdfLanguage"]:checked').value;
             const quote = quotes.find(q => q.id === currentQuoteForPDF);
             const fileName = `Quote_${quote.number}_${pdfLang.toUpperCase()}.pdf`;
+            const settings = getPDFSettings();
             
             try {
                 // Create temporary element for PDF
@@ -1248,7 +1433,6 @@
                 tempDiv.style.position = 'absolute';
                 tempDiv.style.left = '-9999px';
                 tempDiv.style.top = '0';
-                tempDiv.style.width = '210mm';
                 tempDiv.style.backgroundColor = 'white';
                 tempDiv.style.padding = '0';
                 tempDiv.style.margin = '0';
@@ -1257,44 +1441,66 @@
                 const lines = quoteLines.filter(ql => ql.quoteId === currentQuoteForPDF);
                 const company = companies[currentCompany];
                 
-                tempDiv.innerHTML = generatePDFContent(quote, client, lines, company, pdfLang);
+                tempDiv.innerHTML = generatePDFContent(quote, client, lines, company, pdfLang, settings);
                 document.body.appendChild(tempDiv);
                 
-                // Use html2canvas to capture content with perfect centering
+                // Get format dimensions
+                const formatDimensions = {
+                    a4: { width: 794, height: 1123 },
+                    letter: { width: 816, height: 1056 },
+                    legal: { width: 816, height: 1344 }
+                };
+                
+                const dimensions = formatDimensions[settings.format];
+                
+                // Use html2canvas with optimized settings
                 const canvas = await html2canvas(tempDiv, {
-                    scale: 2,
+                    scale: settings.quality,
                     useCORS: true,
                     allowTaint: true,
                     backgroundColor: '#ffffff',
-                    width: 794, // A4 width in pixels at 96 DPI
-                    height: 1123, // A4 height in pixels at 96 DPI
+                    width: dimensions.width,
+                    height: dimensions.height,
                     x: 0,
                     y: 0,
                     scrollX: 0,
-                    scrollY: 0
+                    scrollY: 0,
+                    logging: false,
+                    removeContainer: true
                 });
                 
                 // Create PDF with jsPDF
                 const { jsPDF } = window.jspdf;
-                const pdf = new jsPDF('p', 'mm', 'a4');
+                const formatMap = {
+                    a4: 'a4',
+                    letter: 'letter',
+                    legal: 'legal'
+                };
                 
-                const imgData = canvas.toDataURL('image/png');
-                const imgWidth = 210; // A4 width in mm
-                const pageHeight = 297; // A4 height in mm
-                const imgHeight = (canvas.height * imgWidth) / canvas.width;
-                let heightLeft = imgHeight;
-                let position = 0;
+                const pdf = new jsPDF('p', 'mm', formatMap[settings.format]);
                 
-                // Add first page
-                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-                heightLeft -= pageHeight;
+                const imgData = canvas.toDataURL('image/png', 0.95);
                 
-                // Add additional pages if necessary
-                while (heightLeft >= 0) {
-                    position = heightLeft - imgHeight;
-                    pdf.addPage();
-                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-                    heightLeft -= pageHeight;
+                // Get page dimensions
+                const pageWidth = pdf.internal.pageSize.getWidth();
+                const pageHeight = pdf.internal.pageSize.getHeight();
+                
+                // Calculate image dimensions to fit exactly one page
+                const imgWidth = pageWidth;
+                const imgHeight = (canvas.height * pageWidth) / canvas.width;
+                
+                // If content fits in one page, add it directly
+                if (imgHeight <= pageHeight) {
+                    pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+                } else {
+                    // If content is too tall, scale it to fit one page
+                    const scaledHeight = pageHeight;
+                    const scaledWidth = (canvas.width * pageHeight) / canvas.height;
+                    
+                    // Center horizontally if needed
+                    const xOffset = scaledWidth < pageWidth ? (pageWidth - scaledWidth) / 2 : 0;
+                    
+                    pdf.addImage(imgData, 'PNG', xOffset, 0, scaledWidth, scaledHeight);
                 }
                 
                 // Download PDF
@@ -1302,6 +1508,8 @@
                 
                 // Clean up
                 document.body.removeChild(tempDiv);
+                
+                document.getElementById('pdfStatus').innerHTML = '✅ PDF downloaded successfully!';
                 
                 showNotification(
                     currentLang === 'ar' 
@@ -1312,6 +1520,7 @@
                 
             } catch (error) {
                 console.error('Error generating PDF:', error);
+                document.getElementById('pdfStatus').innerHTML = '❌ Error generating PDF';
                 showNotification(
                     currentLang === 'ar' 
                         ? 'خطأ في تحميل الملف' 
@@ -1846,5 +2055,5 @@
             }
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9828afd8a2162cfa',t:'MTc1ODQ0ODUyNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9828ead0e38908b5',t:'MTc1ODQ1MDk0Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
