@@ -668,7 +668,7 @@
             wooden: {
                 name: 'Wooden Pieces EST.',
                 nameAr: 'مؤسسة القطع الخشبية للتجارة',
-                logo: 'https://raw.githubusercontent.com/yourusername/yourrepo/main/logowooden.png',
+                logo: 'logowooden.png',
                 cr: '1010798529',
                 vat: '310798529700003',
                 address: 'RFKB2501. ALQods st, Alkhaleej, P.O.Box: 2401, RIYADH 13223, Kingdom of Saudi Arabia',
@@ -686,7 +686,7 @@
             rattan: {
                 name: 'Rattan Palace',
                 nameAr: 'قصر الخيزران',
-                logo: 'https://raw.githubusercontent.com/yourusername/yourrepo/main/logo.png',
+                logo: 'logo.png',
                 cr: '7050562888',
                 vat: '305056288800003',
                 address: 'RFKB2501. ALQods st, Alkhaleej, P.O.Box: 2401, RIYADH 13223, Kingdom of Saudi Arabia',
@@ -1031,11 +1031,8 @@
                                         </h1>
                                     </div>
                                     <div style="background: #f8fafc; padding: ${isCompact ? '6px' : '8px'}; border-radius: 6px; border-${isArabic ? 'right' : 'left'}: 3px solid #667eea; font-size: ${isCompact ? '8px' : '9px'};">
-                                        <p style="margin: 1px 0; color: #475569; font-weight: 600;">
-                                            <strong>${isArabic ? 'س.ت:' : 'CR:'}</strong> ${company.cr} | <strong>${isArabic ? 'ض.ق.م:' : 'VAT:'}</strong> ${company.vat}
-                                        </p>
-                                        <p style="margin: 1px 0; color: #64748b; line-height: 1.3;">
-                                            ${isArabic ? company.addressAr : company.address}
+                                        <p style="margin: 1px 0; color: #475569; font-weight: 600; line-height: 1.3;">
+                                            ${isArabic ? 'مؤسسة متخصصة في الأثاث عالي الجودة' : 'Specialized in high-quality furniture'}
                                         </p>
                                     </div>
                                 </div>
@@ -1204,6 +1201,20 @@
                                                 <strong>SWIFT:</strong> <span style="direction: ltr; display: inline-block;">${company.swift}</span>
                                             </p>
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Company Registration Info -->
+                            <div class="pdf-section">
+                                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: ${isCompact ? '6px' : '8px'}; margin-bottom: ${isCompact ? '4px' : '6px'};">
+                                    <div style="text-align: center; font-size: ${isCompact ? '7px' : '8px'};">
+                                        <p style="margin: 1px 0; color: #475569; font-weight: 600; line-height: 1.3;">
+                                            <strong>${isArabic ? 'س.ت:' : 'CR:'}</strong> ${company.cr} | <strong>${isArabic ? 'ض.ق.م:' : 'VAT:'}</strong> ${company.vat}
+                                        </p>
+                                        <p style="margin: 1px 0; color: #64748b; line-height: 1.3;">
+                                            ${isArabic ? company.addressAr : company.address}
+                                        </p>
                                     </div>
                                 </div>
                             </div>
@@ -1795,5 +1806,5 @@
             }
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9827e6bd462508b5',t:'MTc1ODQ0MDI4OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9827f1dac176357d',t:'MTc1ODQ0MDc0NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
