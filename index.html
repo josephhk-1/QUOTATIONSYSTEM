@@ -199,19 +199,20 @@
             transition: all 0.3s ease;
         }
 
-        /* PDF Styles - Perfect Centering */
+        /* PDF Styles - Perfect Single Page Layout */
         .pdf-container {
             width: 210mm;
-            min-height: 297mm;
+            height: 297mm;
             margin: 0 auto;
             background: white;
-            padding: 15mm;
+            padding: 10mm;
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
             font-family: 'Arial', sans-serif;
+            font-size: 12px;
+            line-height: 1.3;
+            overflow: hidden;
         }
 
         .pdf-container[dir="rtl"] {
@@ -220,7 +221,29 @@
 
         .pdf-content {
             width: 100%;
-            max-width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .pdf-section {
+            margin-bottom: 8px;
+        }
+
+        .pdf-header {
+            flex-shrink: 0;
+        }
+
+        .pdf-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .pdf-footer {
+            flex-shrink: 0;
+            margin-top: auto;
         }
     </style>
 </head>
@@ -947,212 +970,201 @@
             return `
                 <div class="pdf-container" ${isArabic ? 'dir="rtl"' : ''}>
                     <div class="pdf-content">
-                        <!-- Header with perfect centering -->
-                        <div style="width: 100%; display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 3px solid #667eea;">
-                            <div style="text-align: ${isArabic ? 'right' : 'left'}; flex: 1;">
-                                <div style="display: flex; align-items: center; margin-bottom: 15px; ${isArabic ? 'flex-direction: row-reverse;' : ''}">
-                                    <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-${isArabic ? 'left' : 'right'}: 15px;">
-                                        <span style="color: white; font-size: 24px; font-weight: bold;">${company.name.charAt(0)}</span>
-                                    </div>
-                                    <div>
-                                        <h1 style="font-size: 28px; font-weight: bold; color: #667eea; margin: 0; line-height: 1.2; text-align: ${isArabic ? 'right' : 'left'};">
+                        <!-- Header Section -->
+                        <div class="pdf-header pdf-section">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 12px; border-bottom: 2px solid #667eea;">
+                                <div style="flex: 1; ${isArabic ? 'text-align: right;' : 'text-align: left;'}">
+                                    <div style="display: flex; align-items: center; margin-bottom: 8px; ${isArabic ? 'flex-direction: row-reverse;' : ''}">
+                                        <div style="width: 35px; height: 35px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 6px; display: flex; align-items: center; justify-content: center; margin-${isArabic ? 'left' : 'right'}: 10px;">
+                                            <span style="color: white; font-size: 18px; font-weight: bold;">${company.name.charAt(0)}</span>
+                                        </div>
+                                        <h1 style="font-size: 20px; font-weight: bold; color: #667eea; margin: 0; line-height: 1.1;">
                                             ${isArabic ? company.nameAr : company.name}
                                         </h1>
                                     </div>
+                                    <div style="background: #f8fafc; padding: 8px; border-radius: 6px; border-${isArabic ? 'right' : 'left'}: 3px solid #667eea; font-size: 10px;">
+                                        <p style="margin: 2px 0; color: #475569;">
+                                            <strong>${isArabic ? 'س.ت:' : 'CR:'}</strong> ${company.cr} | <strong>${isArabic ? 'ض.ق.م:' : 'VAT:'}</strong> ${company.vat}
+                                        </p>
+                                        <p style="margin: 2px 0; color: #64748b; line-height: 1.2;">
+                                            ${isArabic ? company.addressAr : company.address}
+                                        </p>
+                                    </div>
                                 </div>
                                 
-                                <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border-${isArabic ? 'right' : 'left'}: 4px solid #667eea; text-align: ${isArabic ? 'right' : 'left'};">
-                                    <p style="margin: 5px 0; font-size: 13px; color: #475569;">
-                                        <strong style="color: #1e293b;">${isArabic ? 'رقم السجل التجاري:' : 'Commercial Registration:'}</strong> ${company.cr}
-                                    </p>
-                                    <p style="margin: 5px 0; font-size: 13px; color: #475569;">
-                                        <strong style="color: #1e293b;">${isArabic ? 'رقم ضريبة القيمة المضافة:' : 'VAT Registration No:'}</strong> ${company.vat}
-                                    </p>
-                                    <p style="margin: 5px 0; font-size: 12px; color: #64748b; line-height: 1.4;">
-                                        ${isArabic ? company.addressAr : company.address}
-                                    </p>
-                                </div>
-                            </div>
-                            
-                            <div style="text-align: ${isArabic ? 'left' : 'right'}; min-width: 200px; margin-${isArabic ? 'right' : 'left'}: 20px;">
-                                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 12px; margin-bottom: 15px; text-align: ${isArabic ? 'right' : 'left'};">
-                                    <h2 style="font-size: 24px; font-weight: bold; margin: 0 0 10px 0;">
-                                        ${isArabic ? 'عرض سعر' : 'QUOTATION'}
-                                    </h2>
-                                    <p style="margin: 5px 0; font-size: 14px; opacity: 0.9;">
-                                        <strong>${isArabic ? 'رقم العرض:' : 'Quote No:'}</strong> ${quote.number}
-                                    </p>
-                                    <p style="margin: 5px 0; font-size: 14px; opacity: 0.9;">
-                                        <strong>${isArabic ? 'التاريخ:' : 'Date:'}</strong> ${new Date(quote.date).toLocaleDateString(isArabic ? 'ar-SA' : 'en-GB')}
-                                    </p>
+                                <div style="min-width: 140px; margin-${isArabic ? 'right' : 'left'}: 15px;">
+                                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px; border-radius: 8px; text-align: ${isArabic ? 'right' : 'left'};">
+                                        <h2 style="font-size: 16px; font-weight: bold; margin: 0 0 6px 0;">
+                                            ${isArabic ? 'عرض سعر' : 'QUOTATION'}
+                                        </h2>
+                                        <p style="margin: 2px 0; font-size: 11px; opacity: 0.9;">
+                                            <strong>${isArabic ? 'رقم:' : 'No:'}</strong> ${quote.number}
+                                        </p>
+                                        <p style="margin: 2px 0; font-size: 11px; opacity: 0.9;">
+                                            <strong>${isArabic ? 'تاريخ:' : 'Date:'}</strong> ${new Date(quote.date).toLocaleDateString(isArabic ? 'ar-SA' : 'en-GB')}
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Client information with perfect centering -->
-                        <div style="width: 100%; margin-bottom: 30px;">
-                            <div style="background: #f1f5f9; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0;">
-                                <h3 style="font-size: 18px; font-weight: bold; color: #1e293b; margin: 0 0 15px 0; display: flex; align-items: center; ${isArabic ? 'flex-direction: row-reverse;' : ''}">
-                                    <span style="background: #667eea; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-${isArabic ? 'left' : 'right'}: 10px; font-size: 14px;">👤</span>
-                                    ${isArabic ? 'معلومات العميل' : 'Client Information'}
+                        <!-- Client Information -->
+                        <div class="pdf-section">
+                            <div style="background: #f1f5f9; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                <h3 style="font-size: 13px; font-weight: bold; color: #1e293b; margin: 0 0 8px 0; ${isArabic ? 'text-align: right;' : 'text-align: left;'}">
+                                    👤 ${isArabic ? 'معلومات العميل' : 'Client Information'}
                                 </h3>
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; text-align: ${isArabic ? 'right' : 'left'};">
-                                    <div>
-                                        <p style="margin: 8px 0; font-size: 14px; color: #475569;">
-                                            <strong style="color: #1e293b;">${isArabic ? 'اسم الشركة:' : 'Company Name:'}</strong><br>
-                                            <span style="font-size: 16px; color: #667eea; font-weight: 600;">${isArabic ? client.name : (client.nameEn || client.name)}</span>
-                                        </p>
-                                        <p style="margin: 8px 0; font-size: 14px; color: #475569;">
-                                            <strong style="color: #1e293b;">${isArabic ? 'البريد الإلكتروني:' : 'Email Address:'}</strong><br>
-                                            <span style="color: #667eea; direction: ltr; display: inline-block;">${client.email}</span>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 11px;">
+                                    <div style="${isArabic ? 'text-align: right;' : 'text-align: left;'}">
+                                        <p style="margin: 4px 0; color: #475569;">
+                                            <strong>${isArabic ? 'الشركة:' : 'Company:'}</strong><br>
+                                            <span style="color: #667eea; font-weight: 600;">${isArabic ? client.name : (client.nameEn || client.name)}</span>
                                         </p>
                                     </div>
-                                    <div>
-                                        <p style="margin: 8px 0; font-size: 14px; color: #475569;">
-                                            <strong style="color: #1e293b;">${isArabic ? 'العنوان:' : 'Address:'}</strong><br>
-                                            <span style="line-height: 1.5;">${isArabic ? client.address : (client.addressEn || client.address)}</span>
+                                    <div style="${isArabic ? 'text-align: right;' : 'text-align: left;'}">
+                                        <p style="margin: 4px 0; color: #475569;">
+                                            <strong>${isArabic ? 'البريد:' : 'Email:'}</strong> <span style="color: #667eea; direction: ltr; display: inline-block;">${client.email}</span><br>
+                                            <strong>${isArabic ? 'العنوان:' : 'Address:'}</strong> ${isArabic ? client.address : (client.addressEn || client.address)}
                                         </p>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Items table with perfect centering -->
-                        <div style="width: 100%; margin-bottom: 30px;">
-                            <h3 style="font-size: 18px; font-weight: bold; color: #1e293b; margin-bottom: 15px; text-align: ${isArabic ? 'right' : 'left'};">
-                                ${isArabic ? 'تفاصيل العرض' : 'Quote Details'}
-                            </h3>
-                            <div style="overflow: hidden; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-                                <table style="width: 100%; border-collapse: collapse; background: white;">
-                                    <thead>
-                                        <tr style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                                            <th style="padding: 15px 20px; font-size: 14px; font-weight: 600; text-align: ${isArabic ? 'right' : 'left'}; border: none;">
-                                                ${isArabic ? 'وصف المنتج' : 'Product Description'}
-                                            </th>
-                                            <th style="padding: 15px 20px; font-size: 14px; font-weight: 600; text-align: center; border: none; min-width: 80px;">
-                                                ${isArabic ? 'الكمية' : 'Qty'}
-                                            </th>
-                                            <th style="padding: 15px 20px; font-size: 14px; font-weight: 600; text-align: center; border: none; min-width: 120px;">
-                                                ${isArabic ? 'سعر الوحدة' : 'Unit Price'}
-                                            </th>
-                                            <th style="padding: 15px 20px; font-size: 14px; font-weight: 600; text-align: center; border: none; min-width: 120px;">
-                                                ${isArabic ? 'المجموع' : 'Line Total'}
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        ${lines.map((line, index) => {
-                                            const product = products.find(p => p.id === line.productId);
-                                            const lineTotal = line.quantity * line.price;
-                                            const bgColor = index % 2 === 0 ? '#ffffff' : '#f8fafc';
-                                            return `
-                                                <tr style="background: ${bgColor}; border-bottom: 1px solid #e2e8f0;">
-                                                    <td style="padding: 15px 20px; text-align: ${isArabic ? 'right' : 'left'}; border: none;">
-                                                        <div style="font-weight: 600; color: #1e293b; margin-bottom: 4px;">
-                                                            ${isArabic ? product.name : product.nameEn}
-                                                        </div>
-                                                        <div style="font-size: 12px; color: #64748b;">
-                                                            ${isArabic ? product.description : product.descriptionEn}
-                                                        </div>
-                                                    </td>
-                                                    <td style="padding: 15px 20px; text-align: center; font-weight: 600; color: #475569; border: none;">
-                                                        ${line.quantity}
-                                                    </td>
-                                                    <td style="padding: 15px 20px; text-align: center; font-weight: 600; color: #475569; border: none;">
-                                                        <span style="direction: ltr; display: inline-block;">${line.price.toLocaleString('en-US', {minimumFractionDigits: 2})} ${isArabic ? 'ريال' : 'SAR'}</span>
-                                                    </td>
-                                                    <td style="padding: 15px 20px; text-align: center; font-weight: bold; color: #667eea; border: none;">
-                                                        <span style="direction: ltr; display: inline-block;">${lineTotal.toLocaleString('en-US', {minimumFractionDigits: 2})} ${isArabic ? 'ريال' : 'SAR'}</span>
-                                                    </td>
-                                                </tr>
-                                            `;
-                                        }).join('')}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <!-- Totals with perfect centering -->
-                        <div style="width: 100%; margin-bottom: 30px; display: flex; justify-content: ${isArabic ? 'flex-start' : 'flex-end'};">
-                            <div style="min-width: 350px; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); overflow: hidden;">
-                                <div style="background: #f8fafc; padding: 15px 25px; border-bottom: 1px solid #e2e8f0; text-align: ${isArabic ? 'right' : 'left'};">
-                                    <h4 style="margin: 0; font-size: 16px; font-weight: bold; color: #1e293b;">
-                                        ${isArabic ? 'ملخص المبالغ' : 'Amount Summary'}
-                                    </h4>
-                                </div>
-                                <div style="padding: 20px 25px;">
-                                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9;">
-                                        <span style="font-size: 14px; color: #475569;">${isArabic ? 'المجموع الفرعي:' : 'Subtotal:'}</span>
-                                        <span style="font-size: 16px; font-weight: 600; color: #1e293b; direction: ltr;">${subtotal.toLocaleString('en-US', {minimumFractionDigits: 2})} ${isArabic ? 'ريال' : 'SAR'}</span>
-                                    </div>
-                                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9;">
-                                        <span style="font-size: 14px; color: #475569;">${isArabic ? 'ضريبة القيمة المضافة (15%):' : 'VAT (15%):'}</span>
-                                        <span style="font-size: 16px; font-weight: 600; color: #1e293b; direction: ltr;">${tax.toLocaleString('en-US', {minimumFractionDigits: 2})} ${isArabic ? 'ريال' : 'SAR'}</span>
-                                    </div>
-                                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin: 15px -25px -20px -25px; padding-left: 25px; padding-right: 25px;">
-                                        <span style="font-size: 18px; font-weight: bold; color: white;">${isArabic ? 'المجموع الكلي:' : 'Total Amount:'}</span>
-                                        <span style="font-size: 20px; font-weight: bold; color: white; direction: ltr;">${total.toLocaleString('en-US', {minimumFractionDigits: 2})} ${isArabic ? 'ريال' : 'SAR'}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Payment terms with perfect centering -->
-                        <div style="width: 100%; margin-bottom: 25px;">
-                            <div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 12px; padding: 20px;">
-                                <h3 style="font-size: 16px; font-weight: bold; color: #92400e; margin: 0 0 15px 0; display: flex; align-items: center; ${isArabic ? 'flex-direction: row-reverse;' : ''}">
-                                    <span style="margin-${isArabic ? 'left' : 'right'}: 8px;">💳</span>
-                                    ${isArabic ? 'شروط الدفع والضمان' : 'Payment Terms & Warranty'}
+                        <!-- Main Content Area -->
+                        <div class="pdf-main">
+                            <!-- Items Table -->
+                            <div class="pdf-section" style="flex: 1;">
+                                <h3 style="font-size: 13px; font-weight: bold; color: #1e293b; margin-bottom: 8px; ${isArabic ? 'text-align: right;' : 'text-align: left;'}">
+                                    ${isArabic ? 'تفاصيل العرض' : 'Quote Details'}
                                 </h3>
-                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 10px;">
-                                    ${company.paymentTerms[lang].map(term => `
-                                        <div style="display: flex; align-items: center; font-size: 14px; color: #92400e; text-align: ${isArabic ? 'right' : 'left'}; ${isArabic ? 'flex-direction: row-reverse;' : ''}">
-                                            <span style="color: #f59e0b; margin-${isArabic ? 'left' : 'right'}: 8px;">✓</span>
-                                            ${term}
+                                <div style="border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                                    <table style="width: 100%; border-collapse: collapse; background: white; font-size: 10px;">
+                                        <thead>
+                                            <tr style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                                                <th style="padding: 8px 10px; font-weight: 600; text-align: ${isArabic ? 'right' : 'left'}; border: none;">
+                                                    ${isArabic ? 'وصف المنتج' : 'Product Description'}
+                                                </th>
+                                                <th style="padding: 8px 10px; font-weight: 600; text-align: center; border: none; width: 60px;">
+                                                    ${isArabic ? 'كمية' : 'Qty'}
+                                                </th>
+                                                <th style="padding: 8px 10px; font-weight: 600; text-align: center; border: none; width: 80px;">
+                                                    ${isArabic ? 'سعر الوحدة' : 'Unit Price'}
+                                                </th>
+                                                <th style="padding: 8px 10px; font-weight: 600; text-align: center; border: none; width: 80px;">
+                                                    ${isArabic ? 'المجموع' : 'Total'}
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${lines.map((line, index) => {
+                                                const product = products.find(p => p.id === line.productId);
+                                                const lineTotal = line.quantity * line.price;
+                                                const bgColor = index % 2 === 0 ? '#ffffff' : '#f8fafc';
+                                                return `
+                                                    <tr style="background: ${bgColor}; border-bottom: 1px solid #e2e8f0;">
+                                                        <td style="padding: 8px 10px; text-align: ${isArabic ? 'right' : 'left'}; border: none;">
+                                                            <div style="font-weight: 600; color: #1e293b; margin-bottom: 2px;">
+                                                                ${isArabic ? product.name : product.nameEn}
+                                                            </div>
+                                                            <div style="font-size: 9px; color: #64748b;">
+                                                                ${isArabic ? product.description : product.descriptionEn}
+                                                            </div>
+                                                        </td>
+                                                        <td style="padding: 8px 10px; text-align: center; font-weight: 600; color: #475569; border: none;">
+                                                            ${line.quantity}
+                                                        </td>
+                                                        <td style="padding: 8px 10px; text-align: center; font-weight: 600; color: #475569; border: none;">
+                                                            <span style="direction: ltr; display: inline-block;">${line.price.toLocaleString('en-US', {minimumFractionDigits: 2})}</span>
+                                                        </td>
+                                                        <td style="padding: 8px 10px; text-align: center; font-weight: bold; color: #667eea; border: none;">
+                                                            <span style="direction: ltr; display: inline-block;">${lineTotal.toLocaleString('en-US', {minimumFractionDigits: 2})}</span>
+                                                        </td>
+                                                    </tr>
+                                                `;
+                                            }).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Totals -->
+                            <div class="pdf-section" style="display: flex; justify-content: ${isArabic ? 'flex-start' : 'flex-end'}; margin-top: 10px;">
+                                <div style="min-width: 250px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); overflow: hidden;">
+                                    <div style="background: #f8fafc; padding: 8px 15px; border-bottom: 1px solid #e2e8f0;">
+                                        <h4 style="margin: 0; font-size: 12px; font-weight: bold; color: #1e293b; ${isArabic ? 'text-align: right;' : 'text-align: left;'}">
+                                            ${isArabic ? 'ملخص المبالغ' : 'Amount Summary'}
+                                        </h4>
+                                    </div>
+                                    <div style="padding: 10px 15px; font-size: 11px;">
+                                        <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #f1f5f9;">
+                                            <span style="color: #475569;">${isArabic ? 'المجموع الفرعي:' : 'Subtotal:'}</span>
+                                            <span style="font-weight: 600; direction: ltr;">${subtotal.toLocaleString('en-US', {minimumFractionDigits: 2})} ${isArabic ? 'ريال' : 'SAR'}</span>
                                         </div>
-                                    `).join('')}
+                                        <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #f1f5f9;">
+                                            <span style="color: #475569;">${isArabic ? 'ض.ق.م (15%):' : 'VAT (15%):'}</span>
+                                            <span style="font-weight: 600; direction: ltr;">${tax.toLocaleString('en-US', {minimumFractionDigits: 2})} ${isArabic ? 'ريال' : 'SAR'}</span>
+                                        </div>
+                                        <div style="display: flex; justify-content: space-between; padding: 8px 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin: 8px -15px -10px -15px; padding-left: 15px; padding-right: 15px; color: white;">
+                                            <span style="font-weight: bold;">${isArabic ? 'المجموع الكلي:' : 'Total Amount:'}</span>
+                                            <span style="font-weight: bold; direction: ltr;">${total.toLocaleString('en-US', {minimumFractionDigits: 2})} ${isArabic ? 'ريال' : 'SAR'}</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Banking information with perfect centering -->
-                        <div style="width: 100%; background: #dbeafe; border: 1px solid #3b82f6; border-radius: 12px; padding: 20px;">
-                            <h3 style="font-size: 16px; font-weight: bold; color: #1d4ed8; margin: 0 0 15px 0; display: flex; align-items: center; ${isArabic ? 'flex-direction: row-reverse;' : ''}">
-                                <span style="margin-${isArabic ? 'left' : 'right'}: 8px;">🏦</span>
-                                ${isArabic ? 'المعلومات المصرفية' : 'Banking Information'}
-                            </h3>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: ${isArabic ? 'right' : 'left'};">
-                                <div>
-                                    <p style="margin: 8px 0; font-size: 14px; color: #1e40af;">
-                                        <strong>${isArabic ? 'اسم البنك:' : 'Bank Name:'}</strong><br>
-                                        <span style="font-size: 16px; font-weight: 600; color: #1d4ed8;">${isArabic ? company.bankAr : company.bank}</span>
-                                    </p>
-                                    <p style="margin: 8px 0; font-size: 14px; color: #1e40af;">
-                                        <strong>${isArabic ? 'رقم الحساب:' : 'Account Number:'}</strong><br>
-                                        <span style="font-size: 16px; font-weight: 600; color: #1d4ed8; font-family: monospace; direction: ltr; display: inline-block;">${company.accountNumber}</span>
-                                    </p>
-                                </div>
-                                <div>
-                                    <p style="margin: 8px 0; font-size: 14px; color: #1e40af;">
-                                        <strong>IBAN:</strong><br>
-                                        <span style="font-size: 16px; font-weight: 600; color: #1d4ed8; font-family: monospace; direction: ltr; display: inline-block;">${company.iban}</span>
-                                    </p>
-                                    <p style="margin: 8px 0; font-size: 14px; color: #1e40af;">
-                                        <strong>SWIFT Code:</strong><br>
-                                        <span style="font-size: 16px; font-weight: 600; color: #1d4ed8; font-family: monospace; direction: ltr; display: inline-block;">${company.swift}</span>
-                                    </p>
+                        <!-- Footer Section -->
+                        <div class="pdf-footer">
+                            <!-- Payment Terms -->
+                            <div class="pdf-section">
+                                <div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 10px; margin-bottom: 8px;">
+                                    <h3 style="font-size: 11px; font-weight: bold; color: #92400e; margin: 0 0 6px 0; ${isArabic ? 'text-align: right;' : 'text-align: left;'}">
+                                        💳 ${isArabic ? 'شروط الدفع والضمان' : 'Payment Terms & Warranty'}
+                                    </h3>
+                                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 4px; font-size: 9px;">
+                                        ${company.paymentTerms[lang].map(term => `
+                                            <div style="display: flex; align-items: center; color: #92400e; ${isArabic ? 'flex-direction: row-reverse; text-align: right;' : 'text-align: left;'}">
+                                                <span style="color: #f59e0b; margin-${isArabic ? 'left' : 'right'}: 4px;">✓</span>
+                                                ${term}
+                                            </div>
+                                        `).join('')}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- Professional footer with perfect centering -->
-                        <div style="width: 100%; margin-top: 40px; padding-top: 20px; border-top: 2px solid #e2e8f0; text-align: center;">
-                            <p style="font-size: 12px; color: #64748b; margin: 0;">
-                                ${isArabic ? 'شكراً لثقتكم بنا - نتطلع للعمل معكم' : 'Thank you for your trust - We look forward to working with you'}
-                            </p>
-                            <p style="font-size: 11px; color: #94a3b8; margin: 5px 0 0 0;">
-                                ${isArabic ? 'هذا العرض صالح لمدة 30 يوماً من تاريخ الإصدار' : 'This quotation is valid for 30 days from the date of issue'}
-                            </p>
+                            <!-- Banking Information -->
+                            <div class="pdf-section">
+                                <div style="background: #dbeafe; border: 1px solid #3b82f6; border-radius: 8px; padding: 10px; margin-bottom: 8px;">
+                                    <h3 style="font-size: 11px; font-weight: bold; color: #1d4ed8; margin: 0 0 6px 0; ${isArabic ? 'text-align: right;' : 'text-align: left;'}">
+                                        🏦 ${isArabic ? 'المعلومات المصرفية' : 'Banking Information'}
+                                    </h3>
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 9px;">
+                                        <div style="${isArabic ? 'text-align: right;' : 'text-align: left;'}">
+                                            <p style="margin: 2px 0; color: #1e40af;">
+                                                <strong>${isArabic ? 'البنك:' : 'Bank:'}</strong> ${isArabic ? company.bankAr : company.bank}<br>
+                                                <strong>${isArabic ? 'رقم الحساب:' : 'Account:'}</strong> <span style="direction: ltr; display: inline-block;">${company.accountNumber}</span>
+                                            </p>
+                                        </div>
+                                        <div style="${isArabic ? 'text-align: right;' : 'text-align: left;'}">
+                                            <p style="margin: 2px 0; color: #1e40af;">
+                                                <strong>IBAN:</strong> <span style="direction: ltr; display: inline-block;">${company.iban}</span><br>
+                                                <strong>SWIFT:</strong> <span style="direction: ltr; display: inline-block;">${company.swift}</span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Footer -->
+                            <div style="text-align: center; padding-top: 8px; border-top: 1px solid #e2e8f0; font-size: 9px;">
+                                <p style="color: #64748b; margin: 0;">
+                                    ${isArabic ? 'شكراً لثقتكم بنا - نتطلع للعمل معكم' : 'Thank you for your trust - We look forward to working with you'}
+                                </p>
+                                <p style="color: #94a3b8; margin: 2px 0 0 0;">
+                                    ${isArabic ? 'هذا العرض صالح لمدة 30 يوماً من تاريخ الإصدار' : 'This quotation is valid for 30 days from the date of issue'}
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1731,5 +1743,5 @@
             }
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98272b26423b2cfc',t:'MTc1ODQzMjYwNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9827ce74b67b2cfa',t:'MTc1ODQzOTI5NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
