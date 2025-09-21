@@ -301,12 +301,51 @@
                         <option value="en">English</option>
                         <option value="ar">العربية</option>
                     </select>
+                    
+                    <!-- Statut de synchronisation -->
+                    <div class="bg-white/20 px-3 py-2 rounded-lg border border-white/30">
+                        <span id="syncStatus" class="text-sm text-white">📱 Hors ligne</span>
+                    </div>
+                    
                     <button onclick="toggleDarkMode()" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition-colors" title="Toggle Dark Mode">
                         <span id="darkModeIcon">🌙</span>
                     </button>
-                    <button class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition-colors">
-                        👤 <span data-translate="profile">Profile</span>
-                    </button>
+                    
+                    <!-- Menu utilisateur -->
+                    <div class="relative">
+                        <button id="userMenuBtn" onclick="toggleUserMenu()" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition-colors flex items-center space-x-2">
+                            <span id="userIcon">👤</span>
+                            <span id="userName">Utilisateur</span>
+                            <span>▼</span>
+                        </button>
+                        
+                        <!-- Menu déroulant -->
+                        <div id="userMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                            <div class="p-3 border-b border-gray-200">
+                                <p class="text-sm font-medium text-gray-800" id="userNameFull">Utilisateur</p>
+                                <p class="text-xs text-gray-500" id="userRole">Rôle</p>
+                            </div>
+                            <div class="py-1">
+                                <button onclick="showDatabaseConfig()" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2">
+                                    <span>⚙️</span>
+                                    <span>Configuration BDD</span>
+                                </button>
+                                <button onclick="manualSync()" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2">
+                                    <span>🔄</span>
+                                    <span>Synchroniser</span>
+                                </button>
+                                <button onclick="exportData()" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2">
+                                    <span>📤</span>
+                                    <span>Exporter données</span>
+                                </button>
+                                <hr class="my-1">
+                                <button onclick="logout()" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2">
+                                    <span>🚪</span>
+                                    <span>Déconnexion</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -920,8 +959,193 @@
         let currentLang = 'en';
         let currentCompany = 'wooden';
 
-        // Data storage functions
-        function saveData() {
+        // 🔥 SYSTÈME DE BASE DE DONNÉES EN LIGNE 🔥
+        // Configuration de la base de données
+        const DATABASE_CONFIG = {
+            // Remplacez par votre propre URL de base de données
+            apiUrl: 'https://api.jsonbin.io/v3/b',
+            binId: '67890abcdef12345', // Votre ID de bin unique
+            apiKey: '$2a$10$votre-cle-api-ici', // Votre clé API
+            
+            // Alternative avec Google Sheets (plus facile)
+            useGoogleSheets: true,
+            googleSheetsUrl: 'https://script.google.com/macros/s/AKfycbxSCbj_kxjEs9xuH9Q0-vf9YkLJms0nJVE62H0Ru5lPtGu7cizfKg2WIJqWdGEpi2eq/exec',
+            
+            // Configuration locale de secours
+            useLocalStorage: false
+        };
+
+        let isOnline = navigator.onLine;
+        let syncInProgress = false;
+        let lastSyncTime = null;
+
+        // Système d'authentification simple
+        let currentUser = null;
+        let isAuthenticated = false;
+
+        // Fonctions d'authentification
+        function showLoginModal() {
+            const loginModal = document.createElement('div');
+            loginModal.id = 'loginModal';
+            loginModal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            loginModal.innerHTML = `
+                <div class="bg-white rounded-xl max-w-md w-full mx-4 p-6">
+                    <div class="text-center mb-6">
+                        <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span class="text-purple-600 text-2xl">🔐</span>
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-800">Connexion QuoteFlow</h2>
+                        <p class="text-gray-600 mt-2">Accédez à vos données partagées</p>
+                    </div>
+                    
+                    <form id="loginForm" onsubmit="handleLogin(event)">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Nom d'utilisateur</label>
+                                <input type="text" id="username" required 
+                                       class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500"
+                                       placeholder="Entrez votre nom">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Code d'accès</label>
+                                <input type="password" id="accessCode" required 
+                                       class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500"
+                                       placeholder="Code partagé de l'équipe">
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6 space-y-3">
+                            <button type="submit" class="w-full btn-primary text-white py-3 rounded-lg font-medium">
+                                🚀 Se connecter
+                            </button>
+                            <button type="button" onclick="useOfflineMode()" 
+                                    class="w-full bg-gray-500 hover:bg-gray-600 text-white py-2 rounded-lg">
+                                📱 Mode hors ligne
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <div class="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                        <h4 class="font-semibold text-red-800 mb-2">🔐 Accès Sécurisé</h4>
+                        <div class="text-sm text-red-700 space-y-2">
+                            <p><strong>Administrateurs autorisés :</strong></p>
+                            <ul class="list-disc list-inside ml-2 space-y-1">
+                                <li>Joseph Hamdy</li>
+                                <li>Micheal Hamdy</li>
+                                <li>Mohamed Zakzouk</li>
+                            </ul>
+                            <p class="mt-2 text-xs"><em>Chaque admin a son code personnel unique</em></p>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                        <h4 class="font-semibold text-yellow-800 mb-2">👥 Accès Équipe</h4>
+                        <div class="text-sm text-yellow-700 space-y-1">
+                            <p><strong>Équipe :</strong> TEAM2024_LIMITED</p>
+                            <p><strong>Lecture seule :</strong> VIEW2024_READONLY</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(loginModal);
+        }
+
+        function handleLogin(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('username').value.trim();
+            const accessCode = document.getElementById('accessCode').value.trim();
+            
+            // 🔐 ACCÈS SÉCURISÉ - Administrateurs autorisés uniquement
+            const authorizedAdmins = {
+                'Joseph Hamdy': 'ADMIN_JH_2024_SECURE',
+                'Micheal Hamdy': 'ADMIN_MH_2024_SECURE', 
+                'Mohamed Zakzouk': 'ADMIN_MZ_2024_SECURE'
+            };
+            
+            // Vérification stricte nom + code
+            let isAuthorized = false;
+            let userRole = null;
+            
+            // Vérifier si c'est un admin autorisé
+            if (authorizedAdmins[username] && authorizedAdmins[username] === accessCode) {
+                isAuthorized = true;
+                userRole = { role: 'admin', permissions: ['read', 'write', 'delete'] };
+            }
+            
+            // Codes d'équipe (accès limité)
+            const teamCodes = {
+                'TEAM2024_LIMITED': { role: 'user', permissions: ['read', 'write'] },
+                'VIEW2024_READONLY': { role: 'viewer', permissions: ['read'] }
+            };
+            
+            if (!isAuthorized && teamCodes[accessCode]) {
+                isAuthorized = true;
+                userRole = teamCodes[accessCode];
+            }
+            
+            if (isAuthorized) {
+                currentUser = {
+                    name: username,
+                    code: accessCode,
+                    role: userRole.role,
+                    permissions: userRole.permissions,
+                    loginTime: new Date().toISOString(),
+                    isAdmin: authorizedAdmins[username] === accessCode
+                };
+                
+                isAuthenticated = true;
+                localStorage.setItem('quoteFlowUser', JSON.stringify(currentUser));
+                
+                document.getElementById('loginModal').remove();
+                showNotification(`Bienvenue ${username} ! 🎉`, 'success');
+                
+                // Log de sécurité
+                console.log(`✅ Connexion autorisée: ${username} (${userRole.role})`);
+                
+                // Charger les données depuis la base de données
+                loadDataFromDatabase();
+                
+            } else {
+                showNotification('Accès refusé ! Nom ou code incorrect ❌', 'error');
+                console.warn(`🚫 Tentative de connexion non autorisée: ${username}`);
+            }
+        }
+
+        function useOfflineMode() {
+            currentUser = {
+                name: 'Utilisateur Local',
+                role: 'offline',
+                permissions: ['read', 'write'],
+                loginTime: new Date().toISOString()
+            };
+            
+            isAuthenticated = true;
+            DATABASE_CONFIG.useLocalStorage = true;
+            
+            document.getElementById('loginModal').remove();
+            showNotification('Mode hors ligne activé 📱', 'info');
+            loadData();
+        }
+
+        function logout() {
+            currentUser = null;
+            isAuthenticated = false;
+            localStorage.removeItem('quoteFlowUser');
+            location.reload();
+        }
+
+        // Fonctions de base de données en ligne
+        async function saveDataToDatabase() {
+            if (!isAuthenticated || !currentUser.permissions.includes('write')) {
+                showNotification('Pas d\'autorisation d\'écriture ❌', 'error');
+                return;
+            }
+
+            if (syncInProgress) return;
+            syncInProgress = true;
+
             const data = {
                 clients,
                 products,
@@ -930,9 +1154,178 @@
                 nextQuoteId,
                 nextClientId,
                 nextProductId,
-                nextQuoteLineId
+                nextQuoteLineId,
+                lastModified: new Date().toISOString(),
+                modifiedBy: currentUser.name
             };
-            localStorage.setItem('quoteFlowData', JSON.stringify(data));
+
+            try {
+                if (DATABASE_CONFIG.useGoogleSheets) {
+                    await saveToGoogleSheets(data);
+                } else {
+                    await saveToJsonBin(data);
+                }
+                
+                lastSyncTime = new Date();
+                updateSyncStatus('✅ Synchronisé', 'success');
+                
+            } catch (error) {
+                console.error('Erreur de sauvegarde:', error);
+                updateSyncStatus('❌ Erreur sync', 'error');
+                
+                // Sauvegarde locale de secours
+                localStorage.setItem('quoteFlowData', JSON.stringify(data));
+            }
+            
+            syncInProgress = false;
+        }
+
+        async function loadDataFromDatabase() {
+            try {
+                updateSyncStatus('⏳ Chargement...', 'info');
+                
+                let data;
+                if (DATABASE_CONFIG.useGoogleSheets) {
+                    data = await loadFromGoogleSheets();
+                } else {
+                    data = await loadFromJsonBin();
+                }
+                
+                if (data) {
+                    clients = data.clients || [];
+                    products = data.products || [];
+                    quotes = data.quotes || [];
+                    quoteLines = data.quoteLines || [];
+                    nextQuoteId = data.nextQuoteId || 1;
+                    nextClientId = data.nextClientId || 1;
+                    nextProductId = data.nextProductId || 1;
+                    nextQuoteLineId = data.nextQuoteLineId || 1;
+                    
+                    // Rafraîchir l'interface
+                    loadClients();
+                    loadProducts();
+                    loadQuotes();
+                    updateDashboard();
+                    
+                    lastSyncTime = new Date();
+                    updateSyncStatus('✅ Données chargées', 'success');
+                    
+                    if (data.modifiedBy && data.modifiedBy !== currentUser.name) {
+                        showNotification(`Données mises à jour par ${data.modifiedBy} 🔄`, 'info');
+                    }
+                } else {
+                    initializeDefaultData();
+                }
+                
+            } catch (error) {
+                console.error('Erreur de chargement:', error);
+                updateSyncStatus('❌ Erreur chargement', 'error');
+                
+                // Chargement local de secours
+                loadData();
+            }
+        }
+
+        // Intégration Google Sheets (plus facile à configurer)
+        async function saveToGoogleSheets(data) {
+            const response = await fetch(DATABASE_CONFIG.googleSheetsUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    action: 'save',
+                    data: data,
+                    user: currentUser.name
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error('Erreur Google Sheets');
+            }
+            
+            return await response.json();
+        }
+
+        async function loadFromGoogleSheets() {
+            const response = await fetch(`${DATABASE_CONFIG.googleSheetsUrl}?action=load`);
+            
+            if (!response.ok) {
+                throw new Error('Erreur chargement Google Sheets');
+            }
+            
+            const result = await response.json();
+            return result.data;
+        }
+
+        // Alternative JSONBin (base de données JSON en ligne)
+        async function saveToJsonBin(data) {
+            const response = await fetch(`${DATABASE_CONFIG.apiUrl}/${DATABASE_CONFIG.binId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Master-Key': DATABASE_CONFIG.apiKey
+                },
+                body: JSON.stringify(data)
+            });
+            
+            if (!response.ok) {
+                throw new Error('Erreur JSONBin');
+            }
+            
+            return await response.json();
+        }
+
+        async function loadFromJsonBin() {
+            const response = await fetch(`${DATABASE_CONFIG.apiUrl}/${DATABASE_CONFIG.binId}/latest`, {
+                headers: {
+                    'X-Master-Key': DATABASE_CONFIG.apiKey
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error('Erreur chargement JSONBin');
+            }
+            
+            const result = await response.json();
+            return result.record;
+        }
+
+        // Fonctions de synchronisation automatique
+        function startAutoSync() {
+            // Synchronisation toutes les 30 secondes
+            setInterval(async () => {
+                if (isAuthenticated && isOnline && !syncInProgress) {
+                    await loadDataFromDatabase();
+                }
+            }, 30000);
+        }
+
+        function updateSyncStatus(message, type) {
+            const statusElement = document.getElementById('syncStatus');
+            if (statusElement) {
+                statusElement.textContent = message;
+                statusElement.className = `text-sm ${type === 'success' ? 'text-green-600' : type === 'error' ? 'text-red-600' : 'text-blue-600'}`;
+            }
+        }
+
+        // Fonctions de sauvegarde (remplacent les anciennes)
+        function saveData() {
+            if (DATABASE_CONFIG.useLocalStorage) {
+                const data = {
+                    clients,
+                    products,
+                    quotes,
+                    quoteLines,
+                    nextQuoteId,
+                    nextClientId,
+                    nextProductId,
+                    nextQuoteLineId
+                };
+                localStorage.setItem('quoteFlowData', JSON.stringify(data));
+            } else {
+                saveDataToDatabase();
+            }
         }
 
         function loadData() {
@@ -951,6 +1344,20 @@
                 initializeDefaultData();
             }
         }
+
+        // Détection de connexion internet
+        window.addEventListener('online', () => {
+            isOnline = true;
+            updateSyncStatus('🌐 En ligne', 'success');
+            if (isAuthenticated) {
+                loadDataFromDatabase();
+            }
+        });
+
+        window.addEventListener('offline', () => {
+            isOnline = false;
+            updateSyncStatus('📱 Hors ligne', 'error');
+        });
 
         function initializeDefaultData() {
             clients = [
@@ -1530,16 +1937,181 @@
             }
         }
 
+        // Fonctions d'interface utilisateur
+        function toggleUserMenu() {
+            const menu = document.getElementById('userMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        function updateUserInterface() {
+            if (isAuthenticated && currentUser) {
+                document.getElementById('userName').textContent = currentUser.name.split(' ')[0];
+                document.getElementById('userNameFull').textContent = currentUser.name;
+                document.getElementById('userRole').textContent = currentUser.role.toUpperCase();
+                
+                // Icône selon le rôle
+                const roleIcons = {
+                    admin: '👑',
+                    user: '👤',
+                    viewer: '👁️',
+                    offline: '📱'
+                };
+                document.getElementById('userIcon').textContent = roleIcons[currentUser.role] || '👤';
+            }
+        }
+
+        function showDatabaseConfig() {
+            const configModal = document.createElement('div');
+            configModal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            configModal.innerHTML = `
+                <div class="bg-white rounded-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+                    <div class="p-6 border-b border-gray-200">
+                        <h3 class="text-xl font-semibold">⚙️ Configuration Base de Données</h3>
+                    </div>
+                    <div class="p-6 space-y-6">
+                        <!-- Google Sheets Configuration -->
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                            <h4 class="font-semibold text-green-800 mb-3">📊 Google Sheets (Recommandé)</h4>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">URL du script Google Apps</label>
+                                    <input type="text" id="googleSheetsUrl" value="${DATABASE_CONFIG.googleSheetsUrl}" 
+                                           class="w-full border border-gray-300 rounded px-3 py-2 text-sm">
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <input type="checkbox" id="useGoogleSheets" ${DATABASE_CONFIG.useGoogleSheets ? 'checked' : ''}>
+                                    <label class="text-sm">Utiliser Google Sheets</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- JSONBin Configuration -->
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <h4 class="font-semibold text-blue-800 mb-3">🗄️ JSONBin (Alternative)</h4>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Bin ID</label>
+                                    <input type="text" id="binId" value="${DATABASE_CONFIG.binId}" 
+                                           class="w-full border border-gray-300 rounded px-3 py-2 text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">API Key</label>
+                                    <input type="password" id="apiKey" value="${DATABASE_CONFIG.apiKey}" 
+                                           class="w-full border border-gray-300 rounded px-3 py-2 text-sm">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Status -->
+                        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                            <h4 class="font-semibold text-gray-800 mb-2">📊 Statut actuel</h4>
+                            <div class="text-sm space-y-1">
+                                <p><strong>Mode :</strong> ${DATABASE_CONFIG.useGoogleSheets ? 'Google Sheets' : 'JSONBin'}</p>
+                                <p><strong>Connexion :</strong> ${isOnline ? '🟢 En ligne' : '🔴 Hors ligne'}</p>
+                                <p><strong>Dernière sync :</strong> ${lastSyncTime ? lastSyncTime.toLocaleString() : 'Jamais'}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6 border-t border-gray-200 flex justify-end space-x-3">
+                        <button onclick="this.closest('.fixed').remove()" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                            Annuler
+                        </button>
+                        <button onclick="saveConfig()" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
+                            Sauvegarder
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(configModal);
+            document.getElementById('userMenu').classList.add('hidden');
+        }
+
+        function saveConfig() {
+            DATABASE_CONFIG.googleSheetsUrl = document.getElementById('googleSheetsUrl').value;
+            DATABASE_CONFIG.useGoogleSheets = document.getElementById('useGoogleSheets').checked;
+            DATABASE_CONFIG.binId = document.getElementById('binId').value;
+            DATABASE_CONFIG.apiKey = document.getElementById('apiKey').value;
+            
+            localStorage.setItem('databaseConfig', JSON.stringify(DATABASE_CONFIG));
+            
+            document.querySelector('.fixed').remove();
+            showNotification('Configuration sauvegardée ! 💾', 'success');
+        }
+
+        function manualSync() {
+            document.getElementById('userMenu').classList.add('hidden');
+            if (isAuthenticated) {
+                loadDataFromDatabase();
+                showNotification('Synchronisation manuelle lancée 🔄', 'info');
+            } else {
+                showNotification('Connexion requise pour synchroniser ❌', 'error');
+            }
+        }
+
+        function exportData() {
+            const data = {
+                clients,
+                products,
+                quotes,
+                quoteLines,
+                exportDate: new Date().toISOString(),
+                exportedBy: currentUser ? currentUser.name : 'Utilisateur'
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `QuoteFlow_Export_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            document.getElementById('userMenu').classList.add('hidden');
+            showNotification('Données exportées ! 📤', 'success');
+        }
+
+        // Fermer le menu utilisateur en cliquant ailleurs
+        document.addEventListener('click', function(event) {
+            const userMenu = document.getElementById('userMenu');
+            const userMenuBtn = document.getElementById('userMenuBtn');
+            
+            if (userMenu && !userMenu.contains(event.target) && !userMenuBtn.contains(event.target)) {
+                userMenu.classList.add('hidden');
+            }
+        });
+
         // Initialization
         document.addEventListener('DOMContentLoaded', function() {
-            loadData();
+            // Charger la configuration sauvegardée
+            const savedConfig = localStorage.getItem('databaseConfig');
+            if (savedConfig) {
+                Object.assign(DATABASE_CONFIG, JSON.parse(savedConfig));
+            }
+            
+            // Vérifier si l'utilisateur est déjà connecté
+            const savedUser = localStorage.getItem('quoteFlowUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                isAuthenticated = true;
+                updateUserInterface();
+                loadDataFromDatabase();
+                startAutoSync();
+            } else {
+                showLoginModal();
+            }
+            
             document.getElementById('quoteDate').value = new Date().toISOString().split('T')[0];
             updateDarkMode();
             updateTranslations();
-            loadClients();
-            loadProducts();
-            loadQuotes();
-            updateDashboard();
+            
+            if (!isAuthenticated) {
+                loadData();
+                loadClients();
+                loadProducts();
+                loadQuotes();
+                updateDashboard();
+            }
         });
 
         // Close modal with Escape key
@@ -2079,5 +2651,5 @@
             }
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9828f476d37d2cfc',t:'MTc1ODQ1MTMzNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98292f22f581feb7',t:'MTc1ODQ1Mzc0MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
