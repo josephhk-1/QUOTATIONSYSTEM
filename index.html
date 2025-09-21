@@ -907,10 +907,10 @@
             const total = subtotal + tax;
 
             return `
-                <div style="font-family: ${isArabic ? "'Tahoma', 'Arial Unicode MS', sans-serif" : "'Arial', sans-serif"}; max-width: 210mm; margin: 0 auto; background: white; padding: 20px; box-shadow: 0 0 20px rgba(0,0,0,0.1);">
+                <div style="font-family: ${isArabic ? "'Tahoma', 'Arial Unicode MS', sans-serif" : "'Arial', sans-serif"}; width: 210mm; height: 297mm; margin: 0 auto; background: white; padding: 15mm; box-sizing: border-box; display: flex; flex-direction: column; justify-content: flex-start; align-items: center;">
                     
                     <!-- En-tête professionnel avec logo -->
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 3px solid #667eea;">
+                    <div style="width: 100%; display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 3px solid #667eea;">
                         <div style="text-align: left; flex: 1;">
                             <div style="display: flex; align-items: center; margin-bottom: 15px;">
                                 <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
@@ -952,7 +952,7 @@
                     </div>
 
                     <!-- Informations client avec design amélioré -->
-                    <div style="margin-bottom: 30px;">
+                    <div style="width: 100%; margin-bottom: 30px;">
                         <div style="background: #f1f5f9; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0;">
                             <h3 style="font-size: 18px; font-weight: bold; color: #1e293b; margin: 0 0 15px 0; display: flex; align-items: center;">
                                 <span style="background: #667eea; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 10px; font-size: 14px;">👤</span>
@@ -980,7 +980,7 @@
                     </div>
 
                     <!-- Tableau des articles avec design professionnel -->
-                    <div style="margin-bottom: 30px;">
+                    <div style="width: 100%; margin-bottom: 30px;">
                         <h3 style="font-size: 18px; font-weight: bold; color: #1e293b; margin-bottom: 15px; text-align: left;">
                             ${isArabic ? 'تفاصيل العرض' : 'Quote Details'}
                         </h3>
@@ -1035,7 +1035,7 @@
                     </div>
 
                     <!-- Totaux avec design amélioré -->
-                    <div style="margin-bottom: 30px; display: flex; justify-content: flex-end;">
+                    <div style="width: 100%; margin-bottom: 30px; display: flex; justify-content: flex-end;">
                         <div style="min-width: 350px; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); overflow: hidden;">
                             <div style="background: #f8fafc; padding: 15px 25px; border-bottom: 1px solid #e2e8f0; text-align: left;">
                                 <h4 style="margin: 0; font-size: 16px; font-weight: bold; color: #1e293b;">
@@ -1060,7 +1060,7 @@
                     </div>
 
                     <!-- Conditions de paiement avec design professionnel -->
-                    <div style="margin-bottom: 25px;">
+                    <div style="width: 100%; margin-bottom: 25px;">
                         <div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 12px; padding: 20px;">
                             <h3 style="font-size: 16px; font-weight: bold; color: #92400e; margin: 0 0 15px 0; display: flex; align-items: center;">
                                 <span style="margin-right: 8px;">💳</span>
@@ -1078,7 +1078,7 @@
                     </div>
 
                     <!-- Coordonnées bancaires avec design professionnel -->
-                    <div style="background: #dbeafe; border: 1px solid #3b82f6; border-radius: 12px; padding: 20px;">
+                    <div style="width: 100%; background: #dbeafe; border: 1px solid #3b82f6; border-radius: 12px; padding: 20px;">
                         <h3 style="font-size: 16px; font-weight: bold; color: #1d4ed8; margin: 0 0 15px 0; display: flex; align-items: center;">
                             <span style="margin-right: 8px;">🏦</span>
                             ${isArabic ? 'المعلومات المصرفية' : 'Banking Information'}
@@ -1108,7 +1108,7 @@
                     </div>
 
                     <!-- Footer professionnel -->
-                    <div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #e2e8f0; text-align: center;">
+                    <div style="width: 100%; margin-top: 40px; padding-top: 20px; border-top: 2px solid #e2e8f0; text-align: center;">
                         <p style="font-size: 12px; color: #64748b; margin: 0;">
                             ${isArabic ? 'شكراً لثقتكم بنا - نتطلع للعمل معكم' : 'Thank you for your trust - We look forward to working with you'}
                         </p>
@@ -1152,7 +1152,11 @@
                     allowTaint: true,
                     backgroundColor: '#ffffff',
                     width: 794, // A4 width in pixels at 96 DPI
-                    height: 1123 // A4 height in pixels at 96 DPI
+                    height: 1123, // A4 height in pixels at 96 DPI
+                    x: 0,
+                    y: 0,
+                    scrollX: 0,
+                    scrollY: 0
                 });
                 
                 // Créer le PDF avec jsPDF
@@ -1699,5 +1703,5 @@
             }
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'982714e5a5ff2cfb',t:'MTc1ODQzMTY5My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98271b4bb3f52cfb',t:'MTc1ODQzMTk1Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
