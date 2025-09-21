@@ -423,16 +423,16 @@
                         </thead>
                         <tbody id="recentQuotes">
                             <tr class="border-b border-gray-100 hover-row transition-all">
-                                <td class="py-3 px-4 font-medium">#QF-2024-001</td>
+                                <td class="py-3 px-4 font-medium">#QF-2025-001</td>
                                 <td class="py-3 px-4">Advanced Business Co.</td>
-                                <td class="py-3 px-4">15/01/2024</td>
+                                <td class="py-3 px-4">15/01/2025</td>
                                 <td class="py-3 px-4 font-semibold">2,450.00 SAR</td>
                                 <td class="py-3 px-4"><span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-sm" data-translate="pending">Pending</span></td>
                             </tr>
                             <tr class="border-b border-gray-100 hover-row transition-all">
-                                <td class="py-3 px-4 font-medium">#QF-2024-002</td>
+                                <td class="py-3 px-4 font-medium">#QF-2025-002</td>
                                 <td class="py-3 px-4">Modern Tech Est.</td>
-                                <td class="py-3 px-4">14/01/2024</td>
+                                <td class="py-3 px-4">14/01/2025</td>
                                 <td class="py-3 px-4 font-semibold">1,890.00 SAR</td>
                                 <td class="py-3 px-4"><span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm" data-translate="accepted">Accepted</span></td>
                             </tr>
@@ -994,7 +994,7 @@
                         <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
                             <span class="text-purple-600 text-2xl">🔐</span>
                         </div>
-                        <h2 class="text-2xl font-bold text-gray-800">Connexion QuoteFlow</h2>
+                        <h2 class="text-2xl font-bold text-gray-800">Connexion QuoteFlow 2025</h2>
                         <p class="text-gray-600 mt-2">Accédez à vos données partagées</p>
                     </div>
                     
@@ -1004,13 +1004,13 @@
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Nom d'utilisateur</label>
                                 <input type="text" id="username" required 
                                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500"
-                                       placeholder="Entrez votre nom">
+                                       placeholder="Entrez votre nom exact">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Code d'accès</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Code d'accès 2025</label>
                                 <input type="password" id="accessCode" required 
                                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500"
-                                       placeholder="Code partagé de l'équipe">
+                                       placeholder="Code personnel 2025">
                             </div>
                         </div>
                         
@@ -1025,24 +1025,23 @@
                         </div>
                     </form>
                     
-                    <div class="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                        <h4 class="font-semibold text-red-800 mb-2">🔐 Accès Sécurisé</h4>
-                        <div class="text-sm text-red-700 space-y-2">
+                    <div class="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                        <h4 class="font-semibold text-green-800 mb-2">🔐 Codes 2025 Activés</h4>
+                        <div class="text-sm text-green-700 space-y-2">
                             <p><strong>Administrateurs autorisés :</strong></p>
                             <ul class="list-disc list-inside ml-2 space-y-1">
-                                <li>Joseph Hamdy</li>
-                                <li>Micheal Hamdy</li>
-                                <li>Mohamed Zakzouk</li>
+                                <li><strong>Joseph Hamdy:</strong> ADMIN_JH_2025_SECURE</li>
+                                <li><strong>Micheal Hamdy:</strong> ADMIN_MH_2025_SECURE</li>
+                                <li><strong>Mohamed Zakzouk:</strong> ADMIN_MZ_2025_SECURE</li>
                             </ul>
-                            <p class="mt-2 text-xs"><em>Chaque admin a son code personnel unique</em></p>
                         </div>
                     </div>
                     
-                    <div class="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                        <h4 class="font-semibold text-yellow-800 mb-2">👥 Accès Équipe</h4>
-                        <div class="text-sm text-yellow-700 space-y-1">
-                            <p><strong>Équipe :</strong> TEAM2024_LIMITED</p>
-                            <p><strong>Lecture seule :</strong> VIEW2024_READONLY</p>
+                    <div class="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                        <h4 class="font-semibold text-blue-800 mb-2">👥 Accès Équipe 2025</h4>
+                        <div class="text-sm text-blue-700 space-y-1">
+                            <p><strong>Équipe :</strong> TEAM2025_LIMITED</p>
+                            <p><strong>Lecture seule :</strong> VIEW2025_READONLY</p>
                         </div>
                     </div>
                 </div>
@@ -1057,11 +1056,11 @@
             const username = document.getElementById('username').value.trim();
             const accessCode = document.getElementById('accessCode').value.trim();
             
-            // 🔐 ACCÈS SÉCURISÉ - Administrateurs autorisés uniquement
+            // 🔐 ACCÈS SÉCURISÉ 2025 - Administrateurs autorisés uniquement
             const authorizedAdmins = {
-                'Joseph Hamdy': 'ADMIN_JH_2024_SECURE',
-                'Micheal Hamdy': 'ADMIN_MH_2024_SECURE', 
-                'Mohamed Zakzouk': 'ADMIN_MZ_2024_SECURE'
+                'Joseph Hamdy': 'ADMIN_JH_2025_SECURE',
+                'Micheal Hamdy': 'ADMIN_MH_2025_SECURE', 
+                'Mohamed Zakzouk': 'ADMIN_MZ_2025_SECURE'
             };
             
             // Vérification stricte nom + code
@@ -1074,10 +1073,10 @@
                 userRole = { role: 'admin', permissions: ['read', 'write', 'delete'] };
             }
             
-            // Codes d'équipe (accès limité)
+            // Codes d'équipe 2025 (accès limité)
             const teamCodes = {
-                'TEAM2024_LIMITED': { role: 'user', permissions: ['read', 'write'] },
-                'VIEW2024_READONLY': { role: 'viewer', permissions: ['read'] }
+                'TEAM2025_LIMITED': { role: 'user', permissions: ['read', 'write'] },
+                'VIEW2025_READONLY': { role: 'viewer', permissions: ['read'] }
             };
             
             if (!isAuthorized && teamCodes[accessCode]) {
@@ -1099,17 +1098,17 @@
                 localStorage.setItem('quoteFlowUser', JSON.stringify(currentUser));
                 
                 document.getElementById('loginModal').remove();
-                showNotification(`Bienvenue ${username} ! 🎉`, 'success');
+                showNotification(`Bienvenue ${username} ! 🎉 Codes 2025 activés`, 'success');
                 
                 // Log de sécurité
-                console.log(`✅ Connexion autorisée: ${username} (${userRole.role})`);
+                console.log(`✅ Connexion 2025 autorisée: ${username} (${userRole.role})`);
                 
                 // Charger les données depuis la base de données
                 loadDataFromDatabase();
                 
             } else {
-                showNotification('Accès refusé ! Nom ou code incorrect ❌', 'error');
-                console.warn(`🚫 Tentative de connexion non autorisée: ${username}`);
+                showNotification('Accès refusé ! Vérifiez votre nom et code 2025 ❌', 'error');
+                console.warn(`🚫 Tentative de connexion non autorisée: ${username} avec code: ${accessCode}`);
             }
         }
 
@@ -1397,9 +1396,9 @@
             ];
 
             quotes = [
-                { id: 1, number: 'QF-2024-001', clientId: 1, date: '2024-01-15', status: 'pending', total: 2450.00 },
-                { id: 2, number: 'QF-2024-002', clientId: 2, date: '2024-01-14', status: 'accepted', total: 1890.00 },
-                { id: 3, number: 'QF-2024-003', clientId: 3, date: '2024-01-13', status: 'pending', total: 3200.00 }
+                { id: 1, number: 'QF-2025-001', clientId: 1, date: '2025-01-15', status: 'pending', total: 2450.00 },
+                { id: 2, number: 'QF-2025-002', clientId: 2, date: '2025-01-14', status: 'accepted', total: 1890.00 },
+                { id: 3, number: 'QF-2025-003', clientId: 3, date: '2025-01-13', status: 'pending', total: 3200.00 }
             ];
 
             quoteLines = [
@@ -2081,115 +2080,68 @@
             }
         });
 
-        // Initialization
-        document.addEventListener('DOMContentLoaded', function() {
-            // Charger la configuration sauvegardée
-            const savedConfig = localStorage.getItem('databaseConfig');
-            if (savedConfig) {
-                Object.assign(DATABASE_CONFIG, JSON.parse(savedConfig));
-            }
+        // Notification system
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg transition-all transform translate-x-full`;
             
-            // Vérifier si l'utilisateur est déjà connecté
-            const savedUser = localStorage.getItem('quoteFlowUser');
-            if (savedUser) {
-                currentUser = JSON.parse(savedUser);
-                isAuthenticated = true;
-                updateUserInterface();
-                loadDataFromDatabase();
-                startAutoSync();
-            } else {
-                showLoginModal();
-            }
+            const colors = {
+                success: 'bg-green-500 text-white',
+                error: 'bg-red-500 text-white',
+                info: 'bg-blue-500 text-white',
+                warning: 'bg-yellow-500 text-black'
+            };
             
-            document.getElementById('quoteDate').value = new Date().toISOString().split('T')[0];
-            updateDarkMode();
-            updateTranslations();
+            notification.className += ` ${colors[type] || colors.info}`;
+            notification.textContent = message;
             
-            if (!isAuthenticated) {
-                loadData();
-                loadClients();
-                loadProducts();
-                loadQuotes();
-                updateDashboard();
-            }
-        });
+            document.body.appendChild(notification);
+            
+            // Animate in
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+            }, 100);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
 
-        // Close modal with Escape key
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                const pdfModal = document.getElementById('pdfPreviewModal');
-                if (!pdfModal.classList.contains('hidden')) {
-                    closePDFModal();
-                }
-            }
-        });
-
-        // Tab navigation
+        // Tab functions
         function showTab(tabName) {
+            // Hide all tabs
             document.querySelectorAll('.tab-content').forEach(tab => {
                 tab.classList.add('hidden');
             });
             
+            // Remove active class from all buttons
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.classList.remove('active', 'text-purple-600', 'border-b-2', 'border-purple-600');
                 btn.classList.add('text-gray-600');
             });
             
+            // Show selected tab
             document.getElementById(tabName).classList.remove('hidden');
             
-            event.target.classList.add('active', 'text-purple-600', 'border-b-2', 'border-purple-600');
-            event.target.classList.remove('text-gray-600');
+            // Add active class to clicked button
+            event.target.closest('.tab-btn').classList.add('active', 'text-purple-600', 'border-b-2', 'border-purple-600');
+            event.target.closest('.tab-btn').classList.remove('text-gray-600');
         }
 
-        // Modal management
-        function showNewQuoteModal() {
-            updateClientSelect();
-            const modal = document.getElementById('newQuoteModal');
-            const content = modal.querySelector('.modal-content');
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                content.classList.add('show');
-            }, 50);
-        }
-
-        function showNewClientModal() {
-            const modal = document.getElementById('newClientModal');
-            const content = modal.querySelector('.modal-content');
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                content.classList.add('show');
-            }, 50);
-        }
-
-        function showNewProductModal() {
-            const modal = document.getElementById('newProductModal');
-            const content = modal.querySelector('.modal-content');
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                content.classList.add('show');
-            }, 50);
-        }
-
+        // Modal functions
         function closeModal(modalId) {
-            const modal = document.getElementById(modalId);
-            const content = modal.querySelector('.modal-content');
-            content.classList.remove('show');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-                if (modalId === 'newQuoteModal') {
-                    document.getElementById('newQuoteForm').reset();
-                    document.getElementById('quoteLines').innerHTML = '';
-                    updateQuoteTotals();
-                }
-            }, 300);
+            document.getElementById(modalId).classList.add('hidden');
         }
 
         function closePDFModal() {
-            const modal = document.getElementById('pdfPreviewModal');
-            modal.classList.add('hidden');
+            document.getElementById('pdfPreviewModal').classList.add('hidden');
             currentQuoteForPDF = null;
-            document.getElementById('pdfPreviewContent').innerHTML = '';
-            document.getElementById('pdfStatus').innerHTML = '📄 Ready to generate';
         }
 
         function closePDFModalOnBackdrop(event) {
@@ -2198,29 +2150,41 @@
             }
         }
 
-        // Client management
+        // Client functions
         function loadClients() {
             const grid = document.getElementById('clientsGrid');
+            const select = document.getElementById('quoteClient');
+            
             grid.innerHTML = '';
+            select.innerHTML = '<option value="">' + t('selectClient') + '</option>';
             
             clients.forEach(client => {
+                const displayName = currentLang === 'ar' ? client.name : (client.nameEn || client.name);
+                const displayAddress = currentLang === 'ar' ? client.address : (client.addressEn || client.address);
+                
+                // Add to grid
                 const clientCard = document.createElement('div');
-                clientCard.className = 'bg-gray-50 rounded-lg p-4 hover-card transition-all';
+                clientCard.className = 'bg-white rounded-lg border border-gray-200 p-4 hover-card transition-all';
                 clientCard.innerHTML = `
-                    <div class="flex items-start justify-between mb-3">
-                        <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                            <span class="text-purple-600 font-semibold">${(currentLang === 'ar' ? client.name : client.nameEn).charAt(0)}</span>
-                        </div>
-                        <button onclick="deleteClient(${client.id})" class="text-red-500 hover:text-red-700 transition-colors hover-button">
-                            🗑️
-                        </button>
+                    <div class="flex justify-between items-start mb-3">
+                        <h4 class="font-semibold text-gray-800">${displayName}</h4>
+                        <button onclick="deleteClient(${client.id})" class="text-red-500 hover:text-red-700 text-sm">🗑️</button>
                     </div>
-                    <h4 class="font-semibold text-gray-800 mb-1">${currentLang === 'ar' ? client.name : client.nameEn}</h4>
-                    <p class="text-sm text-gray-600 mb-2">${client.email}</p>
-                    <p class="text-xs text-gray-500">${currentLang === 'ar' ? client.address : client.addressEn}</p>
+                    <p class="text-sm text-gray-600 mb-2">📧 ${client.email}</p>
+                    <p class="text-sm text-gray-500">📍 ${displayAddress}</p>
                 `;
                 grid.appendChild(clientCard);
+                
+                // Add to select
+                const option = document.createElement('option');
+                option.value = client.id;
+                option.textContent = displayName;
+                select.appendChild(option);
             });
+        }
+
+        function showNewClientModal() {
+            document.getElementById('newClientModal').classList.remove('hidden');
         }
 
         function createClient(event) {
@@ -2242,57 +2206,53 @@
             clients.push(newClient);
             saveData();
             loadClients();
-            updateClientSelect();
             closeModal('newClientModal');
             
-            showNotification(
-                currentLang === 'ar' ? 'تم إنشاء العميل بنجاح!' : 'Client created successfully!', 
-                'success'
-            );
+            // Reset form
+            document.getElementById('newClientForm').reset();
+            
+            showNotification(currentLang === 'ar' ? 'تم إضافة العميل بنجاح' : 'Client added successfully', 'success');
         }
 
         function deleteClient(clientId) {
-            const confirmMessage = currentLang === 'ar' 
-                ? 'هل أنت متأكد من حذف هذا العميل؟' 
-                : 'Are you sure you want to delete this client?';
-                
-            if (confirm(confirmMessage)) {
-                clients = clients.filter(client => client.id !== clientId);
+            if (confirm(currentLang === 'ar' ? 'هل أنت متأكد من حذف هذا العميل؟' : 'Are you sure you want to delete this client?')) {
+                clients = clients.filter(c => c.id !== clientId);
                 saveData();
                 loadClients();
-                updateClientSelect();
-                showNotification(
-                    currentLang === 'ar' ? 'تم حذف العميل' : 'Client deleted', 
-                    'info'
-                );
+                showNotification(currentLang === 'ar' ? 'تم حذف العميل' : 'Client deleted', 'success');
             }
         }
 
-        // Product management
+        // Product functions
         function loadProducts() {
             const grid = document.getElementById('productsGrid');
             grid.innerHTML = '';
             
-            const filteredProducts = products.filter(product => product.company === currentCompany);
+            const companyProducts = products.filter(p => p.company === currentCompany);
             
-            filteredProducts.forEach(product => {
+            companyProducts.forEach(product => {
+                const displayName = currentLang === 'ar' ? product.name : product.nameEn;
+                const displayDesc = currentLang === 'ar' ? product.description : product.descriptionEn;
+                
                 const productCard = document.createElement('div');
-                productCard.className = 'bg-gray-50 rounded-lg p-4 hover-card transition-all';
+                productCard.className = 'bg-white rounded-lg border border-gray-200 p-4 hover-card transition-all';
                 productCard.innerHTML = `
-                    <div class="flex items-start justify-between mb-3">
-                        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                            <span class="text-blue-600">📦</span>
-                        </div>
-                        <button onclick="deleteProduct(${product.id})" class="text-red-500 hover:text-red-700 transition-colors hover-button">
-                            🗑️
-                        </button>
+                    <div class="flex justify-between items-start mb-3">
+                        <h4 class="font-semibold text-gray-800">${displayName}</h4>
+                        <button onclick="deleteProduct(${product.id})" class="text-red-500 hover:text-red-700 text-sm">🗑️</button>
                     </div>
-                    <h4 class="font-semibold text-gray-800 mb-1">${currentLang === 'ar' ? product.name : product.nameEn}</h4>
-                    <p class="text-sm text-gray-600 mb-2">${currentLang === 'ar' ? product.description : product.descriptionEn}</p>
-                    <p class="text-lg font-bold text-purple-600">${product.price.toFixed(2)} SAR</p>
+                    <p class="text-sm text-gray-600 mb-3">${displayDesc}</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-lg font-bold text-purple-600">${product.price.toFixed(2)} SAR</span>
+                        <span class="text-xs text-gray-500">${companies[currentCompany].name}</span>
+                    </div>
                 `;
                 grid.appendChild(productCard);
             });
+        }
+
+        function showNewProductModal() {
+            document.getElementById('newProductModal').classList.remove('hidden');
         }
 
         function createProduct(event) {
@@ -2317,64 +2277,54 @@
             loadProducts();
             closeModal('newProductModal');
             
-            showNotification(
-                currentLang === 'ar' ? 'تم إنشاء المنتج بنجاح!' : 'Product created successfully!', 
-                'success'
-            );
+            // Reset form
+            document.getElementById('newProductForm').reset();
+            
+            showNotification(currentLang === 'ar' ? 'تم إضافة المنتج بنجاح' : 'Product added successfully', 'success');
         }
 
         function deleteProduct(productId) {
-            const confirmMessage = currentLang === 'ar' 
-                ? 'هل أنت متأكد من حذف هذا المنتج؟' 
-                : 'Are you sure you want to delete this product?';
-                
-            if (confirm(confirmMessage)) {
-                products = products.filter(product => product.id !== productId);
+            if (confirm(currentLang === 'ar' ? 'هل أنت متأكد من حذف هذا المنتج؟' : 'Are you sure you want to delete this product?')) {
+                products = products.filter(p => p.id !== productId);
                 saveData();
                 loadProducts();
-                showNotification(
-                    currentLang === 'ar' ? 'تم حذف المنتج' : 'Product deleted', 
-                    'info'
-                );
+                showNotification(currentLang === 'ar' ? 'تم حذف المنتج' : 'Product deleted', 'success');
             }
         }
 
-        // Quote management
+        // Quote functions
         function loadQuotes() {
             const table = document.getElementById('quotesTable');
             table.innerHTML = '';
             
             quotes.forEach(quote => {
                 const client = clients.find(c => c.id === quote.clientId);
-                const statusClass = quote.status === 'accepted' ? 'bg-green-100 text-green-800' : 
-                                  quote.status === 'rejected' ? 'bg-red-100 text-red-800' : 
-                                  'bg-yellow-100 text-yellow-800';
-                const statusText = currentLang === 'ar' 
-                    ? (quote.status === 'accepted' ? 'مقبول' : quote.status === 'rejected' ? 'مرفوض' : 'معلق')
-                    : (quote.status === 'accepted' ? 'Accepted' : quote.status === 'rejected' ? 'Rejected' : 'Pending');
+                const clientName = client ? (currentLang === 'ar' ? client.name : (client.nameEn || client.name)) : 'Unknown';
+                
+                const statusColors = {
+                    pending: 'bg-yellow-100 text-yellow-800',
+                    accepted: 'bg-green-100 text-green-800',
+                    rejected: 'bg-red-100 text-red-800'
+                };
                 
                 const row = document.createElement('tr');
                 row.className = 'border-b border-gray-100 hover-row transition-all';
                 row.innerHTML = `
                     <td class="py-3 px-4 font-medium">#${quote.number}</td>
-                    <td class="py-3 px-4">${client ? (currentLang === 'ar' ? client.name : client.nameEn) : 'Unknown Client'}</td>
-                    <td class="py-3 px-4">${new Date(quote.date).toLocaleDateString(currentLang === 'ar' ? 'ar-SA' : 'en-GB')}</td>
+                    <td class="py-3 px-4">${clientName}</td>
+                    <td class="py-3 px-4">${new Date(quote.date).toLocaleDateString()}</td>
                     <td class="py-3 px-4 font-semibold">${quote.total.toFixed(2)} SAR</td>
                     <td class="py-3 px-4">
-                        <span class="${statusClass} px-2 py-1 rounded-full text-sm">${statusText}</span>
+                        <span class="${statusColors[quote.status]} px-2 py-1 rounded-full text-sm">
+                            ${t(quote.status)}
+                        </span>
                     </td>
                     <td class="py-3 px-4">
                         <div class="flex space-x-2">
-                            <button onclick="generatePDF(${quote.id})" class="text-blue-600 hover:text-blue-800 transition-colors" title="${currentLang === 'ar' ? 'إنشاء PDF' : 'Generate PDF'}">
-                                📄
+                            <button onclick="showPDFPreview(${quote.id})" class="text-blue-600 hover:text-blue-800 text-sm hover-button transition-all" title="${t('preview')}">
+                                👁️
                             </button>
-                            <button onclick="updateQuoteStatus(${quote.id}, 'accepted')" class="text-green-600 hover:text-green-800 transition-colors" title="${currentLang === 'ar' ? 'قبول' : 'Accept'}">
-                                ✅
-                            </button>
-                            <button onclick="updateQuoteStatus(${quote.id}, 'rejected')" class="text-red-600 hover:text-red-800 transition-colors" title="${currentLang === 'ar' ? 'رفض' : 'Reject'}">
-                                ❌
-                            </button>
-                            <button onclick="deleteQuote(${quote.id})" class="text-gray-600 hover:text-gray-800 transition-colors" title="${currentLang === 'ar' ? 'حذف' : 'Delete'}">
+                            <button onclick="deleteQuote(${quote.id})" class="text-red-600 hover:text-red-800 text-sm hover-button transition-all" title="${t('delete')}">
                                 🗑️
                             </button>
                         </div>
@@ -2384,50 +2334,47 @@
             });
         }
 
-        function updateClientSelect() {
-            const select = document.getElementById('quoteClient');
-            select.innerHTML = `<option value="">${currentLang === 'ar' ? 'اختر عميل' : 'Select a client'}</option>`;
-            
-            clients.forEach(client => {
-                const option = document.createElement('option');
-                option.value = client.id;
-                option.textContent = currentLang === 'ar' ? client.name : client.nameEn;
-                select.appendChild(option);
-            });
+        function showNewQuoteModal() {
+            document.getElementById('newQuoteModal').classList.remove('hidden');
+            document.getElementById('quoteDate').value = new Date().toISOString().split('T')[0];
+            addQuoteLine(); // Add first line
         }
 
         function addQuoteLine() {
             const container = document.getElementById('quoteLines');
-            const lineId = Date.now();
-            const filteredProducts = products.filter(product => product.company === currentCompany);
+            const lineId = `line_${Date.now()}`;
             
             const line = document.createElement('div');
-            line.className = 'quote-line bg-gray-50 rounded-lg p-4';
-            line.setAttribute('data-line-id', lineId);
+            line.className = 'quote-line bg-gray-50 rounded-lg p-4 border border-gray-200';
+            line.id = lineId;
+            
+            const companyProducts = products.filter(p => p.company === currentCompany);
+            
             line.innerHTML = `
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2" data-translate="productName">${t('productName')}</label>
-                        <select class="product-select w-full border border-gray-300 rounded-lg px-3 py-2" onchange="updateLinePrice(${lineId})">
-                            <option value="">${currentLang === 'ar' ? 'اختر منتج' : 'Select a product'}</option>
-                            ${filteredProducts.map(p => `<option value="${p.id}" data-price="${p.price}">${currentLang === 'ar' ? p.name : p.nameEn}</option>`).join('')}
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">${t('products')}</label>
+                        <select class="product-select w-full border border-gray-300 rounded-lg px-3 py-2" onchange="updateLinePrice('${lineId}')">
+                            <option value="">Select product</option>
+                            ${companyProducts.map(p => `
+                                <option value="${p.id}" data-price="${p.price}">
+                                    ${currentLang === 'ar' ? p.name : p.nameEn} - ${p.price.toFixed(2)} SAR
+                                </option>
+                            `).join('')}
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2" data-translate="quantity">${t('quantity')}</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">${t('quantity')}</label>
                         <input type="number" class="quantity-input w-full border border-gray-300 rounded-lg px-3 py-2" 
-                               value="1" min="1" onchange="updateQuoteTotals()">
+                               value="1" min="1" onchange="updateLinePrice('${lineId}')">
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2" data-translate="unitPrice">${t('unitPrice')} (SAR)</label>
-                        <input type="number" class="price-input w-full border border-gray-300 rounded-lg px-3 py-2" 
-                               step="0.01" onchange="updateQuoteTotals()">
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <span class="line-total font-semibold text-purple-600">0.00 SAR</span>
-                        <button type="button" onclick="removeLine(${lineId})" class="text-red-500 hover:text-red-700 transition-colors hover-button">
-                            🗑️
-                        </button>
+                    <div class="flex items-end">
+                        <div class="flex-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">${t('total')}</label>
+                            <div class="line-total font-semibold text-purple-600 py-2">0.00 SAR</div>
+                        </div>
+                        <button type="button" onclick="removeLine('${lineId}')" 
+                                class="ml-2 text-red-600 hover:text-red-800 p-2">🗑️</button>
                     </div>
                 </div>
             `;
@@ -2435,21 +2382,23 @@
             container.appendChild(line);
         }
 
-        function updateLinePrice(lineId) {
-            const line = document.querySelector(`[data-line-id="${lineId}"]`);
-            const select = line.querySelector('.product-select');
-            const priceInput = line.querySelector('.price-input');
-            
-            const selectedOption = select.options[select.selectedIndex];
-            if (selectedOption.value) {
-                priceInput.value = selectedOption.getAttribute('data-price');
-                updateQuoteTotals();
-            }
+        function removeLine(lineId) {
+            document.getElementById(lineId).remove();
+            updateQuoteTotals();
         }
 
-        function removeLine(lineId) {
-            const line = document.querySelector(`[data-line-id="${lineId}"]`);
-            line.remove();
+        function updateLinePrice(lineId) {
+            const line = document.getElementById(lineId);
+            const select = line.querySelector('.product-select');
+            const quantityInput = line.querySelector('.quantity-input');
+            const totalDiv = line.querySelector('.line-total');
+            
+            const selectedOption = select.options[select.selectedIndex];
+            const price = selectedOption ? parseFloat(selectedOption.dataset.price) || 0 : 0;
+            const quantity = parseInt(quantityInput.value) || 0;
+            const total = price * quantity;
+            
+            totalDiv.textContent = total.toFixed(2) + ' SAR';
             updateQuoteTotals();
         }
 
@@ -2457,20 +2406,23 @@
             let subtotal = 0;
             
             document.querySelectorAll('.quote-line').forEach(line => {
-                const quantity = parseFloat(line.querySelector('.quantity-input').value) || 0;
-                const price = parseFloat(line.querySelector('.price-input').value) || 0;
-                const lineTotal = quantity * price;
+                const select = line.querySelector('.product-select');
+                const quantityInput = line.querySelector('.quantity-input');
                 
-                line.querySelector('.line-total').textContent = `${lineTotal.toFixed(2)} SAR`;
-                subtotal += lineTotal;
+                if (select.value) {
+                    const selectedOption = select.options[select.selectedIndex];
+                    const price = parseFloat(selectedOption.dataset.price) || 0;
+                    const quantity = parseInt(quantityInput.value) || 0;
+                    subtotal += price * quantity;
+                }
             });
             
             const tax = subtotal * 0.15;
             const total = subtotal + tax;
             
-            document.getElementById('subtotalHT').textContent = `${subtotal.toFixed(2)} SAR`;
-            document.getElementById('taxAmount').textContent = `${tax.toFixed(2)} SAR`;
-            document.getElementById('totalTTC').textContent = `${total.toFixed(2)} SAR`;
+            document.getElementById('subtotalHT').textContent = subtotal.toFixed(2) + ' SAR';
+            document.getElementById('taxAmount').textContent = tax.toFixed(2) + ' SAR';
+            document.getElementById('totalTTC').textContent = total.toFixed(2) + ' SAR';
         }
 
         function createQuote(event) {
@@ -2480,7 +2432,7 @@
             const date = document.getElementById('quoteDate').value;
             
             if (!clientId) {
-                alert(currentLang === 'ar' ? 'يرجى اختيار عميل' : 'Please select a client');
+                showNotification(currentLang === 'ar' ? 'يرجى اختيار عميل' : 'Please select a client', 'error');
                 return;
             }
             
@@ -2488,11 +2440,15 @@
             let total = 0;
             
             document.querySelectorAll('.quote-line').forEach(line => {
-                const productId = parseInt(line.querySelector('.product-select').value);
-                const quantity = parseFloat(line.querySelector('.quantity-input').value);
-                const price = parseFloat(line.querySelector('.price-input').value);
+                const select = line.querySelector('.product-select');
+                const quantityInput = line.querySelector('.quantity-input');
                 
-                if (productId && quantity && price) {
+                if (select.value) {
+                    const productId = parseInt(select.value);
+                    const quantity = parseInt(quantityInput.value);
+                    const selectedOption = select.options[select.selectedIndex];
+                    const price = parseFloat(selectedOption.dataset.price);
+                    
                     lines.push({
                         id: nextQuoteLineId++,
                         quoteId: nextQuoteId,
@@ -2500,156 +2456,123 @@
                         quantity: quantity,
                         price: price
                     });
-                    total += quantity * price;
+                    
+                    total += price * quantity;
                 }
             });
             
             if (lines.length === 0) {
-                alert(currentLang === 'ar' ? 'يرجى إضافة منتج واحد على الأقل' : 'Please add at least one item to the quote');
+                showNotification(currentLang === 'ar' ? 'يرجى إضافة منتج واحد على الأقل' : 'Please add at least one product', 'error');
                 return;
             }
             
-            total = total * 1.15;
+            const totalWithTax = total * 1.15;
             
             const newQuote = {
                 id: nextQuoteId++,
-                number: `QF-2024-${String(nextQuoteId - 1).padStart(3, '0')}`,
+                number: `QF-2025-${String(nextQuoteId - 1).padStart(3, '0')}`,
                 clientId: clientId,
                 date: date,
                 status: 'pending',
-                total: total
+                total: totalWithTax
             };
             
             quotes.push(newQuote);
             quoteLines.push(...lines);
-            saveData();
             
+            saveData();
             loadQuotes();
             updateDashboard();
             closeModal('newQuoteModal');
             
-            showNotification(
-                currentLang === 'ar' ? 'تم إنشاء عرض السعر بنجاح!' : 'Quote created successfully!', 
-                'success'
-            );
-        }
-
-        function updateQuoteStatus(quoteId, status) {
-            const quote = quotes.find(q => q.id === quoteId);
-            if (quote) {
-                quote.status = status;
-                saveData();
-                loadQuotes();
-                updateDashboard();
-                
-                const statusText = currentLang === 'ar' 
-                    ? (status === 'accepted' ? 'مقبول' : 'مرفوض')
-                    : (status === 'accepted' ? 'accepted' : 'rejected');
-                showNotification(
-                    currentLang === 'ar' ? `عرض السعر ${statusText}` : `Quote ${statusText}`, 
-                    'success'
-                );
-            }
+            // Reset form
+            document.getElementById('newQuoteForm').reset();
+            document.getElementById('quoteLines').innerHTML = '';
+            
+            showNotification(currentLang === 'ar' ? 'تم إنشاء عرض السعر بنجاح' : 'Quote created successfully', 'success');
         }
 
         function deleteQuote(quoteId) {
-            const confirmMessage = currentLang === 'ar' 
-                ? 'هل أنت متأكد من حذف عرض السعر هذا؟' 
-                : 'Are you sure you want to delete this quote?';
-                
-            if (confirm(confirmMessage)) {
+            if (confirm(currentLang === 'ar' ? 'هل أنت متأكد من حذف عرض السعر؟' : 'Are you sure you want to delete this quote?')) {
                 quotes = quotes.filter(q => q.id !== quoteId);
                 quoteLines = quoteLines.filter(ql => ql.quoteId !== quoteId);
                 saveData();
                 loadQuotes();
                 updateDashboard();
-                showNotification(
-                    currentLang === 'ar' ? 'تم حذف عرض السعر' : 'Quote deleted', 
-                    'info'
-                );
+                showNotification(currentLang === 'ar' ? 'تم حذف عرض السعر' : 'Quote deleted', 'success');
             }
         }
 
-        function generatePDF(quoteId) {
-            showPDFPreview(quoteId);
-        }
-
-        function updateDashboard() {
-            const pending = quotes.filter(q => q.status === 'pending').length;
-            const accepted = quotes.filter(q => q.status === 'accepted').length;
-            const revenue = quotes.filter(q => q.status === 'accepted')
-                                 .reduce((sum, q) => sum + q.total, 0);
-            
-            document.getElementById('pendingCount').textContent = pending;
-            document.getElementById('acceptedCount').textContent = accepted;
-            document.getElementById('monthlyRevenue').textContent = `${revenue.toLocaleString('en-US')} SAR`;
-        }
-
         function filterQuotes(status) {
+            // Remove active class from all filter buttons
             document.querySelectorAll('.filter-btn').forEach(btn => {
                 btn.classList.remove('active', 'bg-purple-100', 'text-purple-700');
                 btn.classList.add('bg-gray-100', 'text-gray-700');
             });
             
+            // Add active class to clicked button
             event.target.classList.add('active', 'bg-purple-100', 'text-purple-700');
             event.target.classList.remove('bg-gray-100', 'text-gray-700');
             
+            // Filter quotes (for now just reload all)
             loadQuotes();
-            showNotification(`Filter applied: ${status}`, 'info');
         }
 
-        function showNotification(message, type) {
-            const notification = document.createElement('div');
-            notification.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg text-white font-medium transform transition-all duration-300 translate-x-full notification-enter hover-lift`;
+        function updateDashboard() {
+            const pendingQuotes = quotes.filter(q => q.status === 'pending');
+            const acceptedQuotes = quotes.filter(q => q.status === 'accepted');
+            const monthlyRevenue = acceptedQuotes.reduce((sum, q) => sum + q.total, 0);
             
-            // Add icon based on type
-            let icon = '';
-            if (type === 'success') {
-                notification.classList.add('bg-green-500');
-                icon = '✅ ';
-            } else if (type === 'error') {
-                notification.classList.add('bg-red-500');
-                icon = '❌ ';
-            } else {
-                notification.classList.add('bg-blue-500');
-                icon = 'ℹ️ ';
+            document.getElementById('pendingCount').textContent = pendingQuotes.length;
+            document.getElementById('acceptedCount').textContent = acceptedQuotes.length;
+            document.getElementById('monthlyRevenue').textContent = monthlyRevenue.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' SAR';
+        }
+
+        // Initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            // Charger la configuration sauvegardée
+            const savedConfig = localStorage.getItem('databaseConfig');
+            if (savedConfig) {
+                Object.assign(DATABASE_CONFIG, JSON.parse(savedConfig));
             }
             
-            notification.innerHTML = `
-                <div class="flex items-center space-x-2">
-                    <span>${icon}</span>
-                    <span>${message}</span>
-                    <button onclick="this.parentElement.parentElement.remove()" class="ml-2 text-white hover:text-gray-200 transition-colors">
-                        ✕
-                    </button>
-                </div>
-            `;
+            // Vérifier si l'utilisateur est déjà connecté
+            const savedUser = localStorage.getItem('quoteFlowUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                isAuthenticated = true;
+                updateUserInterface();
+                loadDataFromDatabase();
+                startAutoSync();
+            } else {
+                showLoginModal();
+            }
             
-            document.body.appendChild(notification);
+            // Initialize interface
+            updateDarkMode();
+            updateTranslations();
             
-            // Animate in
-            setTimeout(() => {
-                notification.classList.remove('translate-x-full');
-                notification.classList.add('animate-slideInRight');
-            }, 100);
+            // Set current date
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('quoteDate').value = today;
             
-            // Auto remove after 4 seconds
-            setTimeout(() => {
-                notification.classList.add('notification-exit', 'translate-x-full');
-                setTimeout(() => {
-                    if (notification.parentElement) {
-                        document.body.removeChild(notification);
-                    }
-                }, 300);
-            }, 4000);
-        }
+            // Load initial data if not authenticated (fallback)
+            if (!isAuthenticated) {
+                loadData();
+                loadClients();
+                loadProducts();
+                loadQuotes();
+                updateDashboard();
+            }
+        });
 
-        // Add default line when modal opens
-        document.getElementById('newQuoteModal').addEventListener('transitionend', function() {
-            if (!this.classList.contains('hidden') && document.getElementById('quoteLines').children.length === 0) {
-                addQuoteLine();
+        // Close modals when clicking outside
+        document.addEventListener('click', function(event) {
+            if (event.target.classList.contains('modal-backdrop')) {
+                const modal = event.target;
+                modal.classList.add('hidden');
             }
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98292f22f581feb7',t:'MTc1ODQ1Mzc0MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'982963e7a66f2cff',t:'MTc1ODQ1NTkwMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
