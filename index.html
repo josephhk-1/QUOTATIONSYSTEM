@@ -407,7 +407,7 @@
         <div id="quotes" class="tab-content hidden">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-bold text-gray-800" data-translate="quoteManagement">Quote Management</h2>
-                <button onclick="showNewQuoteModal()" class="btn-primary text-white px-6 py-3 rounded-lg font-medium hover:shadow-lg transition-all hover-button">
+                <button onclick="showNewQuoteModal()" class="btn-primary text-white px-6 py-3 rounded-lg font-medium hover:shadow-lg transition-all">
                     ➕ <span data-translate="newQuote">New Quote</span>
                 </button>
             </div>
@@ -415,16 +415,16 @@
             <div class="bg-white rounded-xl card-shadow">
                 <div class="p-6 border-b border-gray-200">
                     <div class="flex flex-wrap gap-4">
-                        <button onclick="filterQuotes('all')" class="filter-btn active bg-purple-100 text-purple-700 px-4 py-2 rounded-lg font-medium transition-all hover-button">
+                        <button onclick="filterQuotes('all')" class="filter-btn active bg-purple-100 text-purple-700 px-4 py-2 rounded-lg font-medium transition-all">
                             <span data-translate="all">All</span> (20)
                         </button>
-                        <button onclick="filterQuotes('pending')" class="filter-btn bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-medium transition-all hover-button">
+                        <button onclick="filterQuotes('pending')" class="filter-btn bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-medium transition-all">
                             <span data-translate="pending">Pending</span> (12)
                         </button>
-                        <button onclick="filterQuotes('accepted')" class="filter-btn bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-medium transition-all hover-button">
+                        <button onclick="filterQuotes('accepted')" class="filter-btn bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-medium transition-all">
                             <span data-translate="accepted">Accepted</span> (8)
                         </button>
-                        <button onclick="filterQuotes('rejected')" class="filter-btn bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-medium transition-all hover-button">
+                        <button onclick="filterQuotes('rejected')" class="filter-btn bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-medium transition-all">
                             <span data-translate="rejected">Rejected</span> (0)
                         </button>
                     </div>
@@ -455,7 +455,7 @@
         <div id="clients" class="tab-content hidden">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-bold text-gray-800" data-translate="clientManagement">Client Management</h2>
-                <button onclick="showNewClientModal()" class="btn-primary text-white px-6 py-3 rounded-lg font-medium hover:shadow-lg transition-all hover-button">
+                <button onclick="showNewClientModal()" class="btn-primary text-white px-6 py-3 rounded-lg font-medium hover:shadow-lg transition-all">
                     ➕ <span data-translate="newClient">New Client</span>
                 </button>
             </div>
@@ -471,7 +471,7 @@
         <div id="products" class="tab-content hidden">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-bold text-gray-800" data-translate="productCatalog">Product Catalog</h2>
-                <button onclick="showNewProductModal()" class="btn-primary text-white px-6 py-3 rounded-lg font-medium hover:shadow-lg transition-all hover-button">
+                <button onclick="showNewProductModal()" class="btn-primary text-white px-6 py-3 rounded-lg font-medium hover:shadow-lg transition-all">
                     ➕ <span data-translate="newProduct">New Product</span>
                 </button>
             </div>
@@ -485,8 +485,8 @@
     </div>
 
     <!-- Modal New Quote -->
-    <div id="newQuoteModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
-        <div class="bg-white rounded-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+    <div id="newQuoteModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 modal-backdrop">
+        <div class="bg-white rounded-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto modal-content">
             <div class="p-6 border-b border-gray-200">
                 <div class="flex justify-between items-center">
                     <h3 class="text-xl font-semibold" data-translate="newQuote">New Quote</h3>
@@ -511,7 +511,7 @@
                     <div class="mb-6">
                         <div class="flex justify-between items-center mb-4">
                             <h4 class="text-lg font-medium" data-translate="quoteItems">Quote Items</h4>
-                            <button type="button" onclick="addQuoteLine()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm transition-all hover-button">
+                            <button type="button" onclick="addQuoteLine()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm transition-all">
                                 ➕ <span data-translate="addItem">Add Item</span>
                             </button>
                         </div>
@@ -539,7 +539,7 @@
                         <button type="button" onclick="closeModal('newQuoteModal')" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors" data-translate="cancel">
                             Cancel
                         </button>
-                        <button type="submit" class="btn-primary text-white px-6 py-2 rounded-lg hover:shadow-lg transition-all hover-button" data-translate="createQuote">
+                        <button type="submit" class="btn-primary text-white px-6 py-2 rounded-lg hover:shadow-lg transition-all" data-translate="createQuote">
                             Create Quote
                         </button>
                     </div>
@@ -577,7 +577,7 @@
                         <button type="button" onclick="closeModal('newClientModal')" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors" data-translate="cancel">
                             Cancel
                         </button>
-                        <button type="submit" class="btn-primary text-white px-6 py-2 rounded-lg hover:shadow-lg transition-all hover-button" data-translate="create">
+                        <button type="submit" class="btn-primary text-white px-6 py-2 rounded-lg hover:shadow-lg transition-all" data-translate="create">
                             Create
                         </button>
                     </div>
@@ -615,7 +615,7 @@
                         <button type="button" onclick="closeModal('newProductModal')" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors" data-translate="cancel">
                             Cancel
                         </button>
-                        <button type="submit" class="btn-primary text-white px-6 py-2 rounded-lg hover:shadow-lg transition-all hover-button" data-translate="create">
+                        <button type="submit" class="btn-primary text-white px-6 py-2 rounded-lg hover:shadow-lg transition-all" data-translate="create">
                             Create
                         </button>
                     </div>
@@ -648,10 +648,10 @@
                         </label>
                     </div>
                     <div class="flex space-x-4">
-                        <button onclick="updatePDFPreview()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-all hover-button">
+                        <button onclick="updatePDFPreview()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-all">
                             <span data-translate="preview">Preview</span>
                         </button>
-                        <button onclick="downloadPDF()" class="btn-primary text-white px-4 py-2 rounded-lg transition-all hover-button">
+                        <button onclick="downloadPDF()" class="btn-primary text-white px-4 py-2 rounded-lg transition-all">
                             <span data-translate="download">Download</span>
                         </button>
                     </div>
@@ -1024,11 +1024,11 @@
                                 <div style="flex: 1; ${isArabic ? 'text-align: right;' : 'text-align: left;'}">
                                     <div style="display: flex; align-items: flex-start; margin-bottom: ${isCompact ? '6px' : '8px'};">
                                         <div style="display: flex; flex-direction: column; align-items: center; margin-right: 15px;">
-                                            <img src="${company.logo}" alt="Logo" class="pdf-logo" style="width: ${isCompact ? '180px' : '200px'}; height: ${isCompact ? '180px' : '200px'}; object-fit: contain; background: transparent; border: none; margin-bottom: 8px;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                                            <div style="width: ${isCompact ? '180px' : '200px'}; height: ${isCompact ? '180px' : '200px'}; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; display: none; align-items: center; justify-content: center; margin-bottom: 8px;">
-                                                <span style="color: white; font-size: ${isCompact ? '32px' : '36px'}; font-weight: bold;">${company.name.charAt(0)}</span>
+                                            <img src="${company.logo}" alt="Logo" class="pdf-logo" style="width: 200px; height: 200px; object-fit: contain; background: transparent; border: none; margin-bottom: 8px;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                            <div style="width: 200px; height: 200px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; display: none; align-items: center; justify-content: center; margin-bottom: 8px;">
+                                                <span style="color: white; font-size: 36px; font-weight: bold;">${company.name.charAt(0)}</span>
                                             </div>
-                                            <h1 style="font-size: ${isCompact ? '14px' : '16px'}; font-weight: bold; color: #667eea; margin: 0; line-height: 1.1; text-align: center; max-width: ${isCompact ? '180px' : '200px'};">
+                                            <h1 style="font-size: ${isCompact ? '14px' : '16px'}; font-weight: bold; color: #667eea; margin: 0; line-height: 1.1; text-align: center; max-width: 200px;">
                                                 ${isArabic ? company.nameAr : company.name}
                                             </h1>
                                         </div>
@@ -1353,24 +1353,44 @@
         // Modal management
         function showNewQuoteModal() {
             updateClientSelect();
-            document.getElementById('newQuoteModal').classList.remove('hidden');
+            const modal = document.getElementById('newQuoteModal');
+            const content = modal.querySelector('.modal-content');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.add('show');
+            }, 50);
         }
 
         function showNewClientModal() {
-            document.getElementById('newClientModal').classList.remove('hidden');
+            const modal = document.getElementById('newClientModal');
+            const content = modal.querySelector('.modal-content');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.add('show');
+            }, 50);
         }
 
         function showNewProductModal() {
-            document.getElementById('newProductModal').classList.remove('hidden');
+            const modal = document.getElementById('newProductModal');
+            const content = modal.querySelector('.modal-content');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.add('show');
+            }, 50);
         }
 
         function closeModal(modalId) {
-            document.getElementById(modalId).classList.add('hidden');
-            if (modalId === 'newQuoteModal') {
-                document.getElementById('newQuoteForm').reset();
-                document.getElementById('quoteLines').innerHTML = '';
-                updateQuoteTotals();
-            }
+            const modal = document.getElementById(modalId);
+            const content = modal.querySelector('.modal-content');
+            content.classList.remove('show');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                if (modalId === 'newQuoteModal') {
+                    document.getElementById('newQuoteForm').reset();
+                    document.getElementById('quoteLines').innerHTML = '';
+                    updateQuoteTotals();
+                }
+            }, 300);
         }
 
         // Client management
@@ -1540,16 +1560,16 @@
                     </td>
                     <td class="py-3 px-4">
                         <div class="flex space-x-2">
-                            <button onclick="generatePDF(${quote.id})" class="text-blue-600 hover:text-blue-800 transition-colors hover-button" title="${currentLang === 'ar' ? 'إنشاء PDF' : 'Generate PDF'}">
+                            <button onclick="generatePDF(${quote.id})" class="text-blue-600 hover:text-blue-800 transition-colors" title="${currentLang === 'ar' ? 'إنشاء PDF' : 'Generate PDF'}">
                                 📄
                             </button>
-                            <button onclick="updateQuoteStatus(${quote.id}, 'accepted')" class="text-green-600 hover:text-green-800 transition-colors hover-button" title="${currentLang === 'ar' ? 'قبول' : 'Accept'}">
+                            <button onclick="updateQuoteStatus(${quote.id}, 'accepted')" class="text-green-600 hover:text-green-800 transition-colors" title="${currentLang === 'ar' ? 'قبول' : 'Accept'}">
                                 ✅
                             </button>
-                            <button onclick="updateQuoteStatus(${quote.id}, 'rejected')" class="text-red-600 hover:text-red-800 transition-colors hover-button" title="${currentLang === 'ar' ? 'رفض' : 'Reject'}">
+                            <button onclick="updateQuoteStatus(${quote.id}, 'rejected')" class="text-red-600 hover:text-red-800 transition-colors" title="${currentLang === 'ar' ? 'رفض' : 'Reject'}">
                                 ❌
                             </button>
-                            <button onclick="deleteQuote(${quote.id})" class="text-gray-600 hover:text-gray-800 transition-colors hover-button" title="${currentLang === 'ar' ? 'حذف' : 'Delete'}">
+                            <button onclick="deleteQuote(${quote.id})" class="text-gray-600 hover:text-gray-800 transition-colors" title="${currentLang === 'ar' ? 'حذف' : 'Delete'}">
                                 🗑️
                             </button>
                         </div>
@@ -1775,29 +1795,48 @@
 
         function showNotification(message, type) {
             const notification = document.createElement('div');
-            notification.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg text-white font-medium transform transition-all duration-300 translate-x-full`;
+            notification.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg text-white font-medium transform transition-all duration-300 translate-x-full notification-enter hover-lift`;
             
+            // Add icon based on type
+            let icon = '';
             if (type === 'success') {
                 notification.classList.add('bg-green-500');
+                icon = '✅ ';
             } else if (type === 'error') {
                 notification.classList.add('bg-red-500');
+                icon = '❌ ';
             } else {
                 notification.classList.add('bg-blue-500');
+                icon = 'ℹ️ ';
             }
             
-            notification.textContent = message;
+            notification.innerHTML = `
+                <div class="flex items-center space-x-2">
+                    <span>${icon}</span>
+                    <span>${message}</span>
+                    <button onclick="this.parentElement.parentElement.remove()" class="ml-2 text-white hover:text-gray-200 transition-colors">
+                        ✕
+                    </button>
+                </div>
+            `;
+            
             document.body.appendChild(notification);
             
+            // Animate in
             setTimeout(() => {
                 notification.classList.remove('translate-x-full');
+                notification.classList.add('animate-slideInRight');
             }, 100);
             
+            // Auto remove after 4 seconds
             setTimeout(() => {
-                notification.classList.add('translate-x-full');
+                notification.classList.add('notification-exit', 'translate-x-full');
                 setTimeout(() => {
-                    document.body.removeChild(notification);
+                    if (notification.parentElement) {
+                        document.body.removeChild(notification);
+                    }
                 }, 300);
-            }, 3000);
+            }, 4000);
         }
 
         // Add default line when modal opens
@@ -1807,5 +1846,5 @@
             }
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9828a1ed60eb2cfa',t:'MTc1ODQ0Nzk1Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9828afd8a2162cfa',t:'MTc1ODQ0ODUyNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
