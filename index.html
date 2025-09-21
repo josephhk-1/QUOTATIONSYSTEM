@@ -1,522 +1,1548 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Générateur de Devis - Version Finale</title>
-    
-    <!-- ============================================= -->
-    <!--          SDK ET BIBLIOTHÈQUES EXTERNES        -->
-    <!-- ============================================= -->
-    
-    <!-- SDK Firebase pour la base de données -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-
-    <!-- TailwindCSS pour le style rapide et moderne -->
+    <title>QuoteFlow - Gestion de Devis</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- jsPDF et html2canvas pour la génération de PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    
-    <!-- Polices de caractères depuis Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Cairo:wght@400;700&display=swap" rel="stylesheet">
-    
-    <!-- ============================================= -->
-    <!--                 STYLES CSS                    -->
-    <!-- ============================================= -->
     <style>
-        /* Variables globales pour les couleurs et la police, pour une personnalisation facile */
-        :root {
-            --font-family: 'Inter', sans-serif;
-            --bg-main: #f1f5f9;
-            --bg-card: #ffffff;
-            --text-title: #1e293b;
-            --text-body: #334155;
-            --border-color: #e2e8f0;
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .card-shadow { box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .btn-primary:hover { background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%); }
+        
+        /* Support RTL pour l'arabe */
+        [dir="rtl"] .flex {
+            flex-direction: row-reverse;
+        }
+        [dir="rtl"] .space-x-4 > * + * {
+            margin-left: 0;
+            margin-right: 1rem;
+        }
+        [dir="rtl"] .space-x-3 > * + * {
+            margin-left: 0;
+            margin-right: 0.75rem;
+        }
+        [dir="rtl"] .space-x-2 > * + * {
+            margin-left: 0;
+            margin-right: 0.5rem;
+        }
+        [dir="rtl"] .text-left {
+            text-align: right;
+        }
+        [dir="rtl"] .text-right {
+            text-align: left;
         }
 
-        body { 
-            font-family: var(--font-family); 
-            background-color: var(--bg-main); 
-        }
-
-        /* Styles pour la zone d'aperçu qui sera convertie en PDF */
-        #print-area { 
-            background-color: var(--bg-card); 
-            font-size: 14px; 
-            color: var(--text-body); 
-        }
-        #print-area h2, #print-area h3 { 
-            font-size: 16px; 
-            color: var(--text-title); 
-            font-weight: bold; 
+        /* Mode sombre optimisé */
+        .dark {
+            background-color: #0f172a;
+            color: #f1f5f9;
         }
         
-        /* Style pour le logo de l'entreprise : grand et bien visible */
-        #company-logo {
-            max-width: 450px;
-            margin-bottom: 1rem;
-            object-fit: contain; /* Évite la déformation de l'image */
+        /* Arrière-plans sombres */
+        .dark .bg-gray-50 {
+            background-color: #1e293b;
+            color: #f1f5f9;
         }
-
-        /* Styles pour les cartes du panneau de contrôle à droite */
-        .control-panel-card { 
-            background-color: white; 
-            border-radius: 0.75rem; 
-            padding: 1.5rem; 
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); 
-            border: 1px solid var(--border-color); 
+        .dark .bg-white {
+            background-color: #334155;
+            color: #f1f5f9;
         }
-
-        /* Style pour la zone de téléversement des photos d'articles */
-        .photo-upload-container { 
-            position: relative; 
-            width: 60px; 
-            height: 60px; 
-            background-color: #f8fafc; 
-            border: 2px dashed #e2e8f0; 
-            border-radius: 0.5rem; 
-            cursor: pointer; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            overflow: hidden; 
-        }
-        .photo-upload-container img { 
-            width: 100%; 
-            height: 100%; 
-            object-fit: cover; 
-        }
-
-        /* Cache les éléments non imprimables lors de la génération du PDF */
-        .pdf-render-mode .no-print { 
-            display: none; 
+        .dark .bg-gray-100 {
+            background-color: #475569;
+            color: #f1f5f9;
         }
         
-        /* Style pour chaque devis dans la liste des devis sauvegardés */
-        .saved-quote-item { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            padding: 0.75rem; 
-            border-radius: 0.5rem; 
-            margin-bottom: 0.5rem; 
-            transition: background-color 0.2s; 
-            border: 1px solid var(--border-color); 
+        /* Textes optimisés pour le contraste */
+        .dark .text-gray-600 {
+            color: #cbd5e1;
         }
-        .saved-quote-item:hover { 
-            background-color: #f8fafc; 
+        .dark .text-gray-700 {
+            color: #e2e8f0;
         }
-        .saved-quote-item .details { 
-            cursor: pointer; 
-            flex-grow: 1; 
+        .dark .text-gray-800 {
+            color: #f1f5f9;
+        }
+        .dark .text-gray-500 {
+            color: #94a3b8;
+        }
+        
+        /* Bordures sombres */
+        .dark .border-gray-200 {
+            border-color: #475569;
+        }
+        .dark .border-gray-300 {
+            border-color: #64748b;
+        }
+        .dark .border-gray-100 {
+            border-color: #374151;
+        }
+        
+        /* Ombres adaptées */
+        .dark .card-shadow {
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+        }
+        
+        /* Hover effects - subtle and working */
+        .hover-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+        
+        .hover-row:hover {
+            background-color: rgba(139, 92, 246, 0.05);
+        }
+        
+        .dark .hover-row:hover {
+            background-color: rgba(139, 92, 246, 0.1);
+        }
+        
+        .hover-button:hover {
+            transform: scale(1.05);
+        }
+        
+        /* Couleurs d'accent optimisées */
+        .dark .bg-blue-100 {
+            background-color: #1e3a8a;
+            color: #dbeafe;
+        }
+        .dark .bg-green-100 {
+            background-color: #14532d;
+            color: #dcfce7;
+        }
+        .dark .bg-purple-100 {
+            background-color: #581c87;
+            color: #f3e8ff;
+        }
+        .dark .bg-yellow-100 {
+            background-color: #92400e;
+            color: #fef3c7;
+        }
+        .dark .bg-red-100 {
+            background-color: #7f1d1d;
+            color: #fecaca;
+        }
+        
+        /* Textes colorés optimisés */
+        .dark .text-blue-600 {
+            color: #93c5fd;
+        }
+        .dark .text-green-600 {
+            color: #86efac;
+        }
+        .dark .text-purple-600 {
+            color: #c084fc;
+        }
+        .dark .text-yellow-800 {
+            color: #fcd34d;
+        }
+        .dark .text-green-800 {
+            color: #4ade80;
+        }
+        .dark .text-red-800 {
+            color: #f87171;
+        }
+        .dark .text-red-500 {
+            color: #ef4444;
+        }
+        .dark .text-red-600 {
+            color: #dc2626;
+        }
+        .dark .text-red-700 {
+            color: #b91c1c;
+        }
+        
+        /* Formulaires optimisés */
+        .dark input, .dark select, .dark textarea {
+            background-color: #475569;
+            border-color: #64748b;
+            color: #f1f5f9;
+        }
+        .dark input::placeholder, .dark textarea::placeholder {
+            color: #94a3b8;
+        }
+        .dark input:focus, .dark select:focus, .dark textarea:focus {
+            background-color: #334155;
+            border-color: #8b5cf6;
+            color: #f1f5f9;
+        }
+        
+        /* Boutons et liens */
+        .dark .text-gray-500:hover {
+            color: #cbd5e1;
+        }
+        
+        /* Mode clair - textes bien contrastés */
+        body:not(.dark) {
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        body:not(.dark) .text-gray-600 {
+            color: #475569;
+        }
+        body:not(.dark) .text-gray-700 {
+            color: #374151;
+        }
+        body:not(.dark) .text-gray-800 {
+            color: #1f2937;
+        }
+        body:not(.dark) .bg-white {
+            background-color: #ffffff;
+            color: #1e293b;
+        }
+
+        /* Transitions fluides */
+        .transition-all {
+            transition: all 0.3s ease;
         }
     </style>
 </head>
-<body class="p-4 sm:p-8">
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="gradient-bg text-white shadow-lg">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
+                        <span class="text-purple-600 font-bold text-xl">Q</span>
+                    </div>
+                    <h1 class="text-2xl font-bold">QuoteFlow</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <select id="companySelect" onchange="changeCompany()" class="bg-white/20 text-white rounded-lg px-3 py-2 border border-white/30">
+                        <option value="wooden">Wooden Pieces EST.</option>
+                        <option value="rattan">Rattan Palace</option>
+                    </select>
+                    <select id="languageSelect" onchange="changeLanguage()" class="bg-white/20 text-white rounded-lg px-3 py-2 border border-white/30">
+                        <option value="en">English</option>
+                        <option value="ar">العربية</option>
+                    </select>
+                    <button onclick="toggleDarkMode()" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition-colors" title="Toggle Dark Mode">
+                        <span id="darkModeIcon">🌙</span>
+                    </button>
+                    <button class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition-colors">
+                        👤 <span data-translate="profile">Profile</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
 
-    <!-- ============================================= -->
-    <!--      ÉLÉMENTS D'INTERFACE UTILISATEUR         -->
-    <!-- ============================================= -->
+    <div class="container mx-auto px-6 py-8">
+        <!-- Navigation Tabs -->
+        <div class="bg-white rounded-xl card-shadow mb-8">
+            <div class="flex border-b border-gray-200">
+                <button onclick="showTab('dashboard')" class="tab-btn active px-6 py-4 font-medium text-purple-600 border-b-2 border-purple-600">
+                    📊 <span data-translate="dashboard">Dashboard</span>
+                </button>
+                <button onclick="showTab('quotes')" class="tab-btn px-6 py-4 font-medium text-gray-600 hover:text-purple-600 transition-colors">
+                    📄 <span data-translate="quotes">Quotes</span>
+                </button>
+                <button onclick="showTab('clients')" class="tab-btn px-6 py-4 font-medium text-gray-600 hover:text-purple-600 transition-colors">
+                    👥 <span data-translate="clients">Clients</span>
+                </button>
+                <button onclick="showTab('products')" class="tab-btn px-6 py-4 font-medium text-gray-600 hover:text-purple-600 transition-colors">
+                    📦 <span data-translate="products">Products</span>
+                </button>
+            </div>
+        </div>
 
-    <!-- Zone de notification pour les messages de succès/erreur -->
-    <div id="notification" class="fixed top-5 right-5 text-white py-2 px-4 rounded-lg shadow-lg transform translate-x-[120%] transition-transform duration-300 z-50"></div>
-    
-    <!-- Fenêtre modale pour confirmer la suppression -->
-    <div id="confirm-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
-        <div class="bg-white rounded-lg shadow-2xl max-w-sm w-full p-6 text-center">
-            <h3 id="confirm-title" class="text-lg font-bold text-slate-800 mb-4">Confirmation de suppression</h3>
-            <p id="confirm-message" class="text-slate-600 mb-6"></p>
-            <div class="flex justify-center gap-3">
-                <button id="confirm-cancel" class="bg-slate-500 hover:bg-slate-600 text-white font-bold py-2 px-4 rounded-lg">Annuler</button>
-                <button id="confirm-ok" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg">Supprimer</button>
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white rounded-xl card-shadow p-6 hover-card transition-all">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-600 text-sm">Devis en Cours</p>
+                            <p class="text-3xl font-bold text-blue-600" id="pendingCount">12</p>
+                        </div>
+                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <span class="text-blue-600 text-xl">⏳</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl card-shadow p-6 hover-card transition-all">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-600 text-sm">Devis Acceptés</p>
+                            <p class="text-3xl font-bold text-green-600" id="acceptedCount">8</p>
+                        </div>
+                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                            <span class="text-green-600 text-xl">✅</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl card-shadow p-6 hover-card transition-all">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-600 text-sm">CA du Mois</p>
+                            <p class="text-3xl font-bold text-purple-600">€45,230</p>
+                        </div>
+                        <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                            <span class="text-purple-600 text-xl">💰</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl card-shadow p-6">
+                <h3 class="text-xl font-semibold mb-4">Devis Récents</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="border-b border-gray-200">
+                                <th class="text-left py-3 px-4 font-medium text-gray-600">N° Devis</th>
+                                <th class="text-left py-3 px-4 font-medium text-gray-600">Client</th>
+                                <th class="text-left py-3 px-4 font-medium text-gray-600">Date</th>
+                                <th class="text-left py-3 px-4 font-medium text-gray-600">Montant</th>
+                                <th class="text-left py-3 px-4 font-medium text-gray-600">Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentQuotes">
+                            <tr class="border-b border-gray-100 hover-row transition-all">
+                                <td class="py-3 px-4 font-medium">#QF-2024-001</td>
+                                <td class="py-3 px-4">Entreprise ABC</td>
+                                <td class="py-3 px-4">15/01/2024</td>
+                                <td class="py-3 px-4 font-semibold">€2,450.00</td>
+                                <td class="py-3 px-4"><span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-sm">En cours</span></td>
+                            </tr>
+                            <tr class="border-b border-gray-100 hover-row transition-all">
+                                <td class="py-3 px-4 font-medium">#QF-2024-002</td>
+                                <td class="py-3 px-4">Solutions XYZ</td>
+                                <td class="py-3 px-4">14/01/2024</td>
+                                <td class="py-3 px-4 font-semibold">€1,890.00</td>
+                                <td class="py-3 px-4"><span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm">Accepté</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quotes Tab -->
+        <div id="quotes" class="tab-content hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Gestion des Devis</h2>
+                <button onclick="showNewQuoteModal()" class="btn-primary text-white px-6 py-3 rounded-lg font-medium hover:shadow-lg transition-all hover-button">
+                    ➕ Nouveau Devis
+                </button>
+            </div>
+
+            <div class="bg-white rounded-xl card-shadow">
+                <div class="p-6 border-b border-gray-200">
+                    <div class="flex flex-wrap gap-4">
+                        <button onclick="filterQuotes('all')" class="filter-btn active bg-purple-100 text-purple-700 px-4 py-2 rounded-lg font-medium transition-all hover-button">
+                            Tous (20)
+                        </button>
+                        <button onclick="filterQuotes('pending')" class="filter-btn bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-medium transition-all hover-button">
+                            En cours (12)
+                        </button>
+                        <button onclick="filterQuotes('accepted')" class="filter-btn bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-medium transition-all hover-button">
+                            Acceptés (8)
+                        </button>
+                        <button onclick="filterQuotes('rejected')" class="filter-btn bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-medium transition-all hover-button">
+                            Refusés (0)
+                        </button>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="border-b border-gray-200">
+                                    <th class="text-left py-3 px-4 font-medium text-gray-600">N° Devis</th>
+                                    <th class="text-left py-3 px-4 font-medium text-gray-600">Client</th>
+                                    <th class="text-left py-3 px-4 font-medium text-gray-600">Date</th>
+                                    <th class="text-left py-3 px-4 font-medium text-gray-600">Montant TTC</th>
+                                    <th class="text-left py-3 px-4 font-medium text-gray-600">Statut</th>
+                                    <th class="text-left py-3 px-4 font-medium text-gray-600">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="quotesTable">
+                                <!-- Les devis seront ajoutés ici dynamiquement -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Clients Tab -->
+        <div id="clients" class="tab-content hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Gestion des Clients</h2>
+                <button onclick="showNewClientModal()" class="btn-primary text-white px-6 py-3 rounded-lg font-medium hover:shadow-lg transition-all hover-button">
+                    ➕ Nouveau Client
+                </button>
+            </div>
+
+            <div class="bg-white rounded-xl card-shadow p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="clientsGrid">
+                    <!-- Les clients seront ajoutés ici -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Products Tab -->
+        <div id="products" class="tab-content hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Catalogue Produits</h2>
+                <button onclick="showNewProductModal()" class="btn-primary text-white px-6 py-3 rounded-lg font-medium hover:shadow-lg transition-all hover-button">
+                    ➕ Nouveau Produit
+                </button>
+            </div>
+
+            <div class="bg-white rounded-xl card-shadow p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="productsGrid">
+                    <!-- Les produits seront ajoutés ici -->
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Structure principale de la page -->
-    <div id="editor-page">
-        <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
-            <!-- Colonne de gauche : Aperçu du devis (CORRECTION : la classe est lg:col-span-2) -->
-            <div class="lg:col-span-2">
-                <main class="p-6 md:p-10 bg-white shadow-xl rounded-2xl" id="print-area">
-                    <!-- STRUCTURE HTML COMPLÈTE DU DEVIS - PRÊTE À ÊTRE REMPLIE -->
-                    <input type="hidden" id="current-quote-id" value="">
-                    <div class="text-center mb-8">
-                        <img id="company-logo" src="" alt="Company Logo" class="mx-auto">
-                        <div id="company-info">
-                            <h1 class="text-2xl font-bold" data-field="companyName"></h1>
-                            <p class="text-xs text-slate-500" data-field="companyCR"></p>
-                            <p class="text-xs text-slate-500" data-field="companyVat"></p>
-                            <p class="text-xs text-slate-500" data-field="companyAddress"></p>
+    <!-- Modal Nouveau Devis -->
+    <div id="newQuoteModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xl font-semibold">Nouveau Devis</h3>
+                    <button onclick="closeModal('newQuoteModal')" class="text-gray-500 hover:text-gray-700 text-2xl transition-colors">&times;</button>
+                </div>
+            </div>
+            <div class="p-6">
+                <form id="newQuoteForm" onsubmit="createQuote(event)">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Client *</label>
+                            <select id="quoteClient" required class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                <option value="">Sélectionner un client</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Date</label>
+                            <input type="date" id="quoteDate" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent">
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-6 mb-8 pb-4 border-b">
-                        <div>
-                            <h3 class="mb-2">Customer</h3>
-                            <div class="editable text-sm p-2 bg-slate-50 rounded-md" contenteditable="true" data-field="customerName" data-placeholder="Customer Name"></div>
-                            <div class="editable text-sm p-2 mt-1 bg-slate-50 rounded-md" contenteditable="true" data-field="customerAddress" data-placeholder="Customer Address"></div>
-                            <div class="editable text-sm p-2 mt-1 bg-slate-50 rounded-md" contenteditable="true" data-field="customerCountry" data-placeholder="Country"></div>
+
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="text-lg font-medium">Articles du Devis</h4>
+                            <button type="button" onclick="addQuoteLine()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm transition-all hover-button">
+                                ➕ Ajouter Article
+                            </button>
                         </div>
-                        <div class="text-right">
-                            <table class="w-full text-sm">
+                        <div id="quoteLines" class="space-y-4">
+                            <!-- Les lignes de devis seront ajoutées ici -->
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-50 rounded-lg p-4 mb-6">
+                        <div class="flex justify-between items-center text-sm mb-2">
+                            <span>Sous-total HT:</span>
+                            <span id="subtotalHT" class="font-medium">€0.00</span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm mb-2">
+                            <span>TVA (15%):</span>
+                            <span id="taxAmount" class="font-medium">€0.00</span>
+                        </div>
+                        <div class="flex justify-between items-center text-lg font-bold border-t border-gray-300 pt-2">
+                            <span>Total TTC:</span>
+                            <span id="totalTTC" class="text-purple-600">€0.00</span>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end space-x-4">
+                        <button type="button" onclick="closeModal('newQuoteModal')" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                            Annuler
+                        </button>
+                        <button type="submit" class="btn-primary text-white px-6 py-2 rounded-lg hover:shadow-lg transition-all hover-button">
+                            Créer le Devis
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Nouveau Client -->
+    <div id="newClientModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl max-w-md w-full mx-4">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xl font-semibold">Nouveau Client</h3>
+                    <button onclick="closeModal('newClientModal')" class="text-gray-500 hover:text-gray-700 text-2xl transition-colors">&times;</button>
+                </div>
+            </div>
+            <div class="p-6">
+                <form id="newClientForm" onsubmit="createClient(event)">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nom de l'entreprise *</label>
+                            <input type="text" id="clientName" required class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                            <input type="email" id="clientEmail" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Adresse</label>
+                            <textarea id="clientAddress" rows="3" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent"></textarea>
+                        </div>
+                    </div>
+                    <div class="flex justify-end space-x-4 mt-6">
+                        <button type="button" onclick="closeModal('newClientModal')" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                            Annuler
+                        </button>
+                        <button type="submit" class="btn-primary text-white px-6 py-2 rounded-lg hover:shadow-lg transition-all hover-button">
+                            Créer le Client
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Nouveau Produit -->
+    <div id="newProductModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl max-w-md w-full mx-4">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xl font-semibold" data-translate="newProduct">New Product</h3>
+                    <button onclick="closeModal('newProductModal')" class="text-gray-500 hover:text-gray-700 text-2xl transition-colors">&times;</button>
+                </div>
+            </div>
+            <div class="p-6">
+                <form id="newProductForm" onsubmit="createProduct(event)">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2" data-translate="productName">Product Name *</label>
+                            <input type="text" id="productName" required class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2" data-translate="description">Description</label>
+                            <textarea id="productDescription" rows="3" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2" data-translate="unitPrice">Unit Price (SAR) *</label>
+                            <input type="number" id="productPrice" step="0.01" required class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        </div>
+                    </div>
+                    <div class="flex justify-end space-x-4 mt-6">
+                        <button type="button" onclick="closeModal('newProductModal')" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors" data-translate="cancel">
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn-primary text-white px-6 py-2 rounded-lg hover:shadow-lg transition-all hover-button" data-translate="create">
+                            Create
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Prévisualisation PDF -->
+    <div id="pdfPreviewModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xl font-semibold">
+                        <span data-translate="preview">Preview</span> - <span id="previewQuoteNumber"></span>
+                    </h3>
+                    <button onclick="closeModal('pdfPreviewModal')" class="text-gray-500 hover:text-gray-700 text-2xl transition-colors">&times;</button>
+                </div>
+            </div>
+            <div class="p-6">
+                <div class="mb-6 flex justify-between items-center">
+                    <div class="flex space-x-4">
+                        <label class="flex items-center space-x-2">
+                            <input type="radio" name="pdfLanguage" value="en" checked class="text-purple-600">
+                            <span>English</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="radio" name="pdfLanguage" value="ar" class="text-purple-600">
+                            <span>العربية</span>
+                        </label>
+                    </div>
+                    <div class="flex space-x-4">
+                        <button onclick="updatePDFPreview()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-all hover-button">
+                            <span data-translate="preview">Preview</span>
+                        </button>
+                        <button onclick="downloadPDF()" class="btn-primary text-white px-4 py-2 rounded-lg transition-all hover-button">
+                            <span data-translate="download">Download</span>
+                        </button>
+                    </div>
+                </div>
+                <div id="pdfPreviewContent" class="border border-gray-300 rounded-lg p-6 bg-white min-h-[600px]">
+                    <!-- Le contenu de prévisualisation sera généré ici -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration des entreprises
+        const companies = {
+            wooden: {
+                name: 'Wooden Pieces EST.',
+                nameAr: 'مؤسسة القطع الخشبية للتجارة',
+                cr: '1010798529',
+                vat: '310798529700003',
+                address: 'RFKB2501. ALQods st, Alkhaleej, P.O.Box: 2401, RIYADH 13223, Kingdom of Saudi Arabia',
+                addressAr: 'الرياض 13223، المملكة العربية السعودية، ص.ب: 2401، الخليج، شارع القدس',
+                bank: 'ALINMAA BANK',
+                bankAr: 'بنك الإنماء',
+                iban: 'SA2512000000001234567890',
+                swift: 'INMASARI',
+                accountNumber: '1234567890',
+                paymentTerms: {
+                    en: ['50% down payment', '30% on delivery', '20% after delivery', 'Delivery: 20-30 days', '3 years warranty'],
+                    ar: ['دفعة مقدمة 50%', '30% عند التسليم', '20% بعد التسليم', 'التسليم: 20-30 يوم', 'ضمان 3 سنوات']
+                }
+            },
+            rattan: {
+                name: 'Rattan Palace',
+                nameAr: 'قصر الراتان',
+                cr: '7050562888',
+                vat: '305056288800003',
+                address: 'RFKB2501. ALQods st, Alkhaleej, P.O.Box: 2401, RIYADH 13223, Kingdom of Saudi Arabia',
+                addressAr: 'الرياض 13223، المملكة العربية السعودية، ص.ب: 2401، الخليج، شارع القدس',
+                bank: 'Riyad Bank',
+                bankAr: 'بنك الرياض',
+                iban: 'SA2494000000009876543210',
+                swift: 'RIBLSARI',
+                accountNumber: '9876543210',
+                paymentTerms: {
+                    en: ['50% down payment', '50% after delivery', 'Delivery: 20-30 days', '3 years warranty'],
+                    ar: ['دفعة مقدمة 50%', '50% بعد التسليم', 'التسليم: 20-30 يوم', 'ضمان 3 سنوات']
+                }
+            }
+        };
+
+        // Système de traduction
+        const translations = {
+            en: {
+                dashboard: 'Dashboard',
+                quotes: 'Quotes',
+                clients: 'Clients',
+                products: 'Products',
+                pendingQuotes: 'Pending Quotes',
+                acceptedQuotes: 'Accepted Quotes',
+                monthlyRevenue: 'Monthly Revenue',
+                recentQuotes: 'Recent Quotes',
+                quoteNumber: 'Quote #',
+                client: 'Client',
+                date: 'Date',
+                amount: 'Amount',
+                status: 'Status',
+                actions: 'Actions',
+                pending: 'Pending',
+                accepted: 'Accepted',
+                rejected: 'Rejected',
+                newQuote: 'New Quote',
+                newClient: 'New Client',
+                newProduct: 'New Product',
+                companyName: 'Company Name',
+                email: 'Email',
+                address: 'Address',
+                productName: 'Product Name',
+                description: 'Description',
+                unitPrice: 'Unit Price',
+                quantity: 'Quantity',
+                total: 'Total',
+                subtotal: 'Subtotal',
+                vat: 'VAT (15%)',
+                totalTTC: 'Total (Incl. VAT)',
+                create: 'Create',
+                cancel: 'Cancel',
+                delete: 'Delete',
+                edit: 'Edit',
+                save: 'Save',
+                preview: 'Preview',
+                download: 'Download',
+                company: 'Company'
+            },
+            ar: {
+                dashboard: 'لوحة التحكم',
+                quotes: 'عروض الأسعار',
+                clients: 'العملاء',
+                products: 'المنتجات',
+                pendingQuotes: 'عروض الأسعار المعلقة',
+                acceptedQuotes: 'عروض الأسعار المقبولة',
+                monthlyRevenue: 'الإيرادات الشهرية',
+                recentQuotes: 'عروض الأسعار الأخيرة',
+                quoteNumber: 'رقم العرض',
+                client: 'العميل',
+                date: 'التاريخ',
+                amount: 'المبلغ',
+                status: 'الحالة',
+                actions: 'الإجراءات',
+                pending: 'معلق',
+                accepted: 'مقبول',
+                rejected: 'مرفوض',
+                newQuote: 'عرض سعر جديد',
+                newClient: 'عميل جديد',
+                newProduct: 'منتج جديد',
+                companyName: 'اسم الشركة',
+                email: 'البريد الإلكتروني',
+                address: 'العنوان',
+                productName: 'اسم المنتج',
+                description: 'الوصف',
+                unitPrice: 'السعر للوحدة',
+                quantity: 'الكمية',
+                total: 'المجموع',
+                subtotal: 'المجموع الفرعي',
+                vat: 'ضريبة القيمة المضافة (15%)',
+                totalTTC: 'المجموع الكلي (شامل الضريبة)',
+                create: 'إنشاء',
+                cancel: 'إلغاء',
+                delete: 'حذف',
+                edit: 'تعديل',
+                save: 'حفظ',
+                preview: 'معاينة',
+                download: 'تحميل',
+                company: 'الشركة'
+            }
+        };
+
+        let currentLang = 'en';
+        let currentCompany = 'wooden';
+
+        // Données de démonstration
+        let clients = [
+            { 
+                id: 1, 
+                name: 'شركة الأعمال المتقدمة', 
+                nameEn: 'Advanced Business Co.', 
+                email: 'info@advanced.sa', 
+                address: 'الرياض، المملكة العربية السعودية',
+                addressEn: 'Riyadh, Kingdom of Saudi Arabia'
+            },
+            { 
+                id: 2, 
+                name: 'مؤسسة التقنية الحديثة', 
+                nameEn: 'Modern Tech Est.', 
+                email: 'contact@moderntech.sa', 
+                address: 'جدة، المملكة العربية السعودية',
+                addressEn: 'Jeddah, Kingdom of Saudi Arabia'
+            },
+            { 
+                id: 3, 
+                name: 'شركة الابتكار التجاري', 
+                nameEn: 'Commercial Innovation Co.', 
+                email: 'hello@innovation.sa', 
+                address: 'الدمام، المملكة العربية السعودية',
+                addressEn: 'Dammam, Kingdom of Saudi Arabia'
+            }
+        ];
+
+        let products = [
+            { id: 1, company: 'wooden', name: 'طاولة خشبية فاخرة', nameEn: 'Luxury Wooden Table', description: 'طاولة من الخشب الطبيعي عالي الجودة', descriptionEn: 'High-quality natural wood table', price: 2500.00 },
+            { id: 2, company: 'wooden', name: 'كرسي خشبي مريح', nameEn: 'Comfortable Wooden Chair', description: 'كرسي خشبي مصمم للراحة القصوى', descriptionEn: 'Wooden chair designed for maximum comfort', price: 850.00 },
+            { id: 3, company: 'wooden', name: 'خزانة خشبية', nameEn: 'Wooden Cabinet', description: 'خزانة تخزين من الخشب الصلب', descriptionEn: 'Solid wood storage cabinet', price: 3200.00 },
+            { id: 4, company: 'rattan', name: 'كرسي راتان للحديقة', nameEn: 'Garden Rattan Chair', description: 'كرسي راتان مقاوم للطقس', descriptionEn: 'Weather-resistant rattan chair', price: 650.00 },
+            { id: 5, company: 'rattan', name: 'طاولة راتان دائرية', nameEn: 'Round Rattan Table', description: 'طاولة راتان دائرية أنيقة', descriptionEn: 'Elegant round rattan table', price: 1200.00 },
+            { id: 6, company: 'rattan', name: 'أريكة راتان', nameEn: 'Rattan Sofa', description: 'أريكة راتان مريحة للمعيشة', descriptionEn: 'Comfortable rattan sofa for living', price: 4500.00 }
+        ];
+
+        let quotes = [
+            { id: 1, number: 'QF-2024-001', clientId: 1, date: '2024-01-15', status: 'pending', total: 2450.00 },
+            { id: 2, number: 'QF-2024-002', clientId: 2, date: '2024-01-14', status: 'accepted', total: 1890.00 },
+            { id: 3, number: 'QF-2024-003', clientId: 3, date: '2024-01-13', status: 'pending', total: 3200.00 }
+        ];
+
+        let quoteLines = [
+            { id: 1, quoteId: 1, productId: 1, quantity: 8, price: 150.00 },
+            { id: 2, quoteId: 1, productId: 2, quantity: 1, price: 2500.00 },
+            { id: 3, quoteId: 2, productId: 3, quantity: 2, price: 800.00 },
+            { id: 4, quoteId: 2, productId: 4, quantity: 1, price: 300.00 }
+        ];
+
+        let nextQuoteId = 4;
+        let nextClientId = 4;
+        let nextProductId = 7;
+        let nextQuoteLineId = 5;
+
+        let currentQuoteForPDF = null;
+        let isDarkMode = localStorage.getItem('darkMode') === 'true';
+
+        // Fonction pour basculer le mode sombre
+        function toggleDarkMode() {
+            isDarkMode = !isDarkMode;
+            localStorage.setItem('darkMode', isDarkMode);
+            updateDarkMode();
+        }
+
+        function updateDarkMode() {
+            const body = document.body;
+            const icon = document.getElementById('darkModeIcon');
+            
+            if (isDarkMode) {
+                body.classList.add('dark');
+                icon.textContent = '☀️';
+            } else {
+                body.classList.remove('dark');
+                icon.textContent = '🌙';
+            }
+        }
+
+        // Fonctions de traduction et changement de langue
+        function changeLanguage() {
+            currentLang = document.getElementById('languageSelect').value;
+            updateTranslations();
+            loadClients();
+            loadProducts();
+            loadQuotes();
+            updateDashboard();
+        }
+
+        function changeCompany() {
+            currentCompany = document.getElementById('companySelect').value;
+            loadProducts();
+            showNotification(currentLang === 'ar' ? 'تم تغيير الشركة' : 'Company changed', 'info');
+        }
+
+        function updateTranslations() {
+            document.querySelectorAll('[data-translate]').forEach(element => {
+                const key = element.getAttribute('data-translate');
+                if (translations[currentLang] && translations[currentLang][key]) {
+                    element.textContent = translations[currentLang][key];
+                }
+            });
+
+            // Mise à jour de la direction du texte pour l'arabe
+            if (currentLang === 'ar') {
+                document.body.setAttribute('dir', 'rtl');
+                document.body.classList.add('rtl');
+            } else {
+                document.body.setAttribute('dir', 'ltr');
+                document.body.classList.remove('rtl');
+            }
+        }
+
+        function t(key) {
+            return translations[currentLang] && translations[currentLang][key] ? translations[currentLang][key] : key;
+        }
+
+        // Fonctions PDF
+        function showPDFPreview(quoteId) {
+            currentQuoteForPDF = quoteId;
+            const quote = quotes.find(q => q.id === quoteId);
+            document.getElementById('previewQuoteNumber').textContent = `#${quote.number}`;
+            document.getElementById('pdfPreviewModal').classList.remove('hidden');
+            updatePDFPreview();
+        }
+
+        function updatePDFPreview() {
+            if (!currentQuoteForPDF) return;
+            
+            const pdfLang = document.querySelector('input[name="pdfLanguage"]:checked').value;
+            const quote = quotes.find(q => q.id === currentQuoteForPDF);
+            const client = clients.find(c => c.id === quote.clientId);
+            const lines = quoteLines.filter(ql => ql.quoteId === currentQuoteForPDF);
+            const company = companies[currentCompany];
+            
+            const previewContent = generatePDFContent(quote, client, lines, company, pdfLang);
+            document.getElementById('pdfPreviewContent').innerHTML = previewContent;
+        }
+
+        function generatePDFContent(quote, client, lines, company, lang) {
+            const isArabic = lang === 'ar';
+            
+            let subtotal = 0;
+            lines.forEach(line => {
+                subtotal += line.quantity * line.price;
+            });
+            const tax = subtotal * 0.15;
+            const total = subtotal + tax;
+
+            return `
+                <div style="font-family: ${isArabic ? "'Tahoma', 'Arial Unicode MS', sans-serif" : "'Arial', sans-serif"}; max-width: 210mm; margin: 0 auto; background: white; padding: 20px; box-shadow: 0 0 20px rgba(0,0,0,0.1);">
+                    
+                    <!-- En-tête professionnel avec logo -->
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 3px solid #667eea;">
+                        <div style="text-align: left; flex: 1;">
+                            <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                                <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+                                    <span style="color: white; font-size: 24px; font-weight: bold;">${company.name.charAt(0)}</span>
+                                </div>
+                                <div>
+                                    <h1 style="font-size: 28px; font-weight: bold; color: #667eea; margin: 0; line-height: 1.2; text-align: left;">
+                                        ${isArabic ? company.nameAr : company.name}
+                                    </h1>
+                                </div>
+                            </div>
+                            
+                            <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border-left: 4px solid #667eea; text-align: left;">
+                                <p style="margin: 5px 0; font-size: 13px; color: #475569;">
+                                    <strong style="color: #1e293b;">${isArabic ? 'رقم السجل التجاري:' : 'Commercial Registration:'}</strong> ${company.cr}
+                                </p>
+                                <p style="margin: 5px 0; font-size: 13px; color: #475569;">
+                                    <strong style="color: #1e293b;">${isArabic ? 'رقم ضريبة القيمة المضافة:' : 'VAT Registration No:'}</strong> ${company.vat}
+                                </p>
+                                <p style="margin: 5px 0; font-size: 12px; color: #64748b; line-height: 1.4;">
+                                    ${isArabic ? company.addressAr : company.address}
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div style="text-align: right; min-width: 200px; margin-left: 20px;">
+                            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 12px; margin-bottom: 15px; text-align: left;">
+                                <h2 style="font-size: 24px; font-weight: bold; margin: 0 0 10px 0;">
+                                    ${isArabic ? 'عرض سعر' : 'QUOTATION'}
+                                </h2>
+                                <p style="margin: 5px 0; font-size: 14px; opacity: 0.9;">
+                                    <strong>${isArabic ? 'رقم العرض:' : 'Quote No:'}</strong> ${quote.number}
+                                </p>
+                                <p style="margin: 5px 0; font-size: 14px; opacity: 0.9;">
+                                    <strong>${isArabic ? 'التاريخ:' : 'Date:'}</strong> ${new Date(quote.date).toLocaleDateString(isArabic ? 'ar-SA' : 'en-GB')}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Informations client avec design amélioré -->
+                    <div style="margin-bottom: 30px;">
+                        <div style="background: #f1f5f9; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0;">
+                            <h3 style="font-size: 18px; font-weight: bold; color: #1e293b; margin: 0 0 15px 0; display: flex; align-items: center;">
+                                <span style="background: #667eea; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 10px; font-size: 14px;">👤</span>
+                                ${isArabic ? 'معلومات العميل' : 'Client Information'}
+                            </h3>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; text-align: left;">
+                                <div>
+                                    <p style="margin: 8px 0; font-size: 14px; color: #475569;">
+                                        <strong style="color: #1e293b;">${isArabic ? 'اسم الشركة:' : 'Company Name:'}</strong><br>
+                                        <span style="font-size: 16px; color: #667eea; font-weight: 600;">${isArabic ? client.name : (client.nameEn || client.name)}</span>
+                                    </p>
+                                    <p style="margin: 8px 0; font-size: 14px; color: #475569;">
+                                        <strong style="color: #1e293b;">${isArabic ? 'البريد الإلكتروني:' : 'Email Address:'}</strong><br>
+                                        <span style="color: #667eea; direction: ltr; display: inline-block;">${client.email}</span>
+                                    </p>
+                                </div>
+                                <div>
+                                    <p style="margin: 8px 0; font-size: 14px; color: #475569;">
+                                        <strong style="color: #1e293b;">${isArabic ? 'العنوان:' : 'Address:'}</strong><br>
+                                        <span style="line-height: 1.5;">${isArabic ? client.address : (client.addressEn || client.address)}</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tableau des articles avec design professionnel -->
+                    <div style="margin-bottom: 30px;">
+                        <h3 style="font-size: 18px; font-weight: bold; color: #1e293b; margin-bottom: 15px; text-align: left;">
+                            ${isArabic ? 'تفاصيل العرض' : 'Quote Details'}
+                        </h3>
+                        <div style="overflow: hidden; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                            <table style="width: 100%; border-collapse: collapse; background: white;">
+                                <thead>
+                                    <tr style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                                        <th style="padding: 15px 20px; font-size: 14px; font-weight: 600; text-align: left; border: none;">
+                                            ${isArabic ? 'وصف المنتج' : 'Product Description'}
+                                        </th>
+                                        <th style="padding: 15px 20px; font-size: 14px; font-weight: 600; text-align: center; border: none; min-width: 80px;">
+                                            ${isArabic ? 'الكمية' : 'Qty'}
+                                        </th>
+                                        <th style="padding: 15px 20px; font-size: 14px; font-weight: 600; text-align: center; border: none; min-width: 120px;">
+                                            ${isArabic ? 'سعر الوحدة' : 'Unit Price'}
+                                        </th>
+                                        <th style="padding: 15px 20px; font-size: 14px; font-weight: 600; text-align: center; border: none; min-width: 120px;">
+                                            ${isArabic ? 'المجموع' : 'Line Total'}
+                                        </th>
+                                    </tr>
+                                </thead>
                                 <tbody>
-                                    <tr><td class="font-bold p-1">Quote #:</td><td class="p-1 editable" contenteditable="true" data-field="quoteNum"></td></tr>
-                                    <tr><td class="font-bold p-1">Date:</td><td class="p-1" id="quoteDate"></td></tr>
-                                    <tr><td class="font-bold p-1">Valid Until:</td><td class="p-1" id="validDate"></td></tr>
+                                    ${lines.map((line, index) => {
+                                        const product = products.find(p => p.id === line.productId);
+                                        const lineTotal = line.quantity * line.price;
+                                        const bgColor = index % 2 === 0 ? '#ffffff' : '#f8fafc';
+                                        return `
+                                            <tr style="background: ${bgColor}; border-bottom: 1px solid #e2e8f0;">
+                                                <td style="padding: 15px 20px; text-align: left; border: none;">
+                                                    <div style="font-weight: 600; color: #1e293b; margin-bottom: 4px;">
+                                                        ${isArabic ? product.name : product.nameEn}
+                                                    </div>
+                                                    <div style="font-size: 12px; color: #64748b;">
+                                                        ${isArabic ? product.description : product.descriptionEn}
+                                                    </div>
+                                                </td>
+                                                <td style="padding: 15px 20px; text-align: center; font-weight: 600; color: #475569; border: none;">
+                                                    ${line.quantity}
+                                                </td>
+                                                <td style="padding: 15px 20px; text-align: center; font-weight: 600; color: #475569; border: none;">
+                                                    <span style="direction: ltr; display: inline-block;">${line.price.toLocaleString('en-US', {minimumFractionDigits: 2})} ${isArabic ? 'ريال' : 'SAR'}</span>
+                                                </td>
+                                                <td style="padding: 15px 20px; text-align: center; font-weight: bold; color: #667eea; border: none;">
+                                                    <span style="direction: ltr; display: inline-block;">${lineTotal.toLocaleString('en-US', {minimumFractionDigits: 2})} ${isArabic ? 'ريال' : 'SAR'}</span>
+                                                </td>
+                                            </tr>
+                                        `;
+                                    }).join('')}
                                 </tbody>
                             </table>
                         </div>
                     </div>
-                    <div class="mb-8">
-                        <h3>Project Description</h3>
-                        <div class="editable text-sm p-3 rounded-lg bg-slate-50 border" contenteditable="true" data-field="projectDescription" data-placeholder="Enter project description..."></div>
-                    </div>
-                    <table class="w-full text-sm mb-8" id="items-table">
-                        <thead><tr class="border-b-2 text-left"><th class="p-2 w-20 font-bold">Photo</th><th class="p-2 font-bold">Item</th><th class="p-2 w-24 text-center font-bold">Quantity</th><th class="p-2 w-28 text-right font-bold">Unit Price</th><th class="p-2 w-28 text-right font-bold">Total</th><th class="p-2 w-16 text-center no-print"></th></tr></thead>
-                        <tbody id="table-body"></tbody>
-                    </table>
-                    <button id="add-row" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-2 px-4 rounded-lg no-print">+ Add Row</button>
-                    <div class="flex justify-end mt-8">
-                        <div class="w-full max-w-xs">
-                            <div class="flex justify-between py-2 border-b"><span class="font-bold">Subtotal</span><span id="subtotal">0.00</span></div>
-                            <div class="flex justify-between py-2 border-b"><span class="font-bold">VAT (15%)</span><span id="vat">0.00</span></div>
-                            <div class="flex justify-between py-3 text-lg font-bold bg-slate-100 px-3 rounded-lg mt-2"><span>TOTAL</span><span id="grand-total">0.00</span></div>
+
+                    <!-- Totaux avec design amélioré -->
+                    <div style="margin-bottom: 30px; display: flex; justify-content: flex-end;">
+                        <div style="min-width: 350px; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); overflow: hidden;">
+                            <div style="background: #f8fafc; padding: 15px 25px; border-bottom: 1px solid #e2e8f0; text-align: left;">
+                                <h4 style="margin: 0; font-size: 16px; font-weight: bold; color: #1e293b;">
+                                    ${isArabic ? 'ملخص المبالغ' : 'Amount Summary'}
+                                </h4>
+                            </div>
+                            <div style="padding: 20px 25px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9;">
+                                    <span style="font-size: 14px; color: #475569;">${isArabic ? 'المجموع الفرعي:' : 'Subtotal:'}</span>
+                                    <span style="font-size: 16px; font-weight: 600; color: #1e293b; direction: ltr;">${subtotal.toLocaleString('en-US', {minimumFractionDigits: 2})} ${isArabic ? 'ريال' : 'SAR'}</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9;">
+                                    <span style="font-size: 14px; color: #475569;">${isArabic ? 'ضريبة القيمة المضافة (15%):' : 'VAT (15%):'}</span>
+                                    <span style="font-size: 16px; font-weight: 600; color: #1e293b; direction: ltr;">${tax.toLocaleString('en-US', {minimumFractionDigits: 2})} ${isArabic ? 'ريال' : 'SAR'}</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin: 15px -25px -20px -25px; padding-left: 25px; padding-right: 25px;">
+                                    <span style="font-size: 18px; font-weight: bold; color: white;">${isArabic ? 'المجموع الكلي:' : 'Total Amount:'}</span>
+                                    <span style="font-size: 20px; font-weight: bold; color: white; direction: ltr;">${total.toLocaleString('en-US', {minimumFractionDigits: 2})} ${isArabic ? 'ريال' : 'SAR'}</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="mt-12 pt-6 border-t grid grid-cols-1 md:grid-cols-2 gap-8 text-xs">
-                        <div><h3 class="mb-2">Terms & Conditions</h3><div class="editable space-y-1" contenteditable="true" data-field="terms"></div></div>
-                        <div><h3 class="mb-2">Bank Details</h3><div class="editable space-y-1" contenteditable="true" data-field="bankDetails"></div></div>
+
+                    <!-- Conditions de paiement avec design professionnel -->
+                    <div style="margin-bottom: 25px;">
+                        <div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 12px; padding: 20px;">
+                            <h3 style="font-size: 16px; font-weight: bold; color: #92400e; margin: 0 0 15px 0; display: flex; align-items: center;">
+                                <span style="margin-right: 8px;">💳</span>
+                                ${isArabic ? 'شروط الدفع والضمان' : 'Payment Terms & Warranty'}
+                            </h3>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 10px;">
+                                ${company.paymentTerms[lang].map(term => `
+                                    <div style="display: flex; align-items: center; font-size: 14px; color: #92400e; text-align: left;">
+                                        <span style="color: #f59e0b; margin-right: 8px;">✓</span>
+                                        ${term}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
                     </div>
-                    <div class="mt-12 pt-8 text-right"><div class="w-56 h-12 border-b-2 inline-block"></div><p class="font-bold pr-16">Signature</p></div>
-                    <div class="text-center mt-8 pt-4 border-t"><p class="font-bold editable text-sm" data-field="thankYouNote"></p></div>
-                </main>
-            </div>
+
+                    <!-- Coordonnées bancaires avec design professionnel -->
+                    <div style="background: #dbeafe; border: 1px solid #3b82f6; border-radius: 12px; padding: 20px;">
+                        <h3 style="font-size: 16px; font-weight: bold; color: #1d4ed8; margin: 0 0 15px 0; display: flex; align-items: center;">
+                            <span style="margin-right: 8px;">🏦</span>
+                            ${isArabic ? 'المعلومات المصرفية' : 'Banking Information'}
+                        </h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: left;">
+                            <div>
+                                <p style="margin: 8px 0; font-size: 14px; color: #1e40af;">
+                                    <strong>${isArabic ? 'اسم البنك:' : 'Bank Name:'}</strong><br>
+                                    <span style="font-size: 16px; font-weight: 600; color: #1d4ed8;">${isArabic ? company.bankAr : company.bank}</span>
+                                </p>
+                                <p style="margin: 8px 0; font-size: 14px; color: #1e40af;">
+                                    <strong>${isArabic ? 'رقم الحساب:' : 'Account Number:'}</strong><br>
+                                    <span style="font-size: 16px; font-weight: 600; color: #1d4ed8; font-family: monospace; direction: ltr; display: inline-block;">${company.accountNumber}</span>
+                                </p>
+                            </div>
+                            <div>
+                                <p style="margin: 8px 0; font-size: 14px; color: #1e40af;">
+                                    <strong>IBAN:</strong><br>
+                                    <span style="font-size: 16px; font-weight: 600; color: #1d4ed8; font-family: monospace; direction: ltr; display: inline-block;">${company.iban}</span>
+                                </p>
+                                <p style="margin: 8px 0; font-size: 14px; color: #1e40af;">
+                                    <strong>SWIFT Code:</strong><br>
+                                    <span style="font-size: 16px; font-weight: 600; color: #1d4ed8; font-family: monospace; direction: ltr; display: inline-block;">${company.swift}</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer professionnel -->
+                    <div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #e2e8f0; text-align: center;">
+                        <p style="font-size: 12px; color: #64748b; margin: 0;">
+                            ${isArabic ? 'شكراً لثقتكم بنا - نتطلع للعمل معكم' : 'Thank you for your trust - We look forward to working with you'}
+                        </p>
+                        <p style="font-size: 11px; color: #94a3b8; margin: 5px 0 0 0;">
+                            ${isArabic ? 'هذا العرض صالح لمدة 30 يوماً من تاريخ الإصدار' : 'This quotation is valid for 30 days from the date of issue'}
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function downloadPDF() {
+            if (!currentQuoteForPDF) return;
             
-            <!-- Colonne de droite : Panneau de contrôle (CORRECTION : la classe est lg:col-span-1) -->
-            <aside class="lg:col-span-1 space-y-6 no-print">
-                <div class="control-panel-card">
-                    <h2 class="font-bold text-lg text-slate-700 border-b pb-3 mb-4">Entreprise</h2>
-                    <select id="company-selector" onchange="switchCompany(this.value)" class="w-full p-2 border border-slate-300 rounded-lg">
-                        <option value="wooden_pieces">Wooden Pieces EST.</option>
-                        <option value="rattan_palace">Rattan Palace</option>
-                    </select>
-                </div>
-                <div class="control-panel-card">
-                    <h2 class="font-bold text-lg text-slate-700 border-b pb-3 mb-4">Actions</h2>
-                    <div class="grid grid-cols-2 gap-3">
-                        <button onclick="newQuote()" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-3 rounded-lg">Nouveau Devis</button>
-                        <button onclick="saveQuoteToFirebase()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-3 rounded-lg">Sauvegarder</button>
-                        <button onclick="generatePDF()" class="col-span-2 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 rounded-lg">Générer PDF</button>
-                    </div>
-                </div>
-                <div class="control-panel-card">
-                    <div class="flex justify-between items-center border-b pb-3 mb-4">
-                         <h2 class="font-bold text-lg text-slate-700">Devis Sauvegardés</h2>
-                         <button onclick="loadQuotesFromFirebase()" class="text-blue-500 hover:text-blue-700">Rafraîchir</button>
-                    </div>
-                    <div id="saved-quotes-list" class="space-y-2 max-h-96 overflow-y-auto"></div>
-                </div>
-            </aside>
-        </div>
-    </div>
+            const pdfLang = document.querySelector('input[name="pdfLanguage"]:checked').value;
+            const quote = quotes.find(q => q.id === currentQuoteForPDF);
+            
+            // Simulation du téléchargement PDF
+            const fileName = `Quote_${quote.number}_${pdfLang.toUpperCase()}.pdf`;
+            showNotification(
+                currentLang === 'ar' 
+                    ? `تم تحميل ${fileName} بنجاح!` 
+                    : `${fileName} downloaded successfully!`, 
+                'success'
+            );
+            
+            // Dans une vraie application, ici on utiliserait jsPDF pour générer le PDF réel
+            console.log('Téléchargement PDF:', fileName);
+        }
 
-    <!-- ============================================= -->
-    <!--           SCRIPT PRINCIPAL JAVASCRIPT         -->
-    <!-- ============================================= -->
-    <script>
-        // ... (Le script JavaScript complet et fonctionnel est ici) ...
-        const firebaseConfig = {
-            apiKey: "AIzaSyAcMI9tp51br8JPJrkRoIhGpS8jWlUEgOE",
-            authDomain: "my-quotation-system-e3135.firebaseapp.com",
-            projectId: "my-quotation-system-e3135",
-            storageBucket: "my-quotation-system-e3135.appspot.com",
-            messagingSenderId: "733892069861",
-            appId: "1:733892069861:web:c619b6218852050b4b870c",
-            measurementId: "G-61TP42SNMV"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('quoteDate').value = new Date().toISOString().split('T')[0];
+            updateDarkMode(); // Initialiser le mode sombre
+            updateTranslations();
+            loadClients();
+            loadProducts();
+            loadQuotes();
+            updateDashboard();
+        });
 
-        let currentCompanyKey = 'wooden_pieces';
+        // Navigation entre onglets
+        function showTab(tabName) {
+            // Masquer tous les onglets
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+            
+            // Désactiver tous les boutons d'onglet
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active', 'text-purple-600', 'border-b-2', 'border-purple-600');
+                btn.classList.add('text-gray-600');
+            });
+            
+            // Afficher l'onglet sélectionné
+            document.getElementById(tabName).classList.remove('hidden');
+            
+            // Activer le bouton d'onglet correspondant
+            event.target.classList.add('active', 'text-purple-600', 'border-b-2', 'border-purple-600');
+            event.target.classList.remove('text-gray-600');
+        }
 
-        const companyProfiles = {
-            'wooden_pieces': { 
-                acronym: 'WPE', logo: 'logowooden.png', name: 'Wooden Pieces EST.', cr: 'CR: 1010798529', vat: 'Vat No.: 310618978500003',
-                address: 'RFKB2501. ALQods st, Alkhaleej, P.O.Box: 2401, RIYADH 13223, KSA',
-                bankDetails: `<p><b>Bank:</b> ALINMAA BANK</p><p><b>IBAN:</b> SA0705000068203914512000</p>`,
-                terms: `<ul><li>50% Down payment</li><li>50% After delivery</li><li>Delivery within 20 to 30 days</li><li>3 years warranty</li></ul>`,
-                thankYouNote: 'We appreciate your business and look forward to working with you.'
-            },
-            'rattan_palace': { 
-                acronym: 'RP', logo: 'logo.png', name: 'Rattan Palace', cr: 'CR: 7050562888', vat: 'Vat No.: 313099850500003',
-                address: 'RFKB2501. ALQods st, Alkhaleej, P.O.Box: 2401, RIYADH 13223, KSA',
-                bankDetails: `<p><b>Bank:</b> Riyad Bank</p><p><b>IBAN:</b> SA3020000002126072249940</p>`,
-                terms: `<ul><li>50% Down payment</li><li>50% After delivery</li><li>Delivery within 20 to 30 days</li><li>3 years warranty</li></ul>`,
-                thankYouNote: 'Thank you for your business.'
+        // Gestion des modales
+        function showNewQuoteModal() {
+            updateClientSelect();
+            document.getElementById('newQuoteModal').classList.remove('hidden');
+        }
+
+        function showNewClientModal() {
+            document.getElementById('newClientModal').classList.remove('hidden');
+        }
+
+        function showNewProductModal() {
+            document.getElementById('newProductModal').classList.remove('hidden');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+            // Réinitialiser les formulaires
+            if (modalId === 'newQuoteModal') {
+                document.getElementById('newQuoteForm').reset();
+                document.getElementById('quoteLines').innerHTML = '';
+                updateQuoteTotals();
             }
-        };
+        }
 
-        document.addEventListener('DOMContentLoaded', initializePage);
-
-        function initializePage() {
-            document.getElementById('add-row').addEventListener('click', () => addNewRow());
-            document.querySelectorAll('.editable[data-placeholder]').forEach(el => {
-                el.addEventListener('focus', function() { if(this.querySelector('span.text-slate-400')) this.innerHTML = ''; });
-                el.addEventListener('blur', function() { if(!this.textContent.trim()) this.innerHTML = `<span class="text-slate-400">${this.dataset.placeholder}</span>`; });
+        // Gestion des clients
+        function loadClients() {
+            const grid = document.getElementById('clientsGrid');
+            grid.innerHTML = '';
+            
+            clients.forEach(client => {
+                const clientCard = document.createElement('div');
+                clientCard.className = 'bg-gray-50 rounded-lg p-4 hover-card transition-all';
+                clientCard.innerHTML = `
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                            <span class="text-purple-600 font-semibold">${client.name.charAt(0)}</span>
+                        </div>
+                        <button onclick="deleteClient(${client.id})" class="text-red-500 hover:text-red-700 transition-colors hover-button">
+                            🗑️
+                        </button>
+                    </div>
+                    <h4 class="font-semibold text-gray-800 mb-1">${client.name}</h4>
+                    <p class="text-sm text-gray-600 mb-2">${client.email}</p>
+                    <p class="text-xs text-gray-500">${client.address}</p>
+                `;
+                grid.appendChild(clientCard);
             });
-            switchCompany(currentCompanyKey);
-        }
-        
-        function switchCompany(companyKey) {
-            currentCompanyKey = companyKey;
-            const profile = companyProfiles[companyKey];
-            if (!profile) return;
-            Object.keys(profile).forEach(field => {
-                const el = document.querySelector(`[data-field="company${field.charAt(0).toUpperCase() + field.slice(1)}"], [data-field="${field}"]`);
-                if(el) el.innerHTML = profile[field];
-            });
-            document.getElementById('company-logo').src = profile.logo;
-            newQuote();
-            loadQuotesFromFirebase();
         }
 
-        function newQuote() {
-            document.querySelectorAll('.editable[data-placeholder]').forEach(el => {
-                if(el.dataset.placeholder) el.innerHTML = `<span class="text-slate-400">${el.dataset.placeholder}</span>`;
-            });
-            document.getElementById('table-body').innerHTML = '';
-            document.getElementById('current-quote-id').value = '';
-            generateQuoteNumber();
-            addNewRow();
-            const today = new Date();
-            document.getElementById('quoteDate').textContent = today.toLocaleDateString('en-CA');
-            const validUntil = new Date();
-            validUntil.setDate(today.getDate() + 7);
-            document.getElementById('validDate').textContent = validUntil.toLocaleDateString('en-CA');
-        }
-
-        function generateQuoteNumber() {
-            const profile = companyProfiles[currentCompanyKey];
-            const now = new Date();
-            const day = String(now.getDate()).padStart(2, '0');
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const year = String(now.getFullYear()).slice(-2);
-            const quoteNumber = `Q-${profile.acronym}-${day}${month}${year}`;
-            document.querySelector('[data-field="quoteNum"]').innerHTML = quoteNumber;
-        }
-
-        function updateTotals() {
-            let subtotal = 0;
-            document.querySelectorAll('#table-body tr').forEach(row => {
-                const quantity = parseFloat(row.querySelector('.quantity').value) || 0;
-                const unitPrice = parseFloat(row.querySelector('.unit-price').value) || 0;
-                subtotal += quantity * unitPrice;
-                row.querySelector('.total').textContent = (quantity * unitPrice).toFixed(2);
-            });
-            const vat = subtotal * 0.15;
-            document.getElementById('subtotal').textContent = subtotal.toFixed(2);
-            document.getElementById('vat').textContent = vat.toFixed(2);
-            document.getElementById('grand-total').textContent = (subtotal + vat).toFixed(2);
-        }
-
-        function addNewRow(item = { photo: '', name: '', qty: 1, price: 0 }) {
-            const row = document.getElementById('table-body').insertRow();
-            row.className = 'border-b';
-            row.innerHTML = `<td class="p-2"><div class="photo-upload-container"><img src="${item.photo||'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" class="${item.photo?'':'hidden'}" data-photo-base64="${item.photo||''}"><div class="placeholder-icon ${item.photo?'hidden':''}"><svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div><input type="file" class="hidden" accept="image/*"></div></td><td class="p-2"><div class="item-name w-full p-2 border rounded" contenteditable="true">${item.name}</div></td><td class="p-2"><input type="number" value="${item.qty}" class="quantity w-full text-center p-2 border rounded"></td><td class="p-2"><input type="number" value="${item.price}" step="0.01" class="unit-price w-full text-right p-2 border rounded"></td><td class="p-2 text-right total font-bold">0.00</td><td class="p-2 text-center no-print"><button class="remove-row text-red-500 hover:text-red-700 text-2xl font-bold">&times;</button></td>`;
-            row.querySelectorAll('input').forEach(input => input.addEventListener('input', updateTotals));
-            row.querySelector('.remove-row').addEventListener('click', () => { row.remove(); updateTotals(); });
-            row.querySelector('.photo-upload-container').addEventListener('click', (e) => e.currentTarget.querySelector('input[type="file"]').click());
-            row.querySelector('input[type="file"]').addEventListener('change', (event) => handlePhotoUpload(event, row));
-            updateTotals();
-        }
-
-        function handlePhotoUpload(event, row) {
-            const file = event.target.files[0]; if (!file) return;
-            const reader = new FileReader();
-            reader.onload = e => {
-                const imgEl = row.querySelector('img');
-                imgEl.src = e.target.result;
-                imgEl.dataset.photoBase64 = e.target.result;
-                imgEl.classList.remove('hidden');
-                row.querySelector('.placeholder-icon').classList.add('hidden');
+        function createClient(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('clientName').value;
+            const email = document.getElementById('clientEmail').value;
+            const address = document.getElementById('clientAddress').value;
+            
+            const newClient = {
+                id: nextClientId++,
+                name: name,
+                email: email,
+                address: address
             };
-            reader.readAsDataURL(file);
+            
+            clients.push(newClient);
+            loadClients();
+            updateClientSelect();
+            closeModal('newClientModal');
+            
+            // Notification de succès
+            showNotification('Client créé avec succès!', 'success');
         }
 
-        async function generatePDF() {
-            if (document.activeElement) document.activeElement.blur();
-            const { jsPDF } = window.jspdf;
-            const quoteElement = document.getElementById('print-area');
-            const printableClone = quoteElement.cloneNode(true);
-            printableClone.classList.add('pdf-render-mode');
-            printableClone.style.width = '800px'; 
-            printableClone.style.position = 'absolute';
-            printableClone.style.left = '-9999px';
-            document.body.appendChild(printableClone);
-            
-            printableClone.querySelectorAll('input.quantity, input.unit-price').forEach(input => {
-                const span = document.createElement('span');
-                span.textContent = input.value;
-                input.parentNode.replaceChild(span, input);
-            });
-            printableClone.querySelectorAll('.editable[contenteditable="true"]').forEach(div => div.removeAttribute('contenteditable'));
-
-            try {
-                const canvas = await html2canvas(printableClone, { scale: 3, useCORS: true, windowWidth: printableClone.scrollWidth, windowHeight: printableClone.scrollHeight });
-                const imgData = canvas.toDataURL('image/png', 1.0);
-                const pdf = new jsPDF('p', 'mm', 'a4');
-                const pdfWidth = pdf.internal.pageSize.getWidth();
-                const pdfHeight = pdf.internal.pageSize.getHeight();
-                const imgProps = pdf.getImageProperties(imgData);
-                const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
-                let heightLeft = imgHeight;
-                let position = 0;
-
-                pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
-                heightLeft -= pdfHeight;
-                while (heightLeft > 0) {
-                    position -= pdfHeight;
-                    pdf.addPage();
-                    pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
-                    heightLeft -= pdfHeight;
-                }
-                
-                const customerName = (document.querySelector('[data-field="customerName"]').textContent || 'details').replace(/<[^>]*>?/gm, '').trim();
-                pdf.save(`Quotation_${customerName}.pdf`);
-            } catch(e) {
-                console.error("PDF generation failed:", e);
-                showNotification("PDF generation error.", true);
-            } finally {
-                document.body.removeChild(printableClone);
+        function deleteClient(clientId) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer ce client ?')) {
+                clients = clients.filter(client => client.id !== clientId);
+                loadClients();
+                updateClientSelect();
+                showNotification('Client supprimé', 'info');
             }
         }
 
-        async function saveQuoteToFirebase() {
-            const saveButton = document.querySelector('button[onclick="saveQuoteToFirebase()"]');
-            const customerNameEl = document.querySelector('[data-field="customerName"]');
-            const customerName = customerNameEl.textContent.trim();
-            if (!customerName || customerNameEl.querySelector('span.text-slate-400')) {
-                showNotification("Please enter a customer name before saving.", true);
+        // Gestion des produits
+        function loadProducts() {
+            const grid = document.getElementById('productsGrid');
+            grid.innerHTML = '';
+            
+            const filteredProducts = products.filter(product => product.company === currentCompany);
+            
+            filteredProducts.forEach(product => {
+                const productCard = document.createElement('div');
+                productCard.className = 'bg-gray-50 rounded-lg p-4 hover-card transition-all';
+                productCard.innerHTML = `
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <span class="text-blue-600">📦</span>
+                        </div>
+                        <button onclick="deleteProduct(${product.id})" class="text-red-500 hover:text-red-700 transition-colors hover-button">
+                            🗑️
+                        </button>
+                    </div>
+                    <h4 class="font-semibold text-gray-800 mb-1">${currentLang === 'ar' ? product.name : product.nameEn}</h4>
+                    <p class="text-sm text-gray-600 mb-2">${currentLang === 'ar' ? product.description : product.descriptionEn}</p>
+                    <p class="text-lg font-bold text-purple-600">${product.price.toFixed(2)} ${currentLang === 'ar' ? 'ريال' : 'SAR'}</p>
+                `;
+                grid.appendChild(productCard);
+            });
+        }
+
+        function createProduct(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('productName').value;
+            const description = document.getElementById('productDescription').value;
+            const price = parseFloat(document.getElementById('productPrice').value);
+            
+            const newProduct = {
+                id: nextProductId++,
+                company: currentCompany,
+                name: name,
+                nameEn: name,
+                description: description,
+                descriptionEn: description,
+                price: price
+            };
+            
+            products.push(newProduct);
+            loadProducts();
+            closeModal('newProductModal');
+            
+            showNotification('Produit créé avec succès!', 'success');
+        }
+
+        function deleteProduct(productId) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
+                products = products.filter(product => product.id !== productId);
+                loadProducts();
+                showNotification('Produit supprimé', 'info');
+            }
+        }
+
+        // Gestion des devis
+        function loadQuotes() {
+            const table = document.getElementById('quotesTable');
+            table.innerHTML = '';
+            
+            quotes.forEach(quote => {
+                const client = clients.find(c => c.id === quote.clientId);
+                const statusClass = quote.status === 'accepted' ? 'bg-green-100 text-green-800' : 
+                                  quote.status === 'rejected' ? 'bg-red-100 text-red-800' : 
+                                  'bg-yellow-100 text-yellow-800';
+                const statusText = quote.status === 'accepted' ? 'Accepté' : 
+                                 quote.status === 'rejected' ? 'Refusé' : 'En cours';
+                
+                const row = document.createElement('tr');
+                row.className = 'border-b border-gray-100 hover-row transition-all';
+                row.innerHTML = `
+                    <td class="py-3 px-4 font-medium">#${quote.number}</td>
+                    <td class="py-3 px-4">${client ? client.name : 'Client inconnu'}</td>
+                    <td class="py-3 px-4">${new Date(quote.date).toLocaleDateString('fr-FR')}</td>
+                    <td class="py-3 px-4 font-semibold">${quote.total.toFixed(2)} SAR</td>
+                    <td class="py-3 px-4">
+                        <span class="${statusClass} px-2 py-1 rounded-full text-sm">${statusText}</span>
+                    </td>
+                    <td class="py-3 px-4">
+                        <div class="flex space-x-2">
+                            <button onclick="generatePDF(${quote.id})" class="text-blue-600 hover:text-blue-800 transition-colors hover-button" title="Générer PDF">
+                                📄
+                            </button>
+                            <button onclick="updateQuoteStatus(${quote.id}, 'accepted')" class="text-green-600 hover:text-green-800 transition-colors hover-button" title="Accepter">
+                                ✅
+                            </button>
+                            <button onclick="updateQuoteStatus(${quote.id}, 'rejected')" class="text-red-600 hover:text-red-800 transition-colors hover-button" title="Refuser">
+                                ❌
+                            </button>
+                            <button onclick="deleteQuote(${quote.id})" class="text-gray-600 hover:text-gray-800 transition-colors hover-button" title="Supprimer">
+                                🗑️
+                            </button>
+                        </div>
+                    </td>
+                `;
+                table.appendChild(row);
+            });
+        }
+
+        function updateClientSelect() {
+            const select = document.getElementById('quoteClient');
+            select.innerHTML = '<option value="">Sélectionner un client</option>';
+            
+            clients.forEach(client => {
+                const option = document.createElement('option');
+                option.value = client.id;
+                option.textContent = client.name;
+                select.appendChild(option);
+            });
+        }
+
+        function addQuoteLine() {
+            const container = document.getElementById('quoteLines');
+            const lineId = Date.now(); // ID temporaire unique
+            const filteredProducts = products.filter(product => product.company === currentCompany);
+            
+            const line = document.createElement('div');
+            line.className = 'quote-line bg-gray-50 rounded-lg p-4';
+            line.setAttribute('data-line-id', lineId);
+            line.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2" data-translate="productName">${t('productName')}</label>
+                        <select class="product-select w-full border border-gray-300 rounded-lg px-3 py-2" onchange="updateLinePrice(${lineId})">
+                            <option value="">${currentLang === 'ar' ? 'اختر منتج' : 'Select a product'}</option>
+                            ${filteredProducts.map(p => `<option value="${p.id}" data-price="${p.price}">${currentLang === 'ar' ? p.name : p.nameEn}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2" data-translate="quantity">${t('quantity')}</label>
+                        <input type="number" class="quantity-input w-full border border-gray-300 rounded-lg px-3 py-2" 
+                               value="1" min="1" onchange="updateQuoteTotals()">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2" data-translate="unitPrice">${t('unitPrice')} (SAR)</label>
+                        <input type="number" class="price-input w-full border border-gray-300 rounded-lg px-3 py-2" 
+                               step="0.01" onchange="updateQuoteTotals()">
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="line-total font-semibold text-purple-600">0.00 ${currentLang === 'ar' ? 'ريال' : 'SAR'}</span>
+                        <button type="button" onclick="removeLine(${lineId})" class="text-red-500 hover:text-red-700 transition-colors hover-button">
+                            🗑️
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            container.appendChild(line);
+        }
+
+        function updateLinePrice(lineId) {
+            const line = document.querySelector(`[data-line-id="${lineId}"]`);
+            const select = line.querySelector('.product-select');
+            const priceInput = line.querySelector('.price-input');
+            
+            const selectedOption = select.options[select.selectedIndex];
+            if (selectedOption.value) {
+                priceInput.value = selectedOption.getAttribute('data-price');
+                updateQuoteTotals();
+            }
+        }
+
+        function removeLine(lineId) {
+            const line = document.querySelector(`[data-line-id="${lineId}"]`);
+            line.remove();
+            updateQuoteTotals();
+        }
+
+        function updateQuoteTotals() {
+            let subtotal = 0;
+            const currency = currentLang === 'ar' ? 'ريال' : 'SAR';
+            
+            document.querySelectorAll('.quote-line').forEach(line => {
+                const quantity = parseFloat(line.querySelector('.quantity-input').value) || 0;
+                const price = parseFloat(line.querySelector('.price-input').value) || 0;
+                const lineTotal = quantity * price;
+                
+                line.querySelector('.line-total').textContent = `${lineTotal.toFixed(2)} ${currency}`;
+                subtotal += lineTotal;
+            });
+            
+            const tax = subtotal * 0.15; // TVA 15%
+            const total = subtotal + tax;
+            
+            document.getElementById('subtotalHT').textContent = `${subtotal.toFixed(2)} ${currency}`;
+            document.getElementById('taxAmount').textContent = `${tax.toFixed(2)} ${currency}`;
+            document.getElementById('totalTTC').textContent = `${total.toFixed(2)} ${currency}`;
+        }
+
+        function createQuote(event) {
+            event.preventDefault();
+            
+            const clientId = parseInt(document.getElementById('quoteClient').value);
+            const date = document.getElementById('quoteDate').value;
+            
+            if (!clientId) {
+                alert('Veuillez sélectionner un client');
                 return;
             }
-            saveButton.disabled = true;
-            saveButton.textContent = "Saving...";
-
-            const quoteData = { fields: {}, items: [] };
-            document.querySelectorAll('.editable').forEach(el => {
-                const fieldName = el.dataset.field;
-                if(fieldName) quoteData.fields[fieldName] = el.querySelector('span.text-slate-400') ? '' : el.innerHTML;
-            });
-            document.querySelectorAll('#table-body tr').forEach(row => {
-                quoteData.items.push({
-                    photo: row.querySelector('img').dataset.photoBase64 || '', name: row.querySelector('.item-name').textContent,
-                    qty: row.querySelector('.quantity').value, price: row.querySelector('.unit-price').value
-                });
-            });
-
-            const quoteId = document.getElementById('current-quote-id').value;
-            const fullQuoteObject = {
-                companyId: currentCompanyKey, customerName: customerName, quoteNumber: quoteData.fields.quoteNum,
-                data: quoteData, updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            };
-
-            try {
-                if (quoteId) {
-                    await db.collection("quotes").doc(quoteId).update(fullQuoteObject);
-                    showNotification("Quote updated successfully!");
-                } else {
-                    fullQuoteObject.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-                    const docRef = await db.collection("quotes").add(fullQuoteObject);
-                    document.getElementById('current-quote-id').value = docRef.id;
-                    showNotification("Quote saved successfully!");
+            
+            const lines = [];
+            let total = 0;
+            
+            document.querySelectorAll('.quote-line').forEach(line => {
+                const productId = parseInt(line.querySelector('.product-select').value);
+                const quantity = parseFloat(line.querySelector('.quantity-input').value);
+                const price = parseFloat(line.querySelector('.price-input').value);
+                
+                if (productId && quantity && price) {
+                    lines.push({
+                        id: nextQuoteLineId++,
+                        quoteId: nextQuoteId,
+                        productId: productId,
+                        quantity: quantity,
+                        price: price
+                    });
+                    total += quantity * price;
                 }
-                await loadQuotesFromFirebase();
-            } catch (error) {
-                console.error("Error saving quote: ", error);
-                showNotification("Error saving quote.", true);
-            } finally {
-                saveButton.disabled = false;
-                saveButton.textContent = "Sauvegarder";
+            });
+            
+            if (lines.length === 0) {
+                alert('Veuillez ajouter au moins un article au devis');
+                return;
+            }
+            
+            // Ajouter la TVA au total
+            total = total * 1.15;
+            
+            const newQuote = {
+                id: nextQuoteId++,
+                number: `QF-2024-${String(nextQuoteId - 1).padStart(3, '0')}`,
+                clientId: clientId,
+                date: date,
+                status: 'pending',
+                total: total
+            };
+            
+            quotes.push(newQuote);
+            quoteLines.push(...lines);
+            
+            loadQuotes();
+            updateDashboard();
+            closeModal('newQuoteModal');
+            
+            showNotification('Devis créé avec succès!', 'success');
+        }
+
+        function updateQuoteStatus(quoteId, status) {
+            const quote = quotes.find(q => q.id === quoteId);
+            if (quote) {
+                quote.status = status;
+                loadQuotes();
+                updateDashboard();
+                
+                const statusText = status === 'accepted' ? 'accepté' : 'refusé';
+                showNotification(`Devis ${statusText}`, 'success');
             }
         }
 
-        async function loadQuotesFromFirebase() {
-            const listEl = document.getElementById('saved-quotes-list');
-            listEl.innerHTML = `<p class="text-slate-500">Loading...</p>`;
-            try {
-                const snapshot = await db.collection("quotes").where("companyId", "==", currentCompanyKey).orderBy("updatedAt", "desc").get();
-                if (snapshot.empty) {
-                    listEl.innerHTML = `<p class="text-slate-500">No quotes for ${companyProfiles[currentCompanyKey].name}.</p>`;
-                    return;
-                }
-                listEl.innerHTML = '';
-                snapshot.forEach(doc => {
-                    const quote = doc.data();
-                    const item = document.createElement('div');
-                    item.className = 'saved-quote-item';
-                    const date = quote.updatedAt ? new Date(quote.updatedAt.seconds * 1000) : new Date();
-                    item.innerHTML = `<div class="details"><p class="font-bold">${quote.customerName}</p><p class="text-xs text-slate-500">N°: ${quote.quoteNumber} - ${date.toLocaleDateString()}</p></div><button class="text-red-400 hover:text-red-600 text-2xl font-bold p-1">&times;</button>`;
-                    item.querySelector('.details').onclick = () => loadSpecificQuote(doc.id, quote.data);
-                    item.querySelector('button').onclick = () => deleteQuote(doc.id, quote.customerName);
-                    listEl.appendChild(item);
-                });
-            } catch (error) {
-                console.error("Firebase Error:", error);
-                listEl.innerHTML = `<p class="text-red-500 text-xs">Error loading quotes. Please open the console (F12) and click the link in the error message to create the database index.</p>`;
+        function deleteQuote(quoteId) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer ce devis ?')) {
+                quotes = quotes.filter(q => q.id !== quoteId);
+                quoteLines = quoteLines.filter(ql => ql.quoteId !== quoteId);
+                loadQuotes();
+                updateDashboard();
+                showNotification('Devis supprimé', 'info');
             }
         }
 
-        function loadSpecificQuote(id, data) {
-            document.getElementById('current-quote-id').value = id;
-            Object.keys(data.fields).forEach(fieldName => {
-                const el = document.querySelector(`.editable[data-field="${fieldName}"]`);
-                if (el) {
-                   el.innerHTML = (data.fields[fieldName] && data.fields[fieldName].trim() !== '') ? data.fields[fieldName] : `<span class="text-slate-400">${el.dataset.placeholder}</span>`;
-                }
+        function generatePDF(quoteId) {
+            showPDFPreview(quoteId);
+        }
+
+        function updateDashboard() {
+            const pending = quotes.filter(q => q.status === 'pending').length;
+            const accepted = quotes.filter(q => q.status === 'accepted').length;
+            const revenue = quotes.filter(q => q.status === 'accepted')
+                                 .reduce((sum, q) => sum + q.total, 0);
+            
+            document.getElementById('pendingCount').textContent = pending;
+            document.getElementById('acceptedCount').textContent = accepted;
+            document.querySelector('#dashboard .text-purple-600').textContent = `€${revenue.toLocaleString('fr-FR')}`;
+        }
+
+        function filterQuotes(status) {
+            // Mise à jour visuelle des boutons de filtre
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active', 'bg-purple-100', 'text-purple-700');
+                btn.classList.add('bg-gray-100', 'text-gray-700');
             });
-            const tableBody = document.getElementById('table-body');
-            tableBody.innerHTML = '';
-            if (data.items) data.items.forEach(item => addNewRow(item));
-            updateTotals();
+            
+            event.target.classList.add('active', 'bg-purple-100', 'text-purple-700');
+            event.target.classList.remove('bg-gray-100', 'text-gray-700');
+            
+            // Filtrage des devis (pour la démonstration, on recharge tous les devis)
+            loadQuotes();
+            showNotification(`Filtre appliqué: ${status}`, 'info');
         }
 
-        function deleteQuote(id, customerName) {
-            showConfirmModal(`Are you sure you want to delete the quote for ${customerName}? This is irreversible.`, async () => {
-                try {
-                    await db.collection("quotes").doc(id).delete();
-                    showNotification("Quote deleted successfully.");
-                    if (document.getElementById('current-quote-id').value === id) newQuote();
-                    await loadQuotesFromFirebase();
-                } catch (error) {
-                    console.error("Error deleting quote: ", error);
-                    showNotification("Error deleting quote.", true);
-                }
-            });
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg text-white font-medium transform transition-all duration-300 translate-x-full`;
+            
+            if (type === 'success') {
+                notification.classList.add('bg-green-500');
+            } else if (type === 'error') {
+                notification.classList.add('bg-red-500');
+            } else {
+                notification.classList.add('bg-blue-500');
+            }
+            
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            // Animation d'entrée
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+            }, 100);
+            
+            // Suppression automatique
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
         }
 
-        function showNotification(message, isError = false) {
-            const el = document.getElementById('notification');
-            el.textContent = message;
-            el.className = `fixed top-5 right-5 text-white py-2 px-4 rounded-lg shadow-lg transform transition-transform duration-300 z-50 ${isError ? 'bg-red-500' : 'bg-green-500'} translate-x-0`;
-            setTimeout(() => el.classList.add('translate-x-[120%]'), 3000);
-        }
-
-        function showConfirmModal(message, onConfirm) {
-            const modal = document.getElementById('confirm-modal');
-            document.getElementById('confirm-message').textContent = message;
-            modal.classList.remove('hidden');
-            const close = () => modal.classList.add('hidden');
-            document.getElementById('confirm-cancel').onclick = close;
-            document.getElementById('confirm-ok').onclick = () => {
-                close();
-                onConfirm();
-            };
-        }
+        // Ajouter une ligne par défaut au chargement du modal
+        document.getElementById('newQuoteModal').addEventListener('transitionend', function() {
+            if (!this.classList.contains('hidden') && document.getElementById('quoteLines').children.length === 0) {
+                addQuoteLine();
+            }
+        });
     </script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9826d37f647c2cf9',t:'MTc1ODQyOTAxNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
-
