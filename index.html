@@ -268,15 +268,16 @@
         }
 
         .pdf-logo {
-            width: 40px;
-            height: 40px;
+            width: 80px;
+            height: 80px;
             object-fit: contain;
-            border-radius: 6px;
+            background: transparent;
+            border: none;
         }
 
         .pdf-container.compact .pdf-logo {
-            width: 30px;
-            height: 30px;
+            width: 60px;
+            height: 60px;
         }
     </style>
 </head>
@@ -1022,9 +1023,9 @@
                             <div style="display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: ${sectionPadding}; border-bottom: 2px solid #667eea; margin-bottom: ${sectionPadding};">
                                 <div style="flex: 1; ${isArabic ? 'text-align: right;' : 'text-align: left;'}">
                                     <div style="display: flex; align-items: center; margin-bottom: ${isCompact ? '6px' : '8px'}; ${isArabic ? 'flex-direction: row-reverse;' : ''}">
-                                        <img src="${company.logo}" alt="Logo" class="pdf-logo" style="width: ${logoSize}; height: ${logoSize}; object-fit: contain; border-radius: 6px; margin-${isArabic ? 'left' : 'right'}: 10px; background: #f8fafc; padding: 2px;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                                        <div style="width: ${logoSize}; height: ${logoSize}; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 6px; display: none; align-items: center; justify-content: center; margin-${isArabic ? 'left' : 'right'}: 10px;">
-                                            <span style="color: white; font-size: ${isCompact ? '14px' : '16px'}; font-weight: bold;">${company.name.charAt(0)}</span>
+                                        <img src="${company.logo}" alt="Logo" class="pdf-logo" style="width: ${isCompact ? '60px' : '80px'}; height: ${isCompact ? '60px' : '80px'}; object-fit: contain; margin-${isArabic ? 'left' : 'right'}: 15px; background: transparent; border: none;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                        <div style="width: ${isCompact ? '60px' : '80px'}; height: ${isCompact ? '60px' : '80px'}; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; display: none; align-items: center; justify-content: center; margin-${isArabic ? 'left' : 'right'}: 15px;">
+                                            <span style="color: white; font-size: ${isCompact ? '20px' : '24px'}; font-weight: bold;">${company.name.charAt(0)}</span>
                                         </div>
                                         <h1 style="font-size: ${headerFontSize}; font-weight: bold; color: #667eea; margin: 0; line-height: 1.1;">
                                             ${isArabic ? company.nameAr : company.name}
@@ -1806,5 +1807,5 @@
             }
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9827f1dac176357d',t:'MTc1ODQ0MDc0NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9827fa9ff7a6357d',t:'MTc1ODQ0MTEwMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
